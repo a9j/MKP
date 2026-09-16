@@ -76,3 +76,63 @@ insert into public.corrections (correction_date, page_path, what_changed, why) v
   ('2026-09-08', '/reports/2026-toledo-teacher-pay-report',
    'A step 10 figure read $54,200 and now reads $54,240.',
    'We transcribed the wrong row from the schedule. A reader pointed it out.');
+
+-- ---------------------------------------------------------------------------
+-- Explorer data. Fake figures, example.com sources.
+-- ---------------------------------------------------------------------------
+
+-- Current year, four lanes, six steps, for the home district and four
+-- comparison districts that share the lane names.
+insert into public.salary_schedule (school_year, district, lane, step, salary, source_url)
+select '2026-2027', d.district, l.lane, s.step,
+       round((l.base + (s.step - 1) * l.per_step) * d.factor)::numeric,
+       'https://example.com/source.pdf'
+from (values
+        ('Toledo Public Schools', 1.000),
+        ('Sylvania',              1.124),
+        ('Perrysburg',            1.091),
+        ('Washington Local',      1.038),
+        ('Maumee',                1.067)
+     ) as d(district, factor),
+     (values ('BA', 42800, 1240), ('BA+15', 44300, 1325),
+             ('MA', 47100, 1420), ('MA+30', 49400, 1500)
+     ) as l(lane, base, per_step),
+     (values (1), (3), (7), (10), (15), (20)) as s(step);
+
+-- Springfield publishes its schedule with different lane names, which is the
+-- case the Explorer has to refuse to compare rather than guess at.
+insert into public.salary_schedule (school_year, district, lane, step, salary, source_url)
+select '2026-2027', 'Springfield', l.lane, s.step,
+       round((l.base + (s.step - 1) * l.per_step))::numeric,
+       'https://example.com/source.pdf'
+from (values ('Bachelors', 43100, 1260), ('Masters', 47600, 1440)) as l(lane, base, per_step),
+     (values (1), (3), (7), (10), (15), (20)) as s(step);
+
+-- The home district in 2010, for the inflation line.
+insert into public.salary_schedule (school_year, district, lane, step, salary, source_url)
+select '2010-2011', 'Toledo Public Schools', l.lane, s.step,
+       round((l.base + (s.step - 1) * l.per_step))::numeric,
+       'https://example.com/source.pdf'
+from (values ('BA', 33900, 980), ('BA+15', 35100, 1045),
+             ('MA', 37300, 1120), ('MA+30', 39100, 1185)) as l(lane, base, per_step),
+     (values (1), (3), (7), (10), (15), (20)) as s(step);
+
+update public.cpi set index_value = 218.056 where year = 2010;
+insert into public.cpi (year, index_value, source_url) values
+  (2026, 331.402, 'https://example.com/source.pdf')
+on conflict (year) do nothing;
+
+insert into public.budget_categories (fiscal_year, category, amount, source_url) values
+  ('2026', 'Instruction',         182000000, 'https://example.com/source.pdf'),
+  ('2026', 'Building Operations',  41000000, 'https://example.com/source.pdf'),
+  ('2026', 'Student Support',      23750000, 'https://example.com/source.pdf'),
+  ('2026', 'Transportation',       19500000, 'https://example.com/source.pdf'),
+  ('2026', 'Administration',       16250000, 'https://example.com/source.pdf'),
+  ('2026', 'Debt Service',         12000000, 'https://example.com/source.pdf');
+
+insert into public.vacancies (as_of_date, position, building, posted_date, filled_date, source_url) values
+  ('2026-09-01', 'Intervention Specialist', 'Sample Elementary',   '2026-07-14', null,         'https://example.com/source.pdf'),
+  ('2026-09-01', 'School Psychologist',     'District Wide',       '2026-05-20', null,         'https://example.com/source.pdf'),
+  ('2026-09-01', 'Science Teacher',         'Sample Middle School','2026-07-01', null,         'https://example.com/source.pdf'),
+  ('2026-09-01', 'Math Teacher',            'Sample High School',  '2026-06-30', '2026-08-18', 'https://example.com/source.pdf'),
+  ('2026-09-01', 'Bus Driver',              'Transportation',      '2026-08-04', '2026-08-25', 'https://example.com/source.pdf');

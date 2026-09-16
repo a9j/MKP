@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PayExplorerPreview } from "@/components/pay-explorer-preview";
+import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { NEUTRALITY_LINE } from "@/lib/nav";
 import { getLatestFeed } from "@/lib/queries/feed";
+import { getExplorerData } from "@/lib/queries/explorer";
 
 /**
  * Rebuilt on demand. Every admin save calls revalidatePath for the routes it
@@ -65,7 +66,7 @@ const STEPS = [
 ];
 
 export default async function HomePage() {
-  const latest = await getLatestFeed(6);
+  const [latest, explorer] = await Promise.all([getLatestFeed(6), getExplorerData()]);
 
   return (
     <>
@@ -89,7 +90,7 @@ export default async function HomePage() {
           <p className="pledge">{NEUTRALITY_LINE}</p>
         </div>
 
-        <PayExplorerPreview />
+        <PayExplorer data={explorer} id="explorer" />
       </header>
 
       <section className="wrap" id="programs">

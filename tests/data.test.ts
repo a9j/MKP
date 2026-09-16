@@ -98,6 +98,29 @@ test("the anonymous key is refused on the private tables", async () => {
   assert.equal(subscribers.data, null);
 });
 
+test("the anonymous key cannot write to the explorer tables", async () => {
+  // The admin upload actions check for an administrator, and RLS is the second
+  // layer behind them: even a request that got past the UI writes nothing.
+  const supabase = createPublicClient();
+
+  const salary = await supabase.from("salary_schedule").insert({
+    school_year: "2099-2100", district: "Nowhere", lane: "BA", step: 1,
+    salary: 1, source_url: "https://example.com/a.pdf",
+  });
+  assert.ok(salary.error, "an anonymous write to salary_schedule succeeded");
+
+  const budget = await supabase.from("budget_categories").insert({
+    fiscal_year: "2099", category: "Nowhere", amount: 1,
+    source_url: "https://example.com/a.pdf",
+  });
+  assert.ok(budget.error, "an anonymous write to budget_categories succeeded");
+
+  const cpi = await supabase.from("cpi").insert({
+    year: 2099, index_value: 1, source_url: "https://example.com/a.pdf",
+  });
+  assert.ok(cpi.error, "an anonymous write to cpi succeeded");
+});
+
 test("the anonymous key cannot write", async () => {
   const supabase = createPublicClient();
   const { error } = await supabase

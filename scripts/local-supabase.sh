@@ -29,7 +29,9 @@ fi
 PSQL="psql -h /tmp -p $PGPORT -U postgres -v ON_ERROR_STOP=1"
 $PSQL -q -c "drop database if exists $DB;" -c "create database $DB;"
 $PSQL -d "$DB" -q -f "$ROOT/supabase/tests/supabase_shim.sql"
-$PSQL -d "$DB" -q -f "$ROOT/supabase/migrations/0001_init.sql"
+for migration in "$ROOT"/supabase/migrations/*.sql; do
+  $PSQL -d "$DB" -q -f "$migration"
+done
 $PSQL -d "$DB" -q -f "$ROOT/supabase/seed/dev_seed.sql"
 echo "Database $DB ready with development content."
 

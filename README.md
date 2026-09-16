@@ -77,7 +77,7 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | Command | What it covers |
 | --- | --- |
 | `pnpm test:db` | Applies the migration to a throwaway Postgres and runs 41 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, and the RLS rules for anonymous, non-admin and admin callers |
-| `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, and the RLS boundaries as `supabase-js` sees them |
+| `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
 
 `pnpm test:data` and `pnpm test:visual` need the local stack and a running app.
@@ -86,6 +86,36 @@ The mockup loads Instrument Sans from the Google Fonts CDN. Where that is
 unreachable it silently falls back to a system font and every measurement
 drifts, so `test:visual` serves the mockup from a local origin and proxies the
 app's self hosted font files to it. Both pages then render with the same font.
+
+## Uploading the first salary schedule
+
+Sign in at `/admin/login`, then go to `/admin/explorer`. Upload a CSV with these
+columns, in any order:
+
+```
+school_year,district,lane,step,salary,source_url
+2026-2027,Toledo Public Schools,BA,1,44000,https://example.com/schedule.pdf
+```
+
+`data/samples/` holds an example of each file in the exact expected format.
+
+Before anything is written you get the problems, a count of rows added, changed,
+unchanged and left alone, and a preview of the rows themselves. Nothing is
+imported until you press commit.
+
+A row with no `source_url` is refused with its line number, and a file with any
+problem in it is refused whole. That rule is enforced three times over: by the
+CSV validator, by a check constraint in the database, and by the Explorer query
+layer, which stops the build rather than render a figure with nothing behind it.
+
+Uploading again updates the rows in the file and leaves every other row alone.
+It never deletes.
+
+The Explorer reads the newest `school_year` present, and treats the district
+named in the `explorer_home_district` setting as "you". A district that
+publishes different lane names shows "Not directly comparable" rather than a
+guess. The inflation line needs a 2010 schedule and CPI rows for 2010 and a
+later year; without them the line is hidden rather than estimated.
 
 ## Regenerating database types
 

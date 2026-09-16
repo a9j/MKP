@@ -11,10 +11,15 @@
   --band: #F4F6F8;
   --ink: #0F2A44;
   --ink-2: #4B5A6B;
-  /* Mockup value #8593A2 is 3.14:1 on white and fails AA for small text. */
-  --ink-3: #697684;
+  /* Mockup value #8593A2 is 3.14:1 on white and fails AA for small text.
+     This value clears 4.5:1 on white and on the grey band, which is where
+     table captions and helper text actually sit. */
+  --ink-3: #64717D;
   --line: #E3E8ED;
-  --teal: #1B7F8E;
+  /* Mockup value #1B7F8E is 4.69:1 on white but only 4.33:1 on the grey band,
+     where links and primary buttons also appear. Darkened just enough to clear
+     4.5:1 on both. */
+  --teal: #187585;
   --teal-ink: #145F6A;
   --gold: #D9A441;
   --gold-soft: #FBF3E1;
@@ -113,6 +118,16 @@
   }
 
   a { color: var(--teal); text-decoration: none; }
+
+  /* WCAG 1.4.1: a link inside a block of text needs something other than
+     color to mark it. Navigation, buttons and sourced figures are not in
+     running text and keep the mockup's undecorated treatment. */
+  p a:not(.src):not(.btn),
+  caption a:not(.src),
+  .admin-help a:not(.src) {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 
   a:focus-visible,
   button:focus-visible,
@@ -260,6 +275,205 @@
     .fields .field:last-child { grid-column: span 2; }
     .big { font-size: 44px; }
   }
+
+  /* ---------------------------------------------------------------------
+     Admin workspace. Same tokens, but the grey band becomes the page
+     background so it never reads as a published page. Touch targets are 44px
+     throughout, since this is run from a phone.
+     --------------------------------------------------------------------- */
+  .admin { min-height: 100vh; background: var(--band); }
+  .admin-main { padding: 24px 0 96px; }
+  .admin-inner { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+  .admin-inner h1 { font-size: 28px; letter-spacing: -.02em; font-weight: 600; margin-bottom: 8px; }
+  .admin-help { color: var(--ink-2); font-size: 15px; max-width: 48em; margin-bottom: 8px; }
+  .admin-help code { font-size: 13.5px; color: var(--ink); }
+
+  .admin-rail { background: var(--bg); border-bottom: 1px solid var(--line); }
+  .admin-rail .admin-brand { height: 56px; padding: 0 20px; }
+  .admin-rail ul { display: flex; gap: 4px; list-style: none; padding: 0 12px; overflow-x: auto; }
+  .admin-rail li a {
+    display: flex; align-items: center; min-height: 44px; padding: 0 12px;
+    color: var(--ink-2); font-size: 15px; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .admin-rail li a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--teal); }
+  .rail-short { display: none; }
+
+  @media (min-width: 900px) {
+    .admin { display: grid; grid-template-columns: 220px 1fr; }
+    .admin-rail {
+      border-bottom: 0; border-right: 1px solid var(--line);
+      position: sticky; top: 0; height: 100vh;
+    }
+    .admin-rail ul { flex-direction: column; padding: 12px; overflow: visible; }
+    .admin-rail li a { border-bottom: 0; border-left: 2px solid transparent; border-radius: 8px; }
+    .admin-rail li a[aria-current="page"] { border-left-color: var(--teal); background: var(--band); }
+    .admin-inner { margin: 0; padding: 0 32px; }
+  }
+
+  /* Bottom tab bar on a phone, thumb reachable. */
+  @media (max-width: 899px) {
+    .admin-rail {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+      border-top: 1px solid var(--line); border-bottom: 0;
+    }
+    .admin-rail .admin-brand { display: none; }
+    .admin-rail ul { justify-content: space-between; padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); }
+    .admin-rail li { flex: 1; }
+    .admin-rail li a { justify-content: center; font-size: 13px; padding: 0 4px; min-height: 48px; }
+    .rail-long { display: none; }
+    .rail-short { display: inline; }
+  }
+
+  .uploader {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px; margin-top: 20px;
+  }
+  .uploader h3 { font-size: 19px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 6px; }
+
+  .file-field { display: block; margin: 14px 0 6px; }
+  .file-label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+  .file-field input[type="file"] {
+    display: block; width: 100%; min-height: 44px; font: inherit; font-size: 15px;
+    color: var(--ink); background: var(--band); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 12px;
+  }
+  .file-field input[type="file"]::file-selector-button {
+    font: inherit; font-size: 14px; font-weight: 500; margin-right: 12px;
+    min-height: 32px; padding: 0 14px; border: 0; border-radius: 999px;
+    background: var(--ink); color: var(--bg); cursor: pointer;
+  }
+
+  .preview { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .preview-ok { font-size: 15px; font-weight: 500; color: var(--ink); }
+  .preview-bad { font-size: 15px; font-weight: 500; color: var(--ink); }
+  .preview .data-table { display: block; overflow-x: auto; white-space: nowrap; }
+
+  .diff { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+  .diff > div { border-top: 2px solid var(--ink); padding-top: 10px; }
+  .diff dt { font-size: 13px; color: var(--ink-3); }
+  .diff dd { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  @media (max-width: 560px) { .diff { grid-template-columns: 1fr 1fr; } }
+
+  .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .admin-actions .btn { min-height: 44px; }
+
+  .admin-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .admin-form .field-wide { grid-column: 1 / -1; }
+  .admin-form label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+  .admin-form input {
+    width: 100%; min-height: 44px; font: inherit; font-size: 16px; color: var(--ink);
+    background: var(--band); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  .admin-form .admin-actions { grid-column: 1 / -1; margin-top: 0; }
+  @media (max-width: 560px) { .admin-form { grid-template-columns: 1fr; } }
+
+  .toast {
+    position: fixed; left: 16px; right: 16px; bottom: 76px; z-index: 30;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: var(--ink); color: var(--bg);
+    border-radius: 12px; padding: 14px 16px; font-size: 15px;
+    box-shadow: 0 20px 40px -24px rgba(15, 42, 68, .6);
+  }
+  .toast button {
+    font: inherit; font-size: 14px; font-weight: 500; min-height: 44px; padding: 0 8px;
+    background: none; border: 0; color: var(--bg); cursor: pointer; text-decoration: underline;
+  }
+  /* Not gold: gold means "this links to a source document" and nothing else.
+     An error is told apart by the white rule and by its wording. */
+  .toast-error { border-left: 4px solid var(--bg); }
+  @media (min-width: 900px) { .toast { left: auto; right: 24px; bottom: 24px; max-width: 460px; } }
+
+  /* interior page header. The hero grid is the home page's, where a widget
+     sits beside the headline. Other pages lead with the headline alone. */
+  .page-head { padding: 72px 0 8px; }
+  .page-head h1 {
+    font-size: clamp(34px, 4.4vw, 54px); line-height: 1.05;
+    letter-spacing: -.03em; font-weight: 600; max-width: 18em;
+  }
+  @media (max-width: 900px) { .page-head { padding: 48px 0 8px; } }
+
+  .explorer-section { padding: 40px 24px 72px; }
+  /* Full width so the chart is not squeezed into a hero column. */
+  .explorer-section .explorer { padding: 30px; }
+  .explorer-section .fields { grid-template-columns: repeat(3, minmax(0, 220px)); }
+  @media (max-width: 520px) {
+    .explorer-section .fields { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* explorer additions: chart, data tables, budget bars */
+  .unavailable { color: var(--ink-3); font-weight: 400; }
+
+  .chart { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .chart-loading {
+    margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--line);
+    min-height: 300px; font-size: 13px; color: var(--ink-3);
+  }
+  .chart figcaption { display: grid; gap: 4px; margin-bottom: 14px; }
+  .chart figcaption strong { font-size: 15px; font-weight: 600; }
+  .chart figcaption span { font-size: 13px; color: var(--ink-3); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 10px; font-size: 13px; color: var(--ink-2); }
+  .legend-item { display: inline-flex; align-items: center; gap: 7px; }
+
+  /* Two brand colors, told apart by dash pattern and label as well as hue.
+     Recharts writes its own stroke attribute onto the generated path, so the
+     class on the wrapping group is not enough: the path itself has to be
+     targeted or every series renders in the library's default blue. */
+  .mark-current { stroke: var(--teal); fill: none; }
+  .mark-base { stroke: var(--ink); fill: none; }
+  .chart-plot .mark-current .recharts-curve,
+  .chart-plot .mark-current .recharts-dot { stroke: var(--teal); }
+  .chart-plot .mark-base .recharts-curve,
+  .chart-plot .mark-base .recharts-dot { stroke: var(--ink); }
+  .chart-plot .mark-current .recharts-dot { fill: var(--teal); }
+  .chart-plot .mark-base .recharts-dot { fill: var(--ink); }
+  .chart-plot .recharts-cartesian-grid line { stroke: var(--line); }
+  .chart-plot .recharts-cartesian-axis-tick text { fill: var(--ink-3); font-size: 12px; }
+  .chart-plot .axis-title { fill: var(--ink-3); font-size: 12px; }
+  .chart-plot .recharts-curve.recharts-tooltip-cursor { stroke: var(--ink-3); }
+  .chart-plot .recharts-dot { stroke: var(--card); stroke-width: 2; }
+
+  .tip {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; font-size: 13px; box-shadow: 0 10px 30px -18px rgba(15, 42, 68, .5);
+  }
+  .tip-head { font-weight: 600; margin-bottom: 6px; }
+  .tip-row { display: flex; justify-content: space-between; gap: 18px; color: var(--ink-2); }
+  .tip-row b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .chart-toggle {
+    margin-top: 14px; min-height: 44px; padding: 0 4px;
+    background: none; border: 0; cursor: pointer;
+    color: var(--teal); font: inherit; font-size: 14px; font-weight: 500;
+  }
+
+  .data-table { width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 8px; }
+  .data-table caption { text-align: left; font-size: 13px; color: var(--ink-3); padding-bottom: 12px; }
+  .data-table th, .data-table td { text-align: left; padding: 12px 16px 12px 0; border-bottom: 1px solid var(--line); }
+  .data-table thead th { font-size: 13px; font-weight: 500; color: var(--ink-3); border-bottom: 1px solid var(--ink); }
+  .data-table tbody th { font-weight: 500; }
+  .data-table td { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .data-table tfoot th, .data-table tfoot td { font-weight: 600; color: var(--ink); border-bottom: 0; }
+  .data-table .num { text-align: right; padding-right: 24px; }
+  .data-table th.num:last-child, .data-table td.num:last-child { padding-right: 0; }
+  @media (max-width: 640px) {
+    .data-table { font-size: 14px; }
+    .data-table th, .data-table td { padding: 10px 10px 10px 0; }
+  }
+
+  .bar-cell { display: flex; align-items: center; gap: 10px; }
+  .bar { flex: 1; min-width: 60px; height: 8px; background: var(--band); border-radius: 2px; overflow: hidden; }
+  .bar-fill { display: block; height: 100%; background: var(--teal); border-radius: 2px; }
+  .bar-pct { font-size: 13px; color: var(--ink-3); min-width: 44px; text-align: right; }
+
+  .feature { padding: 28px 0; border-bottom: 1px solid var(--line); }
+  .feature:last-child { border-bottom: 0; }
+  .feature h3 { font-size: 20px; letter-spacing: -.02em; font-weight: 600; margin-bottom: 8px; }
+  .feature p { color: var(--ink-2); font-size: 16px; max-width: 44em; }
+  .features { margin-top: 36px; border-top: 1px solid var(--line); }
+
+  .note { margin-top: 18px; font-size: 14px; color: var(--ink-3); max-width: 44em; }
 
   /* sections. The mockup relies on element vs class specificity here: a
      <section class="wrap"> takes .wrap's "padding: 0 24px" and so has no

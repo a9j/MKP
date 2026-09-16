@@ -221,6 +221,98 @@ report and a draft listening session that must never reach the public feed, and
 a records request left open past ten business days for the dashboard flag in
 phase 4. It is a development aid and is never run against production.
 
+## 2026-09-16, phase 3
+
+### Two more contrast failures, found on the grey band
+Phase 1 checked the palette against white. The grey band is a second surface,
+and two tokens fail on it, so both were darkened again. Measured, not judged.
+
+- `--ink-3` was 4.28:1 on `--band`, and it carries every table caption and
+  helper line. It is now `#64717D`: 5.00:1 on white, 4.62:1 on the band.
+- `--teal` is the mockup's `#1B7F8E`, which is 4.69:1 on white but 4.33:1 on the
+  band, where links and the primary button also sit. It is now `#187585`:
+  5.35:1 and 4.94:1. White text on it reads 5.35:1, so the teal button improved
+  too.
+
+A link inside running text also needs something other than color to mark it,
+so prose links are underlined. Navigation, buttons and sourced figures are not
+in running text and keep the mockup's undecorated treatment.
+
+axe reports zero WCAG 2.1 A and AA violations across the home page, the
+Explorer and the admin panel, in light, dark and at 390px.
+
+### Chart colors are the brand's, with identity never resting on color
+The palette validator passes the two checks that decide whether the series can
+be told apart: CVD separation is 27.1 against a threshold of 8, and the
+normal-vision floor is 27.7 against 15. It fails the lightness band and chroma
+floor, because navy and teal are deliberately muted and the design system
+forbids anything else. Gold is not available: it means "this links to a source
+document" and nothing else.
+
+Since the palette is restrained, identity carries on more than hue: the base
+year line is dashed, a legend is always present, and the table under the chart
+lists every plotted figure. That table is also how the chart meets the sourcing
+rule, since a line cannot carry a gold underline per point.
+
+Recharts writes its own `stroke` attribute onto the generated path, so a class
+on the wrapping group does nothing. Both series were silently rendering in the
+library's default blue, which is off palette and identical for both, while the
+legend showed the right colors. The CSS now targets the path itself.
+
+### Scenario B carries no gold underline
+Every other figure in the Explorer links to the record it came from. Scenario B
+is a flat amount set in `site_settings`; it is the scenario's own definition,
+not a number read off a public document. Putting a gold underline on it would
+promise a source that does not exist, from an organization whose whole standing
+rests on that promise. The label states the amount, and the figure is plain.
+
+Scenario A is different: it is a percentage of the sourced salary, so it links
+to the same document that salary came from.
+
+### An upload adds and updates, it never deletes
+A partial CSV should not wipe rows the uploader did not mean to touch, so the
+diff counts rows the file leaves alone and shows that count before committing.
+A file with any problem in it is refused whole: a half imported salary schedule
+is worse than a rejected one.
+
+### The vacancies snapshot key uses NULLS NOT DISTINCT
+0001 gave vacancies no natural key, so re-uploading a month would duplicate
+every row. The first attempt was a unique index over `coalesce(building, '')`,
+which dedupes correctly but cannot be used: `ON CONFLICT` only accepts a plain
+column list, so the upsert failed with "no unique or exclusion constraint
+matching the ON CONFLICT specification". Postgres 15 added `NULLS NOT
+DISTINCT`, which gives a plain column index that still treats nulls as equal.
+
+### A blank source_url is now a constraint, not just a convention
+0001 made `source_url` NOT NULL, which still allows an empty string. 0002 adds
+a check for a non-blank value on all four sourced tables, the CSV validator
+rejects the row with its line number, and `getExplorerData` throws during the
+build if one ever reaches it. Three layers, because an unsourced number on this
+site is the one thing that cannot ship.
+
+### Admin writes go through the caller's own session
+The upload actions use the cookie bound client, not the service role key, so
+RLS decides what a signed in administrator may touch. Sign in itself is not
+permission: membership is checked against the `admins` table. Both actions
+refuse before reading a file, so the endpoint is never open while the login
+screen is still to be built in phase 4.
+
+### Public and admin are separate route groups
+The admin panel was inheriting the public sticky nav and the 501(c)(3) footer.
+The root layout is now the document shell only, and `(public)` and `admin` each
+bring their own chrome.
+
+### Recharts is loaded on demand
+Importing it directly put 107kB into the home page bundle for a chart the home
+page does not draw. Loading it lazily took the home page back to 109kB total.
+
+### shadcn/ui is not in yet
+The brief lists it for form controls, dialogs, tables and toasts. Phase 3 needs
+a file input, a small form and a toast, which are plain controls styled from
+the tokens, and shadcn components are copied into the repo and restyled by hand
+anyway. It lands in phase 4 with the screens that need its dialogs and selects:
+the vote roll call, the records desk and the confirm dialogs.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal
@@ -233,6 +325,16 @@ phase 4. It is a development aid and is never run against production.
    replaces them with `salary_schedule` rows, at which point every figure
    carries its own `source_url` and a missing one fails the build.
 3. `src/lib/revalidate.ts` maps each kind of admin save to the public routes it
-   affects, but nothing calls it until the admin panel exists in phase 4. The
-   route lists are worth a read now, since a route missing from one of them is
+   affects. The Explorer upload calls it; the rest arrive with their screens.
+   The route lists are worth a read, since a route missing from one of them is
    a page that silently goes stale after a publish.
+4. The upload screen cannot be exercised end to end until phase 4 adds the
+   login, because the local stack runs PostgREST without an auth server. The
+   parsing, validation and diff rules are covered by 15 tests, and the upsert
+   for all three datasets was run directly against Postgres, but the path from
+   the file input through the server action is not yet under test.
+5. The mockup uses gold in three places: the sourced underline, the bar in the
+   logo mark, and the legend square that explains the underline. Design rule 2
+   says gold is for exactly one thing. The mockup is the approved design and
+   both extra uses are about the device itself, so they are kept. Worth a word
+   at review if that is not the intent.

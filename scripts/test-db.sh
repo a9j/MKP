@@ -20,7 +20,9 @@ fi
 PSQL="psql -h /tmp -p $PORT -U postgres -v ON_ERROR_STOP=1"
 $PSQL -q -c "drop database if exists mkp_test;" -c "create database mkp_test;"
 $PSQL -d mkp_test -q -f "$ROOT/supabase/tests/supabase_shim.sql"
-$PSQL -d mkp_test -q -f "$ROOT/supabase/migrations/0001_init.sql"
+for migration in "$ROOT"/supabase/migrations/*.sql; do
+  $PSQL -d mkp_test -q -f "$migration"
+done
 echo "Migration applied."
 $PSQL -d mkp_test -q -f "$ROOT/supabase/tests/schema_test.sql"
 $PSQL -d mkp_test -q -f "$ROOT/supabase/tests/rls_test.sql"

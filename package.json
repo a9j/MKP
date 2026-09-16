@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:db": "bash scripts/test-db.sh",
     "test:visual": "node scripts/visual-parity.mjs",
-    "test:data": "tsx --test tests/data.test.ts"
+    "test:data": "tsx --test tests/data.test.ts tests/explorer.test.ts tests/import.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -17,6 +17,7 @@
     "next": "15.5.25",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "recharts": "^3.10.1",
     "server-only": "^0.0.1"
   },
   "devDependencies": {

@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
-import { SiteNav } from "@/components/site-nav";
-import { SiteFooter } from "@/components/site-footer";
-import { getSiteSettings } from "@/lib/queries/settings";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -23,18 +20,16 @@ export const metadata: Metadata = {
     "The Mona K Project reads Toledo's school budgets, salary schedules, board votes, and city finances and explains them in plain language. Every number sourced. No positions.",
 };
 
-export default async function RootLayout({
+/**
+ * Document shell only. The public site and the admin panel each bring their
+ * own chrome, so neither inherits the other's.
+ */
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const settings = await getSiteSettings();
-
   return (
     <html lang="en" className={instrumentSans.variable}>
-      <body>
-        <SiteNav />
-        <main id="main">{children}</main>
-        <SiteFooter ein={settings.org_ein} mailingAddress={settings.mailing_address} />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

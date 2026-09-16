@@ -90,4 +90,20 @@ select pg_temp.rejects('duplicate salary step',
      ('2025-2026', 'TPS', 'BA', 1, 1, 'https://example.com/source.pdf'),
      ('2025-2026', 'TPS', 'BA', 1, 2, 'https://example.com/source.pdf')$q$, '23505');
 
+-- 0002: a blank source_url is as bad as a missing one.
+select pg_temp.rejects('salary row with a blank source_url',
+  $q$insert into salary_schedule (school_year, district, lane, step, salary, source_url)
+     values ('2025-2026', 'TPS', 'BA', 2, 45000, '')$q$, '23514');
+select pg_temp.rejects('salary row with a whitespace source_url',
+  $q$insert into salary_schedule (school_year, district, lane, step, salary, source_url)
+     values ('2025-2026', 'TPS', 'BA', 3, 45000, '   ')$q$, '23514');
+select pg_temp.rejects('vacancy with a blank source_url',
+  $q$insert into vacancies (as_of_date, position, source_url)
+     values ('2026-09-01', 'Math Teacher', '')$q$, '23514');
+select pg_temp.rejects('budget row with a blank source_url',
+  $q$insert into budget_categories (fiscal_year, category, amount, source_url)
+     values ('2026', 'Instruction', 1, '')$q$, '23514');
+select pg_temp.rejects('cpi row with a blank source_url',
+  $q$insert into cpi (year, index_value, source_url) values (2012, 1.0, '')$q$, '23514');
+
 \echo 'ALL SCHEMA ASSERTIONS PASSED'
