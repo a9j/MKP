@@ -65,10 +65,12 @@ test("feed dates do not shift across time zones", () => {
 
 test("site settings expose filled values and omit empty ones", async () => {
   const settings = await getSiteSettings();
-  assert.equal(settings.org_ein, "48-1234567");
+  // Values themselves are editable from /admin/settings, so this asserts the
+  // rule rather than a particular string: a filled key is present, an empty
+  // one is absent so the page can fall back to its bracket placeholder.
+  assert.ok(settings.org_ein && settings.org_ein.length > 0, "a filled setting was dropped");
   assert.equal(settings.contact_email, "hello@monakproject.org");
-  // Seeded empty, so it is absent and the page falls back to the placeholder.
-  assert.equal(settings.donate_url, undefined);
+  assert.equal(settings.donate_url, undefined, "an empty setting was returned");
 });
 
 test("the anonymous key never sees an operational setting", async () => {

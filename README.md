@@ -89,7 +89,7 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | `pnpm test:db` | Applies the migration to a throwaway Postgres and runs 41 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, and the RLS rules for anonymous, non-admin and admin callers |
 | `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
-| `pnpm test:e2e` | Playwright, 26 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, and "Send to council" reaches every advisory member |
+| `pnpm test:e2e` | Playwright, 39 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, and a publish notice reaches confirmed addresses only |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
 and a running app.
@@ -155,6 +155,22 @@ and Vote Watch name them.
 Switch the status to Published and it appears on `/reports`, at its own address,
 and in the Latest feed. Editing a published report does not move its publication
 date.
+
+## Subscribers and mail
+
+Subscribing is double opt in. The form writes an unconfirmed row and sends one
+signed link; nothing else is ever sent to an address that has not clicked it.
+The link expires after seven days and is verified by signature, so it cannot be
+guessed or edited.
+
+Publish notices are never automatic. Nothing that saves in the admin sends mail
+to subscribers. `/admin/subscribers` has the only button that does, and it
+states the recipient count in a dialog before anything goes out. It reaches
+confirmed addresses only.
+
+Without `RESEND_API_KEY`, every message is written to `.local-storage/emails`
+as JSON instead of being sent, which is how the tests check who a message went
+to. Mail is never silently dropped.
 
 ## Regenerating database types
 

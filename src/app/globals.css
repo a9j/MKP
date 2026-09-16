@@ -321,6 +321,55 @@
   .table-scroll .data-table { min-width: 640px; }
   .records-table { min-width: 780px; }
 
+  /* listening, about, contact, corrections */
+  .listening-head { margin-top: 20px; font-size: 16px; font-weight: 600; }
+  .listening-list { margin: 10px 0 0 22px; display: grid; gap: 8px; max-width: 46em; }
+  .listening-list li { font-size: 16px; color: var(--ink-2); }
+  .principles { margin-top: 20px; }
+  .principles li { font-size: 17px; }
+  .section-gap { margin-top: 48px; }
+
+  .people { margin-top: 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; border-top: 1px solid var(--line); }
+  .person { padding: 24px 28px 24px 0; border-bottom: 1px solid var(--line); }
+  .person h3 { font-size: 19px; font-weight: 600; letter-spacing: -.01em; }
+  .person-title { font-size: 14px; color: var(--ink-3); margin: 2px 0 8px; }
+  .person p { color: var(--ink-2); font-size: 16px; max-width: 34em; }
+  @media (max-width: 720px) { .people { grid-template-columns: 1fr; } }
+
+  .contact-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 48px; align-items: start; }
+  @media (max-width: 860px) { .contact-grid { grid-template-columns: 1fr; gap: 32px; } }
+  .aside-head { font-size: 18px; font-weight: 600; margin-top: 24px; }
+  .aside-head:first-child { margin-top: 0; }
+
+  .public-form { max-width: 34em; }
+  .public-form label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+  .public-form input, .public-form select, .public-form textarea {
+    width: 100%; min-height: 44px; font: inherit; font-size: 16px; color: var(--ink);
+    background: var(--band); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  .public-form textarea { min-height: 110px; resize: vertical; }
+
+  .subscribe { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-top: 18px; max-width: 34em; }
+  .subscribe .field { flex: 1; min-width: 220px; }
+  .subscribe label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+  .subscribe input {
+    width: 100%; min-height: 44px; font: inherit; font-size: 16px; color: var(--ink);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
+  .subscribe .btn { min-height: 44px; }
+
+  .confirm-page { padding-bottom: 72px; }
+
+  .bullet-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; padding: 8px 0; }
+  .checkbox-field { display: flex; align-items: center; gap: 10px; }
+  .checkbox-field input { width: 22px; height: 22px; min-height: 0; }
+  .checkbox-field label { margin: 0; font-size: 15px; color: var(--ink); }
+
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
   /* reports */
   .report-log { margin-top: 20px; border-top: 1px solid var(--line); }
   .report-row { padding: 24px 0; border-bottom: 1px solid var(--line); }

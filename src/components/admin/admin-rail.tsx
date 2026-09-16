@@ -9,7 +9,12 @@ const LINKS = [
   { href: "/admin/votes", label: "Votes", short: "Votes" },
   { href: "/admin/records", label: "Records", short: "Records" },
   { href: "/admin/reports", label: "Reports", short: "Reports" },
+  { href: "/admin/listening", label: "Listening", short: "Listen" },
   { href: "/admin/explorer", label: "Explorer data", short: "Data" },
+  { href: "/admin/people", label: "People", short: "People" },
+  { href: "/admin/corrections", label: "Corrections", short: "Fixes" },
+  { href: "/admin/subscribers", label: "Subscribers", short: "Subs" },
+  { href: "/admin/settings", label: "Settings", short: "Settings" },
 ];
 
 export function AdminRail() {

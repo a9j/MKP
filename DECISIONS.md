@@ -472,6 +472,67 @@ service role client into the browser bundle. The `server-only` guard turned
 that into a build error rather than a shipped key, which is what it is for, and
 the shared labels and shapes moved to `src/lib/report-types.ts`.
 
+## 2026-09-16, phase 6
+
+### Nothing is sent to an address that has not confirmed
+Subscribing writes an unconfirmed row and sends exactly one message: a signed,
+expiring link. Only clicking it sets `confirmed`. Publish notices go to
+confirmed addresses only, and only when a person presses the button and
+confirms the recipient count in a dialog. No save anywhere sends a notice.
+
+The token is an HMAC over the address and an expiry, so nothing is stored for
+it, it cannot be guessed, and an old link stops working on its own. The
+signature is compared in constant time so a near miss cannot be narrowed down
+by timing it. Tests cover both the happy path and a link with one character of
+the signature flipped.
+
+### The subscribe form gives nothing away
+It says the same thing whether or not the address is already on the list, and
+an address that already confirmed is not sent another link. Otherwise the form
+would answer "is this person a subscriber" to anyone who asked.
+
+### The inquiry row is written before the mail is sent
+If the mail fails, the message is still recorded and readable in the admin.
+Losing what somebody took the trouble to write is worse than a missed
+notification.
+
+### Confirming is its own page, not a redirect
+Redirecting back to `/get-involved` with a query parameter would force that
+page to read the query string, which takes it out of static rendering. The
+confirmation is its own dynamic page and says plainly which of the four things
+went wrong when a link does not work.
+
+### The footer keeps the mockup's links
+Two links to the new pages were added and then taken out again: the footer grew
+by 60px and the parity check caught it. Both pages are already reachable,
+`/listening` from About and `/corrections` from About and Contact, so the
+approved design stands. A footer link to Corrections would suit an organization
+whose credibility rests on correcting in public, and it is a one line change if
+that is wanted.
+
+### A correction cannot be logged without a reason
+"What changed" and "why" are both required. A change with no reason is an edit,
+not a correction, and the whole point of the page is that nothing is quietly
+edited.
+
+### A listening summary needs at least one thing heard
+The copy doc promises that what we hear is published and shapes what we build.
+A summary with neither list does neither, so at least one point is required.
+
+### Settings are grouped, and an unknown key still appears
+The settings screen lays the keys out in sections rather than as one long list,
+and anything seeded later that is not in a group is rendered under "Other", so
+a new key is never quietly uneditable. Records officer addresses are edited
+here but stored on the agency, since the Records Desk publishes them next to
+the office they belong to.
+
+### A data test asserted a seeded value that the admin can change
+`test:data` checked that `org_ein` equalled the seeded string, which broke as
+soon as the end to end suite saved a setting through the admin screen, as it
+should be able to. The test now asserts the rule it cares about, that a filled
+setting is returned and an empty one is omitted, rather than a particular
+string.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal
