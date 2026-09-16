@@ -35,7 +35,7 @@ set role anon;
 select pg_temp.want('anon sees published reports only', (select count(*) from reports), 1);
 select pg_temp.want('anon sees published listening only', (select count(*) from listening_sessions), 1);
 select pg_temp.want('anon sees votes', (select count(*) from votes), 1);
-select pg_temp.want('anon sees public settings only', (select count(*) from site_settings), 12);
+select pg_temp.want('anon sees public settings only', (select count(*) from site_settings), 20);
 select pg_temp.want('anon sees latest_feed', (select count(*) from latest_feed), 4);
 select pg_temp.denied('anon read admins',      'select 1 from admins');
 select pg_temp.denied('anon read inquiries',   'select 1 from inquiries');
@@ -65,7 +65,7 @@ set request.jwt.claims = '{"email":"ED@MonaKProject.org"}';
 select pg_temp.want('admin sees drafts too',   (select count(*) from reports), 2);
 select pg_temp.want('admin sees inquiries',    (select count(*) from inquiries), 2);
 select pg_temp.want('admin sees subscribers',  (select count(*) from subscribers), 2);
-select pg_temp.want('admin sees all settings', (select count(*) from site_settings), 15);
+select pg_temp.want('admin sees all settings', (select count(*) from site_settings), 21);
 insert into votes (body_id, meeting_date, item_title, summary)
   select id, '2026-01-02', 'admin vote', 'x' from bodies limit 1;
 \echo 'OK admin may write a vote'

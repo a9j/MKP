@@ -464,24 +464,41 @@ insert into public.agencies (name, website) values
   ('City of Toledo',        null),
   ('Lucas County',          null);
 
--- Placeholder settings. Values stay empty until they are filled in from
--- /admin/settings. is_public is false for operational keys.
+-- Every [BRACKET] placeholder in mona-k-project-site-copy.md, plus the values
+-- the build brief names. Values stay empty until they are filled in from
+-- /admin/settings, where an empty value renders as the bracket placeholder.
+--
+-- Records officer addresses are deliberately not here. The copy doc publishes
+-- them on the Records Desk page and the schema already holds them on
+-- agencies.records_officer_email, which is public read.
 insert into public.site_settings (key, value, is_public) values
-  ('org_ein',          '', true),
-  ('mailing_address',  '', true),
-  ('donate_url',       '', true),
-  ('explorer_url',     '', true),
-  ('scenario_a_pct',   '3',    true),
-  ('scenario_b_flat',  '2000', true),
-  ('request_template_path', '', true),
-  ('contact_email',    'hello@monakproject.org', true),
-  ('social_facebook',  '', true),
-  ('social_instagram', '', true),
-  ('social_linkedin',  '', true),
-  ('social_x',         '', true),
-  ('records_officer_email_tps',    '', false),
-  ('records_officer_email_city',   '', false),
-  ('records_officer_email_county', '', false);
+  -- Global and footer
+  ('org_ein',                 '', true),   -- [XX-XXXXXXX]
+  ('mailing_address',         '', true),   -- [Mailing address]
+  ('contact_email',           'hello@monakproject.org', true),
+  ('social_facebook',         '', true),
+  ('social_instagram',        '', true),
+  ('social_linkedin',         '', true),
+  ('social_x',                '', true),
+  -- Explorer
+  ('explorer_url',            '', true),
+  ('explorer_data_asof',      '', true),   -- [MONTH YEAR]
+  ('explorer_sources_list',   '', true),   -- [list]
+  ('scenario_a_pct',          '3',    true),
+  ('scenario_b_flat',         '2000', true),
+  -- Reports
+  ('reports_next_report_note','', true),   -- [Coming November 2026]
+  ('levy_status_note',        '', true),   -- [No levy currently on the ballot.]
+  ('contract_status_note',    '', true),   -- [Talks are not currently open.]
+  -- Records Desk
+  ('request_template_path',   '', true),
+  -- About and Get Involved
+  ('partners_note',           '', true),   -- [Other partners as confirmed]
+  ('form_990_url',            '', true),   -- [Link: Form 990 / financials]
+  ('donate_url',              '', true),
+  ('donate_amounts',          '25,50,100', true),
+  -- Operational. Never read by the public site, so is_public is false.
+  ('resend_audience_id',      '', false);
 
 -- A single note row. Real CPI values are entered from /admin/explorer.
 insert into public.cpi (year, index_value, source_url) values

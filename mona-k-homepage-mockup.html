@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Mona K Project. Toledo's public records, explained.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --band:#F4F6F8; --ink:#0F2A44; --ink-2:#4B5A6B; --ink-3:#8593A2;
+  --line:#E3E8ED; --teal:#1B7F8E; --teal-ink:#145F6A; --gold:#D9A441; --gold-soft:#FBF3E1;
+  --card:#FFFFFF;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1826; --band:#10233A; --ink:#F2F5F8; --ink-2:#B7C2CE; --ink-3:#7F8C9A;
+    --line:#1E3247; --teal:#5FC0CD; --teal-ink:#8ED6DF; --gold:#E4B45B; --gold-soft:#2A2410; --card:#10233A;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1826; --band:#10233A; --ink:#F2F5F8; --ink-2:#B7C2CE; --ink-3:#7F8C9A;
+  --line:#1E3247; --teal:#5FC0CD; --teal-ink:#8ED6DF; --gold:#E4B45B; --gold-soft:#2A2410; --card:#10233A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;font-size:17px}
+a{color:var(--teal);text-decoration:none}
+a:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+img{max-width:100%}
+
+/* sourced number: the one signature device */
+.src{color:var(--ink);font-variant-numeric:tabular-nums;text-decoration:none;border-bottom:2px solid var(--gold);padding-bottom:1px}
+.src:hover{background:var(--gold-soft)}
+
+/* nav */
+nav{position:sticky;top:0;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line);z-index:10}
+.nav{display:flex;align-items:center;justify-content:space-between;height:60px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:600;font-size:16px;letter-spacing:-.01em}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--ink);position:relative}
+.mark::after{content:"";position:absolute;left:5px;right:5px;bottom:5px;height:3px;background:var(--gold);border-radius:2px}
+.links{display:flex;gap:28px;font-size:15px}
+.links a{color:var(--ink-2)}
+.links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:500;font-size:15px;border:0;cursor:pointer;transition:transform .12s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.teal{background:var(--teal);color:#fff}
+@media (max-width:820px){.links{display:none}}
+
+/* hero */
+.hero{padding:88px 0 72px;display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+h1{font-size:clamp(40px,5.4vw,66px);line-height:1.02;letter-spacing:-.035em;font-weight:600}
+.lede{margin-top:22px;font-size:19px;color:var(--ink-2);max-width:34em;line-height:1.55}
+.lede .src{color:var(--ink)}
+.actions{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+.pledge{margin-top:36px;font-size:14px;color:var(--ink-3)}
+@media (max-width:900px){.hero{grid-template-columns:1fr;gap:44px;padding:56px 0 48px}}
+
+/* mini explorer */
+.explorer{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:0 30px 60px -40px rgba(15,42,68,.35)}
+.ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.ex-head strong{font-weight:600;font-size:15px}
+.ex-head span{font-size:13px;color:var(--ink-3)}
+.fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.field label{display:block;font-size:12px;color:var(--ink-3);margin-bottom:6px}
+select{width:100%;appearance:none;-webkit-appearance:none;font:inherit;font-size:15px;color:var(--ink);background:var(--band);border:1px solid transparent;border-radius:10px;padding:10px 32px 10px 12px;background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+select:hover{border-color:var(--line)}
+.result{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+.result .lab{font-size:13px;color:var(--ink-3)}
+.big{font-size:52px;font-weight:600;letter-spacing:-.03em;line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums}
+.big .src{border-bottom-width:3px}
+.rows{margin-top:18px;display:grid;gap:9px;font-size:15px}
+.row{display:flex;justify-content:space-between;color:var(--ink-2)}
+.row b{font-weight:500;color:var(--ink)}
+.up{color:var(--teal-ink)}
+.ex-foot{margin-top:18px;font-size:12.5px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.ex-foot .dot{width:8px;height:8px;background:var(--gold);border-radius:2px;display:inline-block}
+@media (max-width:520px){.fields{grid-template-columns:1fr 1fr}.fields .field:last-child{grid-column:span 2}.big{font-size:44px}}
+
+/* programs */
+section{padding:72px 0}
+h2{font-size:clamp(28px,3.4vw,40px);letter-spacing:-.03em;font-weight:600;line-height:1.1;max-width:20em}
+.sub{margin-top:12px;color:var(--ink-2);font-size:18px;max-width:36em}
+.programs{margin-top:44px;display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+.program{padding:32px 28px 32px 0;border-right:1px solid var(--line)}
+.program:last-child{border-right:0}
+.program + .program{padding-left:28px}
+.program h3{font-size:22px;letter-spacing:-.02em;font-weight:600;margin-bottom:10px}
+.program p{color:var(--ink-2);font-size:16px}
+.program a.more{display:inline-block;margin-top:16px;font-weight:500}
+.program .tag{font-size:13px;color:var(--ink-3);margin-bottom:14px}
+@media (max-width:820px){.programs{grid-template-columns:1fr}.program{border-right:0;border-bottom:1px solid var(--line);padding:28px 0}.program + .program{padding-left:0}.program:last-child{border-bottom:0}}
+
+/* how we work: real sequence, so numbered */
+.band{background:var(--band)}
+.steps{margin-top:40px;display:grid;grid-template-columns:repeat(5,1fr);gap:28px;counter-reset:s}
+.step{counter-increment:s;padding-top:18px;border-top:2px solid var(--ink)}
+.step::before{content:counter(s);display:block;font-weight:600;font-size:14px;color:var(--ink-3);margin-bottom:10px;font-variant-numeric:tabular-nums}
+.step h4{font-size:17px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.step p{font-size:15px;color:var(--ink-2)}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.steps{grid-template-columns:1fr}}
+
+/* latest */
+.latest{margin-top:36px;border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:120px 110px 1fr auto;gap:24px;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--line);color:var(--ink)}
+.item .date{color:var(--ink-3);font-size:14px;font-variant-numeric:tabular-nums}
+.item .kind{font-size:14px;color:var(--teal-ink);font-weight:500}
+.item .t{font-size:18px;letter-spacing:-.01em;font-weight:500}
+.item .t small{display:block;font-size:15px;font-weight:400;color:var(--ink-2);margin-top:3px}
+.item .go{color:var(--ink-3);font-size:14px}
+.item:hover .go{color:var(--ink)}
+@media (max-width:720px){.item{grid-template-columns:1fr;gap:6px}.item .go{display:none}}
+
+/* cta */
+.cta{background:var(--ink);color:#fff;border-radius:28px;padding:64px 56px;display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:center}
+.cta h2{color:#fff}
+.cta p{color:rgba(255,255,255,.72);margin-top:14px;font-size:17px;max-width:32em}
+.cta .actions{margin-top:0;justify-content:flex-end}
+.cta .btn{background:#fff;color:#0F2A44}
+.cta .btn.ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.3)}
+@media (max-width:820px){.cta{grid-template-columns:1fr;padding:44px 28px}.cta .actions{justify-content:flex-start}}
+
+/* footer */
+footer{padding:56px 0 40px;border-top:1px solid var(--line);color:var(--ink-2);font-size:14.5px}
+.foot{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px}
+.foot p{max-width:30em}
+.foot .col a{display:block;color:var(--ink-2);margin-bottom:8px}
+.foot .col a:hover{color:var(--ink)}
+.fine{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink-3);display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media (max-width:720px){.foot{grid-template-columns:1fr}}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap nav">
+  <a class="brand" href="#"><span class="mark"></span>The Mona K Project</a>
+  <div class="links"><a href="#explorer">Explorer</a><a href="#reports">Reports</a><a href="#records">Records</a><a href="#votes">Votes</a><a href="#about">About</a></div>
+  <a class="btn" href="#support">Support the work</a>
+</div></nav>
+
+<header class="wrap hero">
+  <div>
+    <h1>The records are public. Now they're readable.</h1>
+    <p class="lede">We read Toledo's school budgets, salary schedules, board votes, and city finances, then explain them in plain language. Every number links to the document it came from, like <a class="src" href="#">this one</a>. We show what the records say and let Toledo decide.</p>
+    <div class="actions"><a class="btn teal" href="#explorer">See what you make</a><a class="btn ghost" href="#reports">Read the latest report</a></div>
+    <p class="pledge">We don't take positions, endorse candidates, or recommend how to vote.</p>
+  </div>
+
+  <div class="explorer" id="explorer" aria-label="Toledo Teacher Pay Explorer preview">
+    <div class="ex-head"><strong>Toledo Teacher Pay Explorer</strong><span>Sample data, 2026-27</span></div>
+    <div class="fields">
+      <div class="field"><label for="step">Step</label>
+        <select id="step"><option>1</option><option>3</option><option selected>7</option><option>10</option><option>15</option><option>20</option></select></div>
+      <div class="field"><label for="lane">Lane</label>
+        <select id="lane"><option>BA</option><option selected>BA+15</option><option>MA</option><option>MA+30</option></select></div>
+      <div class="field"><label for="dist">Compare to</label>
+        <select id="dist"><option selected>Sylvania</option><option>Perrysburg</option><option>Washington Local</option><option>Springfield</option><option>Maumee</option></select></div>
+    </div>
+    <div class="result">
+      <div class="lab">You make</div>
+      <div class="big"><a class="src" href="#" id="salary">$52,410</a></div>
+      <div class="rows">
+        <div class="row"><span>Same step and lane in <span id="dname">Sylvania</span></span><b id="dval">$58,900</b></div>
+        <div class="row"><span>Scenario A: 3% across the board</span><b class="up" id="sA">+$1,572</b></div>
+        <div class="row"><span>Scenario B: $2,000 flat</span><b class="up" id="sB">+$2,000</b></div>
+        <div class="row"><span>Your 2010 step, in today's dollars</span><b id="infl">$54,180</b></div>
+      </div>
+    </div>
+    <div class="ex-foot"><span class="dot"></span>Gold underline means it links to the source document.</div>
+  </div>
+</header>
+
+<section class="wrap" id="programs">
+  <h2>Three things we build, all from public records.</h2>
+  <div class="programs">
+    <div class="program">
+      <div class="tag">Tool</div>
+      <h3>Teacher Pay Explorer</h3>
+      <p>Enter your step, lane, and years. See what you make, what each raise scenario means for you, and how you'd do in the eight surrounding districts.</p>
+      <a class="more" href="#explorer">Open the Explorer</a>
+    </div>
+    <div class="program" id="reports">
+      <div class="tag">Reports</div>
+      <h3>Reports</h3>
+      <p>The annual Toledo Teacher Pay Report, levy explainers when something is on the ballot, a contract tracker when talks open. Sourced, reviewed, no recommendations.</p>
+      <a class="more" href="#">Read the reports</a>
+    </div>
+    <div class="program" id="records">
+      <div class="tag">Records</div>
+      <h3>Records Desk and Vote Watch</h3>
+      <p>Every public records request we've filed and what came back. Every school board vote that touches money or staffing, and how each member voted.</p>
+      <a class="more" href="#" id="votes">See the records</a>
+    </div>
+  </div>
+</section>
+
+<section class="band"><div class="wrap">
+  <h2>How a 400-page PDF becomes a four-minute read.</h2>
+  <div class="steps">
+    <div class="step"><h4>We file the request</h4><p>Under Ohio's Public Records Act. Every request is logged publicly.</p></div>
+    <div class="step"><h4>We read every page</h4><p>Budgets, schedules, minutes, forecasts. All of it.</p></div>
+    <div class="step"><h4>We explain it plainly</h4><p>With every figure linked to the page it came from.</p></div>
+    <div class="step"><h4>The council reviews it</h4><p>Teachers, parents, and accountants read it before anyone else.</p></div>
+    <div class="step"><h4>We publish and brief</h4><p>Free to everyone. Offered as a briefing to the union, the board, and the press.</p></div>
+  </div>
+</div></section>
+
+<section class="wrap">
+  <h2>Latest</h2>
+  <div class="latest">
+    <a class="item" href="#"><span class="date">Sep 12, 2026</span><span class="kind">Vote Watch</span><span class="t">Board approves $4.2M HVAC contract for six buildings<small>Passed 4 to 1. Summary and each member's vote.</small></span><span class="go">Read</span></a>
+    <a class="item" href="#"><span class="date">Sep 3, 2026</span><span class="kind">Records Desk</span><span class="t">TPS 2026-27 certified salary schedule<small>Filed Aug 18. Fulfilled in 11 business days. 42 pages.</small></span><span class="go">Open</span></a>
+    <a class="item" href="#"><span class="date">Aug 21, 2026</span><span class="kind">Listening</span><span class="t">What 31 teachers told us in August<small>Planning time and health premiums came up more than base pay.</small></span><span class="go">Read</span></a>
+    <a class="item" href="#"><span class="date">Coming Nov</span><span class="kind">Report</span><span class="t">The 2026 Toledo Teacher Pay Report<small>Every step, eight districts, inflation, three costed scenarios.</small></span><span class="go">Notify me</span></a>
+  </div>
+</section>
+
+<section class="wrap" id="support"><div class="cta">
+  <div><h2>Help us read the next 400 pages.</h2><p>The Mona K Project runs on small donations and volunteer hours. Every dollar goes to records requests, review, and publishing.</p></div>
+  <div class="actions"><a class="btn" href="#">Donate</a><a class="btn ghost" href="#">Join the advisory council</a></div>
+</div></section>
+
+<footer><div class="wrap">
+  <div class="foot">
+    <div><a class="brand" href="#"><span class="mark"></span>The Mona K Project</a><p style="margin-top:14px">We make Toledo's public data understandable so residents can push for better decisions.</p></div>
+    <div class="col"><a href="#">Explorer</a><a href="#">Reports</a><a href="#">Records Desk</a><a href="#">Vote Watch</a></div>
+    <div class="col"><a href="#" id="about">About</a><a href="#">Get involved</a><a href="#">Contact</a><a href="mailto:hello@monakproject.org">hello@monakproject.org</a></div>
+  </div>
+  <div class="fine"><span>The Mona K Project is a 501(c)(3) nonprofit. EIN XX-XXXXXXX. Toledo, Ohio.</span><span>We do not take positions, endorse candidates, or recommend how to vote.</span></div>
+</div></footer>
+
+<script>
+(function(){
+  // Illustrative sample figures only. Real build reads from Supabase and links each figure to its source PDF.
+  var base={"BA":{1:42800,3:45100,7:49900,10:54200,15:60900,20:66400},"BA+15":{1:44300,3:46700,7:52410,10:56900,15:63800,20:69500},"MA":{1:47100,3:49800,7:55600,10:60700,15:68200,20:74100},"MA+30":{1:49400,3:52200,7:58300,10:63800,15:71600,20:77900}};
+  var dist={"Sylvania":1.124,"Perrysburg":1.091,"Washington Local":1.038,"Springfield":1.012,"Maumee":1.067};
+  var step=document.getElementById('step'),lane=document.getElementById('lane'),d=document.getElementById('dist');
+  var out=document.getElementById('salary'),dn=document.getElementById('dname'),dv=document.getElementById('dval'),sA=document.getElementById('sA'),sB=document.getElementById('sB'),infl=document.getElementById('infl');
+  var fmt=function(n){return '$'+Math.round(n).toLocaleString('en-US')};
+  var cur=52410;
+  function tick(from,to){
+    var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){out.textContent=fmt(to);return}
+    var t0=performance.now(),dur=420;
+    (function f(t){var p=Math.min(1,(t-t0)/dur);p=1-Math.pow(1-p,3);out.textContent=fmt(from+(to-from)*p);if(p<1)requestAnimationFrame(f)})(t0);
+  }
+  function update(){
+    var s=base[lane.value][+step.value];
+    tick(cur,s);cur=s;
+    dn.textContent=d.value;dv.textContent=fmt(s*dist[d.value]);
+    sA.textContent='+'+fmt(s*0.03);sB.textContent='+$2,000';
+    infl.textContent=fmt(s*1.034);
+  }
+  [step,lane,d].forEach(function(el){el.addEventListener('change',update)});
+})();
+</script>
+</body>
+</html>

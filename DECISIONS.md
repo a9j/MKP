@@ -3,12 +3,8 @@
 Choices made while building that were not spelled out in the brief. Each one
 notes what was decided and why, so it can be reversed quickly if it is wrong.
 
-## Blocked: the two reference files were not in the repository
-
-The brief says `mona-k-homepage-mockup.html` and `mona-k-project-site-copy.md`
-are in the folder. They are not, and the repository had no commits at all when
-this build started. Nothing has been invented in their place. See "Open
-questions" at the bottom.
+Both reference files arrived after the first commit and are now in the
+repository root. Phase 1 is built from them.
 
 ## 2026-09-16
 
@@ -70,16 +66,114 @@ suite and touches no Supabase project.
 The `template` owner type is the request template file, which belongs to the
 site rather than to a row in another table.
 
+## 2026-09-16, phase 1
+
+### Two mockup values fail WCAG AA and were changed
+Design rule 10 requires AA contrast, and rule 9 wants Lighthouse 95 on
+accessibility. Two values in the mockup cannot meet that, so they were
+changed. Everything else in the palette is the mockup's value untouched.
+
+1. `--ink-3` in light mode was `#8593A2`, which is 3.14:1 on white. It carries
+   small text throughout: the hero pledge line, feed dates, field labels, step
+   numbers, the footer fine print. It is now `#697684`, 4.64:1, the closest
+   value to the original that clears 4.5:1 with margin. The dark mode value
+   passes as written at 5.22:1 and is unchanged.
+2. `.cta` was `background: var(--ink); color: #fff`. In dark mode `--ink`
+   becomes `#F2F5F8`, so the block rendered white text on a near white
+   background at 1.09:1, effectively invisible. This is not theoretical, it
+   reproduces in a browser. The block now uses its own `--cta-bg`, `--cta-ink`,
+   `--cta-ink-2` and `--cta-line` tokens that stay navy and white in both
+   themes, which also matches design rule 3.
+
+A third token was added for the same reason: `--teal-btn-ink`. A `.btn.teal`
+is white on `--teal`, which is 4.70:1 in light mode but 2.12:1 against the
+lighter dark mode teal. The button now takes dark text in dark mode.
+
+axe-core reports zero WCAG 2.1 A and AA violations on the home page in light
+desktop, dark desktop, and mobile.
+
+### Section padding follows the mockup's specificity, not a class
+In the mockup, `.wrap { padding: 0 24px }` outranks `section { padding: 72px 0 }`,
+so a `<section class="wrap">` ends up with no vertical padding and only
+`<section class="band">` keeps the 72px. Rewriting this as a `.section` utility
+class looked tidier but silently changed every section's spacing and widened
+the content box from 1072px to 1120px. The element selector is kept so the
+cascade behaves exactly as the approved design does.
+
+### Verifying against the mockup needs the real font
+The mockup loads Instrument Sans from the Google Fonts CDN. Where that is
+unreachable it falls back to a system font, every text measurement drifts, and
+a correct build looks wrong. `scripts/visual-parity.mjs` serves the mockup from
+a local origin and proxies the app's self hosted font files to it so both
+pages render with the same font, then compares eleven elements and fails on any
+size difference. All eleven match. Run it with `pnpm test:visual` against a
+running `pnpm start -p 3100`.
+
+### Where the copy doc and the mockup disagree, the copy doc wins
+The copy doc is the approved copy, so its wording is used verbatim and the
+mockup supplies the layout.
+
+- Navigation is the copy doc's six items, which adds "Get Involved" to the
+  mockup's five.
+- The header button is "Support The Mona K Project", not "Support the work".
+- The footer opening line is "The Mona K Project makes Toledo's public data
+  understandable so residents can push for better decisions." The mockup opens
+  it with "We make".
+- The neutrality line is the copy doc's "We do not take positions", used in
+  both the hero and the footer. The mockup's hero says "We don't take
+  positions", which would leave two phrasings of the same sentence on one page.
+- The hero subhead drops the mockup's ", like this one" aside, which the copy
+  doc does not have. It existed to demonstrate the gold underline, and the
+  Explorer widget beside it already does that.
+- The Latest heading is the copy doc's "Latest from The Mona K Project".
+
+### Where the mockup has copy the copy doc does not, the mockup is kept
+The programs heading, "Three things we build, all from public records.", the
+how we work heading, and the five step titles with their supporting sentences
+exist only in the mockup. The copy doc's "How we work" list is the same five
+steps in summary form, so the mockup's fuller treatment is used.
+
+### The Latest feed shows six items, not three
+The copy doc says three. The build brief says "most recent 6 published items
+across reports, records requests, votes, and listening summaries". The brief is
+the functional spec, so six. This is the only reason the built page is taller
+than the mockup: 2753px against 2558px, which is exactly the two extra 98px
+rows.
+
+### The support button moves into the menu on mobile
+The mockup hides the nav links below 820px and puts nothing in their place,
+which leaves the site unnavigable on a phone. A disclosure button holds them
+instead, with 44px rows. The copy doc's longer "Support The Mona K Project"
+also wraps to two lines in a 390px bar and crowds out the menu button, so on
+mobile it moves into the menu rather than being shortened. The desktop bar is
+unchanged and still matches the mockup.
+
+### 44px touch targets are scoped to admin
+Rule 7 asks for 44px minimum targets so the Executive Director can work from an
+iPhone, and names admin forms. Applying it to public links as well pushed the
+footer and the programs list out of alignment with the mockup, so public pages
+follow the mockup and 44px applies to the admin panel and to the mobile menu
+that the mockup does not have.
+
+### Sourced links open in a new tab
+A source document is a PDF on an agency's site. Opening it in place would lose
+the reader's position on the page, so `<Sourced>` uses `target="_blank"` with
+`rel="noopener noreferrer"`.
+
+### The Explorer preview animates only the headline figure
+Rule 5 allows the salary figure to animate. The comparison, scenario and
+inflation rows are derived from the real value and update immediately, so only
+one number is ever in motion. The animation is 400ms with a cubic ease out and
+is skipped entirely under `prefers-reduced-motion`.
+
 ## Open questions
 
-1. `mona-k-homepage-mockup.html` is needed before any design token, spacing
-   value, or component can be written. The palette, type scale and layout all
-   come from it and none of it is safe to guess.
-2. `mona-k-project-site-copy.md` is needed for page copy, which the brief says
-   to use verbatim, and for the full list of `[BRACKET]` placeholder keys to
-   seed into `site_settings`. The migration currently seeds only the keys named
-   directly in the build brief: `org_ein`, `mailing_address`, `donate_url`,
-   `explorer_url`, `scenario_a_pct`, `scenario_b_flat`,
-   `request_template_path`, `contact_email`, the four social links, and three
-   private records officer emails. Any placeholder the copy doc adds needs a
-   follow up migration.
+1. The copy doc's own "What I still need from you" list is unanswered: legal
+   name confirmation, EIN, mailing address, Sasha Kabarday's title, advisory
+   council names, two sentences for the About page, DNS access, and whether the
+   Explorer has its own URL. Everything there is a `site_settings` value or a
+   `people` row, so none of it blocks building. The site renders the bracket
+   placeholder until a value is filled in.
+2. The Explorer preview still uses the mockup's illustrative numbers. Phase 3
+   replaces them with `salary_schedule` rows, at which point every figure
+   carries its own `source_url` and a missing one fails the build.
