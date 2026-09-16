@@ -6,6 +6,9 @@
 insert into admins (email, name) values ('ed@monakproject.org', 'ED');
 insert into inquiries (kind, name, email, message) values ('contact', 'A', 'a@x.com', 'hi');
 insert into subscribers (email, confirmed) values ('s@x.com', true);
+insert into people (name, role, active, sort_order, email) values
+  ('Council One', 'advisory', true, 1, 'one@example.com'),
+  ('Council Two', 'advisory', true, 2, 'two@example.com');
 
 create or replace function pg_temp.want(label text, got bigint, expected bigint)
 returns void language plpgsql as $$
@@ -70,5 +73,14 @@ insert into votes (body_id, meeting_date, item_title, summary)
   select id, '2026-01-02', 'admin vote', 'x' from bodies limit 1;
 \echo 'OK admin may write a vote'
 reset role; reset request.jwt.claims;
+
+\echo '== a council member address is not public =='
+set role anon;
+-- people is public because the About page and Vote Watch name them, but their
+-- email is not. A table wide grant would cover it, so the column is granted
+-- back one by one and this proves the address is not among them.
+select pg_temp.denied('anon read people.email', 'select email from people');
+select pg_temp.want('anon still reads the public columns', (select count(*) from people where role = 'advisory'), 2);
+reset role;
 
 \echo 'ALL RLS ASSERTIONS PASSED'

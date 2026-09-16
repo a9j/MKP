@@ -284,6 +284,7 @@ export type Database = {
           photo_path: string | null;
           sort_order: number;
           created_at: string;
+          email: string | null;
         };
         Insert: {
           id?: string;
@@ -298,6 +299,7 @@ export type Database = {
           photo_path?: string | null;
           sort_order?: number;
           created_at?: string;
+          email?: string | null;
         };
         Update: {
           id?: string;
@@ -312,6 +314,7 @@ export type Database = {
           photo_path?: string | null;
           sort_order?: number;
           created_at?: string;
+          email?: string | null;
         };
         Relationships: [
           {

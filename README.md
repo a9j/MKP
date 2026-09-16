@@ -22,7 +22,7 @@ Copy `.env.example` to `.env.local` and fill it in.
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL, from Project Settings, API |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anonymous key. Safe in the browser, limited by RLS |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key. Server only, bypasses RLS, never expose it |
-| `RESEND_API_KEY` | Resend API key for the contact form and subscriber mail |
+| `RESEND_API_KEY` | Resend API key for the contact form, council previews and subscriber mail. Without it, mail is written to `.local-storage/emails` instead of being sent, so nothing is ever dropped silently |
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL, used for Open Graph images and signed links |
 
 Every read of these goes through `src/lib/env.ts`, so a missing variable fails
@@ -89,7 +89,7 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | `pnpm test:db` | Applies the migration to a throwaway Postgres and runs 41 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, and the RLS rules for anonymous, non-admin and admin callers |
 | `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
-| `pnpm test:e2e` | Playwright. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, and a salary CSV with a missing `source_url` is refused |
+| `pnpm test:e2e` | Playwright, 26 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, and "Send to council" reaches every advisory member |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
 and a running app.
@@ -133,6 +133,28 @@ named in the `explorer_home_district` setting as "you". A district that
 publishes different lane names shows "Not directly comparable" rather than a
 guess. The inflation line needs a 2010 schedule and CPI rows for 2010 and a
 later year; without them the line is hidden rather than estimated.
+
+## Publishing a report
+
+At `/admin/reports`: title, address (made from the title unless you type one),
+type, date, a markdown summary of up to 600 characters, a PDF, and at least one
+source. A report cannot be saved without a source.
+
+Leave the status on Draft and it stays off the public site. Open it for editing
+and you get an unlisted preview link plus a **Send to council** button, which
+emails that link to every active advisory council member who has an address on
+file. The link needs no account, because asking a volunteer reviewer to hold one
+is how a report goes out unreviewed. It is unlisted rather than secret: the page
+is never indexed or cached, and the token cannot be guessed, but anyone holding
+the link can read the draft.
+
+Advisory council addresses are stored on `people.email`, which the anonymous
+role cannot read. The rest of a person's record is public, since the About page
+and Vote Watch name them.
+
+Switch the status to Published and it appears on `/reports`, at its own address,
+and in the Latest feed. Editing a published report does not move its publication
+date.
 
 ## Regenerating database types
 

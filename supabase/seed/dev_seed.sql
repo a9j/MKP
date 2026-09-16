@@ -136,3 +136,21 @@ insert into public.vacancies (as_of_date, position, building, posted_date, fille
   ('2026-09-01', 'Science Teacher',         'Sample Middle School','2026-07-01', null,         'https://example.com/source.pdf'),
   ('2026-09-01', 'Math Teacher',            'Sample High School',  '2026-06-30', '2026-08-18', 'https://example.com/source.pdf'),
   ('2026-09-01', 'Bus Driver',              'Transportation',      '2026-08-04', '2026-08-25', 'https://example.com/source.pdf');
+
+-- Advisory council, who review a report before it is released and are who the
+-- "Send to council" button writes to.
+insert into public.people (name, title, role, active, sort_order, bio) values
+  ('Sample Council Member', 'Retired teacher', 'advisory', true, 1, 'Taught in Toledo for 28 years.'),
+  ('Second Council Member', 'Parent and accountant', 'advisory', true, 2, 'Reads budgets for a living.');
+
+-- Staff, for the About page in phase 6.
+insert into public.people (name, title, role, active, sort_order) values
+  ('Anthony Anderson', 'Executive Director', 'staff', true, 1);
+
+-- Sources for the draft report, so the preview has something to show.
+insert into public.report_sources (report_id, label, url, sort_order)
+select id, 'Levy filing with the county board of elections', 'https://example.com/source.pdf', 0
+from public.reports where slug = 'draft-levy-explainer';
+
+update public.people set email = 'council-one@example.com' where name = 'Sample Council Member';
+update public.people set email = 'council-two@example.com' where name = 'Second Council Member';

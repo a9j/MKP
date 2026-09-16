@@ -401,6 +401,77 @@ recorded. A denial cannot be saved without the reason the office gave, enforced
 in the form, in the action, and by a check constraint, because an unexplained
 denial is exactly what the Records Desk exists to surface.
 
+## 2026-09-16, phase 5
+
+### people gained an email column, and it is not public
+"Send to council" has to write to someone, and the schema in the brief gives
+`people` no address. The column was added, but `people` is public read because
+the About page lists staff and council and Vote Watch names board members, and
+publishing a volunteer's personal email on their behalf is not this
+organization's call to make.
+
+Row level security cannot express "this row but not this column", so the
+address is withheld at the column level instead. The first attempt did not
+work: a column level revoke does not cut into the table wide grant that 0001
+gave `anon`, so the emails were simply readable. They were, and a curl against
+the running stack showed them. The table grant is now revoked and the readable
+columns granted back one by one, `email` not among them. There is an assertion
+for it in the RLS suite.
+
+### The service role needed grants the migration was not making
+A Supabase project grants `service_role` everything automatically, so this is
+invisible there, but the migration is meant to stand on its own and the preview
+link failed with "permission denied for table reports". BYPASSRLS skips the
+policies, not the table privileges. 0005 grants them, and default privileges so
+a later table is covered too.
+
+### The preview link is unlisted, not secret
+A draft is hidden from the anonymous key by RLS, so the preview route reads
+through the service role on an exact match of a `gen_random_uuid()` token. That
+is what stops the route being used to enumerate unpublished work: there is
+nothing to list, and a token cannot be guessed. A malformed token is rejected
+before any query runs, and the page is `force-dynamic` with `noindex, nocache`
+so a draft cannot sit in a CDN or turn up in a search result while the council
+is still reading it.
+
+It does not require a login on purpose. Asking a volunteer reviewer to hold an
+account is how a report goes out unreviewed. The banner on the page says the
+link is unlisted so a reviewer knows not to forward it.
+
+### Mail goes through one function, and never silently nowhere
+`sendEmail` uses Resend when `RESEND_API_KEY` is set and otherwise writes the
+message to `.local-storage/emails`. Dropping mail on the floor in development
+would be worse than either: a council review that never arrives looks exactly
+like one nobody answered. The tests read those files, which is how "send to
+council reaches both advisory members and nobody else" is actually checked.
+
+The house layout is one function too: navy heading, a gold rule under the
+title, and a font stack that falls back to the system sans, which in mail is
+almost everywhere. This is the one place outside the sourced underline where
+gold is used, and the brief asks for it explicitly.
+
+### Report summaries are markdown, rendered on the server
+`react-markdown` renders in the server component and disallows raw HTML, so a
+summary cannot smuggle markup onto the page and no markdown parser reaches the
+browser. The 600 character limit is enforced in the form, in the action, and by
+the counter that shows how much is left.
+
+### Sources are replaced wholesale on save
+Matching existing source rows against submitted ones is more code and more ways
+to go wrong. Deleting and reinserting cannot leave an edited report citing a
+document that is no longer in its list. A report cannot be saved with no
+sources at all.
+
+### A published date is set once
+Editing a published report does not move its publication date. Only the first
+publish sets it.
+
+### Shared report types live outside the query module
+The filter bar is a client component, and importing the query module pulled the
+service role client into the browser bundle. The `server-only` guard turned
+that into a build error rather than a shipped key, which is what it is for, and
+the shared labels and shapes moved to `src/lib/report-types.ts`.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal
