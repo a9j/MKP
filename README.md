@@ -23,7 +23,9 @@ Copy `.env.example` to `.env.local` and fill it in.
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anonymous key. Safe in the browser, limited by RLS |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key. Server only, bypasses RLS, never expose it |
 | `RESEND_API_KEY` | Resend API key for the contact form, council previews and subscriber mail. Without it, mail is written to `.local-storage/emails` instead of being sent, so nothing is ever dropped silently |
-| `NEXT_PUBLIC_SITE_URL` | Absolute site URL, used for Open Graph images and signed links |
+| `NEXT_PUBLIC_SITE_URL` | Absolute site URL. Confirmation links, council preview links, Open Graph images and the sitemap are all built from it |
+| `EMAIL_FROM` | Optional. The from address on outgoing mail. Defaults to `The Mona K Project <hello@monakproject.org>` |
+| `SUBSCRIBE_TOKEN_SECRET` | Optional. Signs subscriber confirmation links. Defaults to the service role key |
 
 Every read of these goes through `src/lib/env.ts`, so a missing variable fails
 with a message naming it rather than showing an empty page.
@@ -89,6 +91,7 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | `pnpm test:db` | Applies the migration to a throwaway Postgres and runs 41 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, and the RLS rules for anonymous, non-admin and admin callers |
 | `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
+| `pnpm test:lighthouse` | Lighthouse over all 11 public routes in mobile emulation. Fails if any category on any route drops below 95 |
 | `pnpm test:e2e` | Playwright, 39 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, and a publish notice reaches confirmed addresses only |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
@@ -188,13 +191,54 @@ embedded selects stay typed.
 
 ## Deploying to Vercel
 
-1. Import the repository in Vercel.
-2. Set the five environment variables above for Preview and Production.
-3. Build command `pnpm build`, output handled by the Next.js preset.
-4. Point `monakproject.org` at the project and set `NEXT_PUBLIC_SITE_URL` to it.
+1. **Create the Supabase project.** Run every file in `supabase/migrations/` in
+   order in the SQL editor. Create a Storage bucket named `documents` with
+   public read: report PDFs, records request documents and people photos are
+   all served from it.
+2. **Add yourself as an administrator**, as above. Nobody can sign in until
+   their address is in `admins`.
+3. **Import the repository in Vercel.** `vercel.json` sets the framework, the
+   build and install commands, and the security headers, so there is nothing to
+   configure by hand.
+4. **Set the environment variables** from the table above, for Production and
+   Preview both. `NEXT_PUBLIC_SITE_URL` must be the real origin: it is what
+   confirmation links, council preview links and the sitemap are built from, so
+   a wrong value sends people to the wrong place.
+5. **Point `monakproject.org` at the project** in Vercel, then set
+   `NEXT_PUBLIC_SITE_URL` to `https://monakproject.org`.
+6. **Verify the Supabase redirect URLs.** In Authentication,"URL Configuration",
+   add `https://monakproject.org/**` so magic links come back to the site rather
+   than to localhost.
+7. **Verify the Resend domain** and set `EMAIL_FROM` if you want something other
+   than `hello@monakproject.org`. Without `RESEND_API_KEY` no mail is sent, and
+   the sign in link will not arrive.
+8. **Check Plausible** is receiving traffic for `monakproject.org`. The script
+   is on public pages only, never on the admin panel.
 
 Public pages use ISR. Every admin save calls `revalidatePath` for the routes it
 affects, so published work appears within seconds without a rebuild.
+
+### What the build needs
+
+The public pages are rendered at build time, so the database has to be
+reachable and the Explorer must have data. A build will stop with a clear
+message if `salary_schedule` is empty, if the home district named in
+`explorer_home_district` has no rows, or if any figure is missing its source
+link. That is deliberate: an unsourced number is the one thing that must never
+reach the site.
+
+## Performance and accessibility
+
+`pnpm test:lighthouse` runs all 11 public routes in mobile emulation and fails
+below 95 in any category. Current scores: Performance 96 to 99, Accessibility
+100, SEO 100, Best Practices 96 locally and 100 in production. The local Best
+Practices cap is the Plausible script, which cannot load in a sandbox without
+outbound network and logs a console error; it is the only error on any page.
+
+Every page carries an Open Graph image generated at build: navy background, the
+page title in Instrument Sans, the gold rule. `/robots.txt` and `/sitemap.xml`
+are generated too, and both keep crawlers away from the admin panel and the
+unlisted report previews.
 
 ## Project conventions
 

@@ -41,7 +41,7 @@ export function VoteList({ votes }: { votes: Vote[] }) {
                   {vote.bodyName} &middot; {vote.categoryLabel}
                 </span>
               </div>
-              <h3>{vote.itemTitle}</h3>
+              <h2 className="vote-heading">{vote.itemTitle}</h2>
               <p className="vote-summary">{vote.summary}</p>
 
               <dl className="vote-facts">

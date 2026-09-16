@@ -127,7 +127,7 @@ test.describe("posting a vote", () => {
 
     const pub = await context.newPage();
     await pub.goto("/votes");
-    await expect(pub.locator(".vote h3").filter({ hasText: title })).toBeVisible();
+    await expect(pub.locator(".vote .vote-heading").filter({ hasText: title })).toBeVisible();
 
     const entry = pub.locator(".vote").filter({ hasText: title });
     await expect(entry).toContainText(`${memberCount - 1} yes, 1 no`);
@@ -135,9 +135,9 @@ test.describe("posting a vote", () => {
 
     // Filters narrow the log.
     await pub.click('.filter:has-text("Facilities")');
-    await expect(pub.locator(".vote h3").filter({ hasText: title })).toBeVisible();
+    await expect(pub.locator(".vote .vote-heading").filter({ hasText: title })).toBeVisible();
     await pub.click('.filter:has-text("Staffing")');
-    await expect(pub.locator(".vote h3").filter({ hasText: title })).toHaveCount(0);
+    await expect(pub.locator(".vote .vote-heading").filter({ hasText: title })).toHaveCount(0);
 
     // And it reaches the home page feed, which is statically rendered, so this
     // also proves revalidatePath ran on save.

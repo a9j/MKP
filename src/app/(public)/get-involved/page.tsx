@@ -24,7 +24,7 @@ export default async function GetInvolvedPage() {
       <section className="wrap vote-section">
         <div className="features">
           <div className="feature">
-            <h3>Donate</h3>
+            <h2>Donate</h2>
             <p>
               The Mona K Project runs on small donations. Records requests, review time,
               and publishing are all we spend on.
@@ -54,7 +54,7 @@ export default async function GetInvolvedPage() {
           </div>
 
           <div className="feature">
-            <h3>Join the advisory council</h3>
+            <h2>Join the advisory council</h2>
             <p>
               Council members review each report before it goes out. We are looking for
               current and retired teachers, parents, accountants, and anyone who has read
@@ -70,7 +70,7 @@ export default async function GetInvolvedPage() {
           </div>
 
           <div className="feature">
-            <h3>Volunteer</h3>
+            <h2>Volunteer</h2>
             <p>
               We need people to read documents, check sources, and attend board meetings.
               No experience required, just patience with PDFs.
@@ -84,7 +84,7 @@ export default async function GetInvolvedPage() {
           </div>
 
           <div className="feature">
-            <h3>For organizations</h3>
+            <h2>For organizations</h2>
             <p>
               Unions, boards, newsrooms, and community groups can request a briefing on
               any report. We present the numbers and take questions. We do not advise on

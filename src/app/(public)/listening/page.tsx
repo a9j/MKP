@@ -44,7 +44,7 @@ export default async function ListeningPage() {
 
                 {session.heard.length > 0 ? (
                   <>
-                    <h3 className="listening-head">What we heard</h3>
+                    <h2 className="listening-head">What we heard</h2>
                     <ul className="listening-list">
                       {session.heard.map((point) => (
                         <li key={point}>{point}</li>
@@ -55,7 +55,7 @@ export default async function ListeningPage() {
 
                 {session.changes.length > 0 ? (
                   <>
-                    <h3 className="listening-head">What it changes</h3>
+                    <h2 className="listening-head">What it changes</h2>
                     <ul className="listening-list">
                       {session.changes.map((point) => (
                         <li key={point}>{point}</li>

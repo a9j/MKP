@@ -56,7 +56,7 @@ export default async function ReportsPage() {
           {TYPES.map((type) => (
             <div className="feature" key={type.title}>
               <div className="tag">{type.cadence}</div>
-              <h3>{type.title}</h3>
+              <h2>{type.title}</h2>
               <p>{type.body}</p>
               <p className="report-actions">
                 {type.status.href ? (

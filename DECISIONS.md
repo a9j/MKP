@@ -533,6 +533,59 @@ should be able to. The test now asserts the rule it cares about, that a filled
 setting is returned and an empty one is omitted, rather than a particular
 string.
 
+## 2026-09-16, phase 7
+
+### The Lighthouse pass found three real defects
+Running it rather than assuming was the point. All eleven public routes now
+score 95 or above on mobile in every category, but they did not at first.
+
+1. `/favicon.ico` was returning 404 on every page, and had been since the
+   scaffold's default icon was deleted in phase 1. Nothing else noticed: axe
+   does not check it and the pages looked right. There is now a brand mark as
+   `icon.svg`, a real `favicon.ico` for clients that ask for it directly, and an
+   apple touch icon, all rendered from the same two shapes.
+2. `/reports` failed heading order: the three report type blocks were `h3`
+   directly under the `h1`. They are section headings, so they are `h2` now. The
+   same fault was on `/votes`, `/listening` and `/get-involved`. No copy was
+   invented to paper over it; the level was simply wrong, and the size is set by
+   the block rather than the level.
+3. Several text links were 23px tall, under the 24px minimum, so they were hard
+   to hit on a phone. Everything tappable now clears 44px, which is what the
+   Explorer and the admin panel already used.
+
+Accessibility and SEO are 100 on every route. Best Practices sits at 96 locally
+for one reason: the Plausible script cannot load in a sandbox without outbound
+network and logs a console error. It is the only console error on any page, so
+that becomes 100 in production.
+
+### Open Graph images are generated at build, from a font on disk
+`src/lib/og.tsx` renders the card and each route has a four line file naming its
+own title. The font is committed under `src/assets` and read from disk rather
+than fetched, so generating a share card never depends on the network being up
+during a build.
+
+### The share card is the third sanctioned use of gold
+The rule is that gold means "this links to a source document". The card uses it
+as a rule under the title, the same motif as the logo mark and the Explorer
+legend, and the brief asks for exactly that. On the site itself, gold is still
+only the sourced underline.
+
+### Plausible is on public pages only
+It is in the public layout, not the root layout, so the admin panel is not
+measured. It sets no cookies and collects nothing personal, so there is nothing
+to ask consent for and nothing that follows a reader anywhere else.
+
+### robots and sitemap keep crawlers out of two places
+The admin panel and the unlisted report previews are disallowed in
+`robots.txt`, carry `noindex` in their own metadata, and get an `X-Robots-Tag`
+header from `vercel.json`. Three layers, because a draft appearing in a search
+result while the council is still reading it is not recoverable.
+
+### A test tracked a heading level it should not have
+Promoting the vote title from `h3` to `h2` broke an end to end test that
+selected `.vote h3`. The heading now carries a class the test matches on, so a
+correct change to the document outline does not read as a regression.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal
