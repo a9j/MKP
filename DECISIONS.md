@@ -166,6 +166,61 @@ inflation rows are derived from the real value and update immediately, so only
 one number is ever in motion. The animation is 400ms with a cubic ease out and
 is skipped entirely under `prefers-reduced-motion`.
 
+## 2026-09-16, phase 2
+
+### Public pages use the anonymous client, not the cookie bound one
+`@supabase/ssr`'s `createServerClient` reads cookies, and reading cookies opts a
+route out of static rendering, which would quietly disable the ISR the brief
+asks for. Nothing on a public page depends on who is asking, so public reads go
+through a plain anonymous client and RLS does the filtering. The cookie bound
+client arrives in phase 4 with the admin panel, where the session is the point.
+
+### Types are generated from the catalog, not by the Supabase CLI
+`supabase gen types` shells out to Docker, which is not available everywhere.
+`scripts/gen-types.mjs` reads the Postgres catalog through psql and emits the
+same shape: 20 tables, the `latest_feed` view, 9 enums, and the 7 foreign keys.
+
+The foreign keys matter. postgrest-js requires a `Relationships` key on every
+table and view, and without it the whole `Database` type silently degrades to
+`never`, so `.from("latest_feed")` type checks as an error with no clue why.
+Emitting real relationships rather than empty arrays also keeps embedded selects
+such as `.select("*, agencies(name)")` typed for the later phases.
+
+### Every column of latest_feed is nullable
+Postgres cannot prove non-nullability through a union, so the generated view
+type is nullable throughout. `getLatestFeed` skips any row missing what it takes
+to render rather than showing a half built row. That is the honest reading of
+the type, not a workaround.
+
+### Feed dates are formatted from parts
+`new Date("2026-09-12")` parses as midnight UTC and then renders in local time,
+which shows a September 12 vote as September 11 for anyone west of UTC. Dates
+are built with `Date.UTC` and formatted with `timeZone: "UTC"`. There is a
+regression test for this that pins the process time zone.
+
+### A missing environment variable fails loudly
+`src/lib/env.ts` throws a message naming the variable and pointing at
+`.env.example`. The alternative, rendering an empty page when the database is
+unreachable, would look like a site with nothing published, which for this
+organization is the worst possible failure mode.
+
+### A local stand in for Supabase, so the data layer is tested for real
+`scripts/local-supabase.sh` brings up Postgres, PostgREST, and a small gateway
+that serves PostgREST under `/rest/v1` the way Supabase does. `pnpm test:data`
+then runs the real query modules through real `supabase-js` against real RLS,
+rather than against a mock that would agree with whatever the code does. It
+proved useful immediately: the anonymous key is refused on `admins`,
+`inquiries` and `subscribers`, and cannot write to `corrections`.
+
+The Docker daemon is unavailable in this environment, so `supabase start` was
+not an option. Nothing in this setup is used in production.
+
+### Development seed content
+`supabase/seed/dev_seed.sql` holds clearly fake content, including a draft
+report and a draft listening session that must never reach the public feed, and
+a records request left open past ten business days for the dashboard flag in
+phase 4. It is a development aid and is never run against production.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal
@@ -177,3 +232,7 @@ is skipped entirely under `prefers-reduced-motion`.
 2. The Explorer preview still uses the mockup's illustrative numbers. Phase 3
    replaces them with `salary_schedule` rows, at which point every figure
    carries its own `source_url` and a missing one fails the build.
+3. `src/lib/revalidate.ts` maps each kind of admin save to the public routes it
+   affects, but nothing calls it until the admin panel exists in phase 4. The
+   route lists are worth a read now, since a route missing from one of them is
+   a page that silently goes stale after a publish.

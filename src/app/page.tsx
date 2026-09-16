@@ -2,6 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PayExplorerPreview } from "@/components/pay-explorer-preview";
 import { NEUTRALITY_LINE } from "@/lib/nav";
+import { getLatestFeed } from "@/lib/queries/feed";
+
+/**
+ * Rebuilt on demand. Every admin save calls revalidatePath for the routes it
+ * affects, so a publish shows up within seconds. The long window is only a
+ * backstop for anything that misses a revalidate call.
+ */
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   description:
@@ -56,62 +64,9 @@ const STEPS = [
   },
 ];
 
-/**
- * Phase 1 sample feed. Phase 2 replaces this with the six most recent rows of
- * the latest_feed view.
- */
-const LATEST = [
-  {
-    date: "Sep 12, 2026",
-    kind: "Vote Watch",
-    title: "Board approves $4.2M HVAC contract for six buildings",
-    subtitle: "Passed 4 to 1. Summary and each member's vote.",
-    action: "Read",
-    href: "/votes",
-  },
-  {
-    date: "Sep 3, 2026",
-    kind: "Records Desk",
-    title: "TPS 2026-27 certified salary schedule",
-    subtitle: "Filed Aug 18. Fulfilled in 11 business days. 42 pages.",
-    action: "Open",
-    href: "/records",
-  },
-  {
-    date: "Aug 29, 2026",
-    kind: "Vote Watch",
-    title: "Board adds four intervention specialist positions",
-    subtitle: "Passed 5 to 0. Summary and each member's vote.",
-    action: "Read",
-    href: "/votes",
-  },
-  {
-    date: "Aug 21, 2026",
-    kind: "Listening",
-    title: "What 31 teachers told us in August",
-    subtitle: "Planning time and health premiums came up more than base pay.",
-    action: "Read",
-    href: "/listening",
-  },
-  {
-    date: "Aug 14, 2026",
-    kind: "Records Desk",
-    title: "City of Toledo general fund monthly report",
-    subtitle: "Filed Jul 30. Fulfilled in 9 business days. 18 pages.",
-    action: "Open",
-    href: "/records",
-  },
-  {
-    date: "Coming Nov",
-    kind: "Report",
-    title: "The 2026 Toledo Teacher Pay Report",
-    subtitle: "Every step, eight districts, inflation, three costed scenarios.",
-    action: "Notify me",
-    href: "/reports",
-  },
-];
+export default async function HomePage() {
+  const latest = await getLatestFeed(6);
 
-export default function HomePage() {
   return (
     <>
       <header className="wrap hero">
@@ -170,10 +125,10 @@ export default function HomePage() {
       <section className="wrap">
         <h2>Latest from The Mona K Project</h2>
         <div className="latest">
-          {LATEST.map((entry) => (
-            <Link className="item" href={entry.href} key={entry.title}>
-              <span className="date">{entry.date}</span>
-              <span className="kind">{entry.kind}</span>
+          {latest.map((entry) => (
+            <Link className="item" href={entry.href} key={`${entry.kind}-${entry.date}-${entry.title}`}>
+              <span className="date">{entry.dateLabel}</span>
+              <span className="kind">{entry.kindLabel}</span>
               <span className="t">
                 {entry.title}
                 <small>{entry.subtitle}</small>
