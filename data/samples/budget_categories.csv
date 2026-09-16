@@ -1,0 +1,7 @@
+fiscal_year,category,amount,source_url
+2026,Instruction,182000000,https://example.com/source.pdf
+2026,Building Operations,41000000,https://example.com/source.pdf
+2026,Transportation,19500000,https://example.com/source.pdf
+2026,Administration,16250000,https://example.com/source.pdf
+2026,Student Support,23750000,https://example.com/source.pdf
+2026,Debt Service,12000000,https://example.com/source.pdf
