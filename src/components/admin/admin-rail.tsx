@@ -35,6 +35,9 @@ export function AdminRail() {
           );
         })}
       </ul>
+      <form className="rail-signout" action="/admin/signout" method="post">
+        <button type="submit">Sign out</button>
+      </form>
     </nav>
   );
 }

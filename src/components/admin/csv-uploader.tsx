@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Toast, type ToastTone } from "@/components/admin/toast";
-import { previewUpload, commitUpload, type PreviewResult } from "@/app/admin/explorer/actions";
+import { previewUpload, commitUpload, type PreviewResult } from "@/lib/actions/explorer";
 import type { DatasetKey } from "@/lib/explorer-import";
 
 type Props = {

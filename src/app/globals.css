@@ -276,12 +276,68 @@
     .big { font-size: 44px; }
   }
 
+  /* votes and records */
+  .vote-section { padding: 32px 24px 72px; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .filter {
+    font: inherit; font-size: 14px; min-height: 44px; padding: 0 16px;
+    background: transparent; color: var(--ink-2);
+    border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+  }
+  .filter:hover { color: var(--ink); }
+  .filter[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+  .vote-log { margin-top: 20px; border-top: 1px solid var(--line); }
+  .vote { padding: 26px 0; border-bottom: 1px solid var(--line); }
+  .vote-head { display: flex; flex-wrap: wrap; gap: 14px; align-items: baseline; margin-bottom: 8px; }
+  .vote-date { font-size: 14px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .vote-kind { font-size: 14px; color: var(--teal-ink); font-weight: 500; }
+  .vote h3 { font-size: 20px; letter-spacing: -.02em; font-weight: 600; margin-bottom: 6px; }
+  .vote-summary { color: var(--ink-2); font-size: 16px; max-width: 46em; }
+
+  .vote-facts { display: flex; flex-wrap: wrap; gap: 32px; margin-top: 16px; }
+  .vote-facts dt { font-size: 13px; color: var(--ink-3); }
+  .vote-facts dd { font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .vote-members { margin-top: 16px; }
+  .vote-members summary {
+    display: flex; align-items: center; min-height: 44px;
+    font-size: 15px; font-weight: 500; color: var(--teal); cursor: pointer;
+  }
+  .vote-members .data-table { max-width: 420px; }
+
+  .vote-links { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 12px; font-size: 15px; }
+
+  .records-table .request-text { font-weight: 500; max-width: 26em; }
+  .records-table .request-text small {
+    display: block; margin-top: 4px; font-weight: 400; font-size: 14px; color: var(--ink-2);
+  }
+  .doc-link { display: block; }
+
+  /* A wide table scrolls inside its own box, so the page itself never does. */
+  .table-scroll { overflow-x: auto; max-width: 100%; }
+  .table-scroll:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+  .table-scroll .data-table { min-width: 640px; }
+  .records-table { min-width: 780px; }
+
+  .steps-list { margin: 24px 0 0; padding-left: 22px; display: grid; gap: 12px; max-width: 46em; }
+  .steps-list li { color: var(--ink-2); font-size: 16px; }
+  .officers-head { margin-top: 32px; font-size: 18px; font-weight: 600; }
+  .officers { list-style: none; padding: 0; margin: 12px 0 0; border-top: 1px solid var(--line); max-width: 46em; }
+  .officers li {
+    display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--line); font-size: 15px;
+  }
+
   /* ---------------------------------------------------------------------
      Admin workspace. Same tokens, but the grey band becomes the page
      background so it never reads as a published page. Touch targets are 44px
      throughout, since this is run from a phone.
      --------------------------------------------------------------------- */
   .admin { min-height: 100vh; background: var(--band); }
+  /* Sign in has no rail, so it does not need the workspace grid. */
+  .admin-plain { display: block; }
   .admin-main { padding: 24px 0 96px; }
   .admin-inner { max-width: 900px; margin: 0 auto; padding: 0 20px; }
   .admin-inner h1 { font-size: 28px; letter-spacing: -.02em; font-weight: 600; margin-bottom: 8px; }
@@ -325,6 +381,23 @@
     .rail-short { display: inline; }
   }
 
+  .login { max-width: 420px; margin: 48px auto; padding: 0 20px; }
+  .login h1 { font-size: 26px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 8px; }
+  .login-form { margin-top: 20px; }
+  .login-sent, .login-error {
+    margin-top: 16px; padding: 14px 16px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--line); font-size: 15px; color: var(--ink-2);
+  }
+  .login-error { border-left: 4px solid var(--ink); }
+
+  .rail-signout { padding: 12px; }
+  .rail-signout button {
+    font: inherit; font-size: 14px; min-height: 44px; padding: 0 12px;
+    background: none; border: 0; color: var(--ink-2); cursor: pointer; text-decoration: underline;
+  }
+  .rail-signout button:hover { color: var(--ink); }
+  @media (max-width: 899px) { .rail-signout { display: none; } }
+
   .uploader {
     background: var(--card); border: 1px solid var(--line); border-radius: 16px;
     padding: 22px; margin-top: 20px;
@@ -367,6 +440,69 @@
   }
   .admin-form .admin-actions { grid-column: 1 / -1; margin-top: 0; }
   @media (max-width: 560px) { .admin-form { grid-template-columns: 1fr; } }
+
+  .admin-form textarea {
+    width: 100%; min-height: 88px; font: inherit; font-size: 16px; color: var(--ink);
+    background: var(--band); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; resize: vertical;
+  }
+  .admin-form input[type="file"] {
+    width: 100%; min-height: 44px; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--band); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px;
+  }
+  .admin-form input[type="file"]::file-selector-button {
+    font: inherit; font-size: 14px; font-weight: 500; margin-right: 12px;
+    min-height: 32px; padding: 0 14px; border: 0; border-radius: 999px;
+    background: var(--ink); color: var(--bg); cursor: pointer;
+  }
+  .counter { font-size: 13px; color: var(--ink-3); margin-top: 6px; }
+  .counter-low { color: var(--ink); font-weight: 500; }
+  .field-error { font-size: 14px; color: var(--ink); font-weight: 500; margin-top: 6px; }
+  .field-error::before { content: "Problem: "; color: var(--ink-2); font-weight: 400; }
+
+  .inline-add {
+    font: inherit; font-size: 14px; min-height: 44px; padding: 0 2px; margin-top: 4px;
+    background: none; border: 0; color: var(--teal); cursor: pointer; text-decoration: underline;
+  }
+
+  .shortcut { margin: 18px 0 8px; }
+
+  /* Roll call: one row per member, four way choice, defaulting to yes. */
+  .rollcall { border: 0; padding: 0; margin: 0; }
+  .rollcall legend { font-size: 13px; color: var(--ink-3); margin-bottom: 10px; }
+  .rollcall-row {
+    display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+    justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line);
+  }
+  .rollcall-name { font-size: 16px; font-weight: 500; }
+  .segmented { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .segment {
+    font: inherit; font-size: 14px; min-height: 44px; padding: 0 14px;
+    background: var(--bg); color: var(--ink-2); border: 0; cursor: pointer;
+    border-right: 1px solid var(--line);
+  }
+  .segment:last-child { border-right: 0; }
+  .segment[data-state="checked"] { background: var(--ink); color: var(--bg); font-weight: 500; }
+  .tally-line { margin-top: 14px; font-size: 15px; font-weight: 500; }
+  @media (max-width: 520px) {
+    .rollcall-row { flex-direction: column; align-items: flex-start; }
+    .segmented { width: 100%; }
+    .segment { flex: 1; padding: 0 6px; }
+  }
+
+  .dialog-overlay { position: fixed; inset: 0; background: rgba(15, 42, 68, .45); z-index: 40; }
+  .dialog {
+    position: fixed; z-index: 41; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(440px, calc(100vw - 32px)); max-height: 90vh; overflow-y: auto;
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px;
+  }
+  .dialog h2, .dialog [data-radix-dialog-title] { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .dialog .field { margin-top: 14px; }
+  .dialog .field label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+  .dialog .field input {
+    width: 100%; min-height: 44px; font: inherit; font-size: 16px; color: var(--ink);
+    background: var(--band); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+  }
 
   .toast {
     position: fixed; left: 16px; right: 16px; bottom: 76px; z-index: 30;

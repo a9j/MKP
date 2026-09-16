@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Toast, type ToastTone } from "@/components/admin/toast";
-import { saveCpiRow } from "@/app/admin/explorer/actions";
+import { saveCpiRow } from "@/lib/actions/explorer";
 
 type Row = { year: number; index_value: number; source_url: string };
 

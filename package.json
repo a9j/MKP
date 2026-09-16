@@ -9,19 +9,25 @@
     "lint": "eslint",
     "test:db": "bash scripts/test-db.sh",
     "test:visual": "node scripts/visual-parity.mjs",
-    "test:data": "tsx --test tests/data.test.ts tests/explorer.test.ts tests/import.test.ts"
+    "test:data": "tsx --test tests/data.test.ts tests/explorer.test.ts tests/import.test.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-radio-group": "^1.4.7",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.116.0",
+    "clsx": "^2.1.1",
     "next": "15.5.25",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^3.10.1",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

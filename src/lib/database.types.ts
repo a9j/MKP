@@ -647,6 +647,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      member_vote_tallies: {
+        Row: {
+          person_id: string | null;
+          name: string | null;
+          title: string | null;
+          body_name: string | null;
+          body_slug: string | null;
+          term_start: string | null;
+          term_end: string | null;
+          active: boolean | null;
+          sort_order: number | null;
+          votes_cast: number | null;
+          yes_count: number | null;
+          no_count: number | null;
+          abstain_count: number | null;
+          absent_count: number | null;
+        };
+        Relationships: [];
+      };
+      records_request_log: {
+        Row: {
+          id: string | null;
+          date_filed: string | null;
+          agency_name: string | null;
+          request_text: string | null;
+          status: Database["public"]["Enums"]["records_request_status"] | null;
+          date_responded: string | null;
+          denial_reason: string | null;
+          response_business_days: number | null;
+          open_business_days: number | null;
+          document_count: number | null;
+        };
+        Relationships: [];
+      };
     };
     Functions: {
       business_days_between: {

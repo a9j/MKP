@@ -61,6 +61,16 @@ pnpm install
 pnpm dev
 ```
 
+## Signing in
+
+Magic link only. Ask for a link at `/admin/login`, follow it, and you are in.
+The link works once. Middleware sends a signed out visitor to sign in, but that
+is a convenience: every admin page and every server action checks for an
+administrator itself, and RLS refuses the write regardless.
+
+Being signed in is not the same as being allowed in. An address that is not in
+the `admins` table is signed straight back out with a clear message.
+
 ## Adding an admin
 
 Magic link sign in is limited to addresses listed in the `admins` table. There
@@ -79,8 +89,15 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | `pnpm test:db` | Applies the migration to a throwaway Postgres and runs 41 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, and the RLS rules for anonymous, non-admin and admin callers |
 | `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
+| `pnpm test:e2e` | Playwright. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, and a salary CSV with a missing `source_url` is refused |
 
-`pnpm test:data` and `pnpm test:visual` need the local stack and a running app.
+`pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
+and a running app.
+
+The local stack includes a small stand in for the Supabase auth server, so the
+end to end tests sign in through the real magic link flow rather than forging a
+session. Links are written to `.local-storage/magic-links.json` instead of being
+emailed; `scripts/local-supabase.sh` prints them too.
 
 The mockup loads Instrument Sans from the Google Fonts CDN. Where that is
 unreachable it silently falls back to a system font and every measurement

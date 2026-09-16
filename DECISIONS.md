@@ -313,6 +313,94 @@ the tokens, and shadcn components are copied into the repo and restyled by hand
 anyway. It lands in phase 4 with the screens that need its dialogs and selects:
 the vote roll call, the records desk and the confirm dialogs.
 
+## 2026-09-16, phase 4
+
+### shadcn/ui cannot be installed from this environment
+`ui.shadcn.com` is refused by the network policy here, so the CLI cannot fetch
+a component and neither `init` nor `add` completes. shadcn components are thin
+wrappers over Radix primitives plus Tailwind classes, and the brief says to
+restyle them anyway, so the primitives are installed directly from npm and the
+styled wrappers are written here. The result is the same accessible behaviour
+under the site's own tokens. If the registry is reachable from your machine,
+`shadcn add` will drop into `src/components/ui/` without disturbing this.
+
+Native `<select>` is kept rather than a custom listbox. On a phone it opens the
+system picker, which is easier one handed than any scripted menu, and the
+Executive Director runs this from an iPhone. Radix is used where it genuinely
+adds behaviour: the roll call segmented control is a RadioGroup, so arrow keys
+move between choices, and the add agency dialog is a Dialog, so focus is
+trapped and restored.
+
+### A local stand in for the auth server
+The Supabase auth server is not downloadable here either, so the dev gateway
+grew a small stub. It issues genuine JWTs signed with the same secret PostgREST
+verifies, so a signed in administrator really does arrive as the authenticated
+role and really is filtered by RLS. What is faked is the auth server's own
+internals, not any code in this project. Magic links are written to
+`.local-storage/magic-links.json` rather than emailed, which is what lets the
+end to end tests sign in the way a person does instead of forging a session.
+
+Two faithfulness bugs surfaced while building it, both of which would have hit
+real Supabase the same way: the browser client needs CORS headers on the auth
+origin, and `emailRedirectTo` travels as a `redirect_to` query parameter rather
+than in the body.
+
+### The redirect is a convenience, not the boundary
+Middleware sends a signed out visitor to `/admin/login`, but it is not what
+keeps them out. Every admin page checks for an administrator itself, every
+server action checks before reading its input, and RLS refuses the write
+regardless. A request that slipped past the middleware still reads and changes
+nothing. Signing in is also not the same as being allowed in: membership is
+checked against the `admins` table, so a stranger who requested a link is
+signed out again with a clear message rather than landing in an empty
+workspace.
+
+### Sign in sits outside the workspace shell
+It was inheriting the admin rail, so a signed out visitor saw navigation into
+pages they could not open, a sign out button, and a burst of prefetches that
+each redirected back to sign in. The shell moved into an `(workspace)` route
+group and sign in now renders on its own.
+
+### Admin writes use the caller's session, never the service role
+The service role key bypasses RLS entirely. Nothing in the admin panel needs
+that, so every write goes through the cookie bound client and the policies stay
+in force for a signed in administrator too.
+
+### Vote Watch publishes the counts, not a verdict
+The mockup shows "Passed 4 to 1". Whether a vote carried depends on the body's
+own majority rule, which the minutes do not state, and abstentions change the
+answer under some rules. Deriving "Passed" from yes against no would eventually
+publish a wrong claim, which is the one thing this organization cannot afford,
+so the tally reads "4 yes, 1 no" and the reader draws the conclusion. This is
+consistent with the copy doc's own note that summaries describe what was
+decided, not whether it was a good decision.
+
+### The roll call defaults to Yes, and the tally is derived
+Most roll calls are unanimous, so the Executive Director only touches the
+exceptions. The tally is counted from the roll call rather than typed, so the
+published totals and the per member breakdown cannot disagree. If the roll call
+fails to save, the vote row is removed rather than left published with a tally
+nobody can check.
+
+### Bodies are ordered so the default one has members
+Alphabetically, "Lucas County Commissioners" sorts first and has no members
+recorded, so the form opened with an empty roll call. Bodies with active
+members now come first, which puts TPS Board where it belongs for the board
+this organization actually tracks.
+
+### Wide tables scroll inside their own box
+`/votes/members` has seven columns and was pushing the whole page sideways at
+390px. The table now scrolls within a labelled region that is reachable from
+the keyboard, so the page itself never scrolls horizontally. An end to end test
+asserts this for every public route.
+
+### Documents are PDF only, refused before anything is saved
+A file that is not a PDF, or is over 25MB, stops the whole save rather than
+being skipped quietly, so the request and its documents are never half
+recorded. A denial cannot be saved without the reason the office gave, enforced
+in the form, in the action, and by a check constraint, because an unexplained
+denial is exactly what the Records Desk exists to surface.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal
@@ -328,11 +416,8 @@ the vote roll call, the records desk and the confirm dialogs.
    affects. The Explorer upload calls it; the rest arrive with their screens.
    The route lists are worth a read, since a route missing from one of them is
    a page that silently goes stale after a publish.
-4. The upload screen cannot be exercised end to end until phase 4 adds the
-   login, because the local stack runs PostgREST without an auth server. The
-   parsing, validation and diff rules are covered by 15 tests, and the upsert
-   for all three datasets was run directly against Postgres, but the path from
-   the file input through the server action is not yet under test.
+4. Resolved in phase 4. The upload screen is now covered end to end: the suite
+   signs in through the real magic link flow and drives the file input.
 5. The mockup uses gold in three places: the sourced underline, the bar in the
    logo mark, and the legend square that explains the underline. Design rule 2
    says gold is for exactly one thing. The mockup is the approved design and

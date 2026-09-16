@@ -42,3 +42,8 @@ next-env.d.ts
 
 # keep the template tracked
 !.env.example
+.local-storage/
+
+# playwright
+/test-results/
+/playwright-report/
