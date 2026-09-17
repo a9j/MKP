@@ -44,6 +44,7 @@ export type Vote = {
   category: VoteCategory;
   categoryLabel: string;
   amount: number | null;
+  /** The meeting agenda, or this item within it when that link is recorded. */
   agendaUrl: string | null;
   minutesUrl: string | null;
   yes: number;
@@ -93,46 +94,67 @@ function termLabel(start: string | null, end: string | null): string {
 export async function getVotes(): Promise<Vote[]> {
   const supabase = createPublicClient();
 
+  // status and ai_draft are also enforced by row level security, so the
+  // anonymous key could not read a draft even without this filter. It is
+  // written out anyway: the rule that a machine draft is never public should
+  // be visible in the query, not only in the policy.
   const { data, error } = await supabase
     .from("votes")
     .select(
-      "id, meeting_date, item_title, summary, category, amount, agenda_url, minutes_url, yes_count, no_count, abstain_count, absent_count, bodies(name), vote_members(vote, people(id, name, sort_order))",
+      "id, item_title, summary, category, amount, agenda_item_url, status, ai_draft, meetings(meeting_date, agenda_url, minutes_url, bodies(name)), vote_members(vote, people(id, name, sort_order))",
     )
-    .order("meeting_date", { ascending: false });
+    .eq("status", "published")
+    .eq("ai_draft", false)
+    .order("published_at", { ascending: false });
   if (error) throw new Error(`Could not load votes: ${error.message}`);
 
-  return (data ?? []).map((row) => {
-    const members: MemberVote[] = (row.vote_members ?? [])
-      .filter((m) => m.people)
-      .map((m) => ({
-        personId: m.people!.id,
-        name: m.people!.name,
-        vote: m.vote as VoteChoice,
-        sortOrder: m.people!.sort_order,
-      }))
-      .sort((a, b) => a.sortOrder - b.sortOrder)
-      .map(({ personId, name, vote }) => ({ personId, name, vote }));
+  return (data ?? [])
+    .filter((row) => row.meetings)
+    .map((row) => {
+      const members: MemberVote[] = (row.vote_members ?? [])
+        .filter((m) => m.people)
+        .map((m) => ({
+          personId: m.people!.id,
+          name: m.people!.name,
+          vote: m.vote as VoteChoice,
+          sortOrder: m.people!.sort_order,
+        }))
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map(({ personId, name, vote }) => ({ personId, name, vote }));
 
-    return {
-      id: row.id,
-      meetingDate: row.meeting_date,
-      meetingDateLabel: formatDay(row.meeting_date),
-      bodyName: row.bodies?.name ?? "Not stated",
-      itemTitle: row.item_title,
-      summary: row.summary,
-      category: row.category as VoteCategory,
-      categoryLabel: CATEGORY_LABEL[row.category as VoteCategory],
-      amount: row.amount === null ? null : Number(row.amount),
-      agendaUrl: row.agenda_url,
-      minutesUrl: row.minutes_url,
-      yes: row.yes_count,
-      no: row.no_count,
-      abstain: row.abstain_count,
-      absent: row.absent_count,
-      tally: tallyLabel(row.yes_count, row.no_count, row.abstain_count, row.absent_count),
-      members,
-    };
-  });
+      // Counted from the roll call rather than read from a stored total, so
+      // the tally and the names under it can never disagree.
+      const count = (choice: VoteChoice) => members.filter((m) => m.vote === choice).length;
+      const yes = count("yes");
+      const no = count("no");
+      const abstain = count("abstain");
+      const absent = count("absent");
+
+      const meeting = row.meetings!;
+
+      return {
+        id: row.id,
+        meetingDate: meeting.meeting_date,
+        meetingDateLabel: formatDay(meeting.meeting_date),
+        bodyName: meeting.bodies?.name ?? "Not stated",
+        itemTitle: row.item_title,
+        summary: row.summary,
+        category: row.category as VoteCategory,
+        categoryLabel: CATEGORY_LABEL[row.category as VoteCategory],
+        amount: row.amount === null ? null : Number(row.amount),
+        // The item link is the more useful of the two when it exists: it opens
+        // the paper for this decision rather than the whole agenda.
+        agendaUrl: row.agenda_item_url ?? meeting.agenda_url,
+        minutesUrl: meeting.minutes_url,
+        yes,
+        no,
+        abstain,
+        absent,
+        tally: tallyLabel(yes, no, abstain, absent),
+        members,
+      };
+    })
+    .sort((a, b) => b.meetingDate.localeCompare(a.meetingDate));
 }
 
 export async function getMemberTallies(): Promise<MemberTally[]> {

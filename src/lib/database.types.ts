@@ -55,6 +55,42 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_runs: {
+        Row: {
+          id: string;
+          kind: string;
+          target_table: string | null;
+          target_id: string | null;
+          model: string;
+          prompt_version: string;
+          input_hash: string;
+          raw_response: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind: string;
+          target_table?: string | null;
+          target_id?: string | null;
+          model: string;
+          prompt_version: string;
+          input_hash: string;
+          raw_response?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          kind?: string;
+          target_table?: string | null;
+          target_id?: string | null;
+          model?: string;
+          prompt_version?: string;
+          input_hash?: string;
+          raw_response?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       bodies: {
         Row: {
           id: string;
@@ -205,6 +241,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      jobs: {
+        Row: {
+          id: string;
+          name: string;
+          started_at: string;
+          finished_at: string | null;
+          status: Database["public"]["Enums"]["job_status"];
+          detail: Json;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          started_at?: string;
+          finished_at?: string | null;
+          status?: Database["public"]["Enums"]["job_status"];
+          detail?: Json;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          started_at?: string;
+          finished_at?: string | null;
+          status?: Database["public"]["Enums"]["job_status"];
+          detail?: Json;
+        };
+        Relationships: [];
+      };
       listening_points: {
         Row: {
           id: string;
@@ -269,6 +332,50 @@ export type Database = {
           created_at?: string;
         };
         Relationships: [];
+      };
+      meetings: {
+        Row: {
+          id: string;
+          body_id: string;
+          meeting_date: string;
+          kind: Database["public"]["Enums"]["meeting_kind"];
+          agenda_url: string | null;
+          minutes_url: string | null;
+          video_url: string | null;
+          discovered_by: Database["public"]["Enums"]["meeting_discovery"];
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          body_id: string;
+          meeting_date: string;
+          kind?: Database["public"]["Enums"]["meeting_kind"];
+          agenda_url?: string | null;
+          minutes_url?: string | null;
+          video_url?: string | null;
+          discovered_by?: Database["public"]["Enums"]["meeting_discovery"];
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          body_id?: string;
+          meeting_date?: string;
+          kind?: Database["public"]["Enums"]["meeting_kind"];
+          agenda_url?: string | null;
+          minutes_url?: string | null;
+          video_url?: string | null;
+          discovered_by?: Database["public"]["Enums"]["meeting_discovery"];
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "meetings_body_id_fkey";
+            columns: ["body_id"];
+            isOneToOne: false;
+            referencedRelation: "bodies";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       people: {
         Row: {
@@ -546,6 +653,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      vacancy_snapshots: {
+        Row: {
+          id: string;
+          as_of_date: string;
+          storage_path: string;
+          row_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          as_of_date: string;
+          storage_path: string;
+          row_count?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          as_of_date?: string;
+          storage_path?: string;
+          row_count?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       vote_members: {
         Row: {
           vote_id: string;
@@ -582,58 +713,71 @@ export type Database = {
       votes: {
         Row: {
           id: string;
-          body_id: string;
-          meeting_date: string;
           item_title: string;
           summary: string;
           category: Database["public"]["Enums"]["vote_category"];
           amount: number | null;
-          agenda_url: string | null;
-          minutes_url: string | null;
-          yes_count: number;
-          no_count: number;
-          abstain_count: number;
-          absent_count: number;
+          agenda_item_url: string | null;
           created_at: string;
+          meeting_id: string;
+          status: Database["public"]["Enums"]["publish_status"];
+          ai_draft: boolean;
+          ai_model: string | null;
+          ai_confidence: number | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          published_at: string | null;
+          updated_at: string;
         };
         Insert: {
           id?: string;
-          body_id: string;
-          meeting_date: string;
           item_title: string;
           summary: string;
           category?: Database["public"]["Enums"]["vote_category"];
           amount?: number | null;
-          agenda_url?: string | null;
-          minutes_url?: string | null;
-          yes_count?: number;
-          no_count?: number;
-          abstain_count?: number;
-          absent_count?: number;
+          agenda_item_url?: string | null;
           created_at?: string;
+          meeting_id: string;
+          status?: Database["public"]["Enums"]["publish_status"];
+          ai_draft?: boolean;
+          ai_model?: string | null;
+          ai_confidence?: number | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          published_at?: string | null;
+          updated_at?: string;
         };
         Update: {
           id?: string;
-          body_id?: string;
-          meeting_date?: string;
           item_title?: string;
           summary?: string;
           category?: Database["public"]["Enums"]["vote_category"];
           amount?: number | null;
-          agenda_url?: string | null;
-          minutes_url?: string | null;
-          yes_count?: number;
-          no_count?: number;
-          abstain_count?: number;
-          absent_count?: number;
+          agenda_item_url?: string | null;
           created_at?: string;
+          meeting_id?: string;
+          status?: Database["public"]["Enums"]["publish_status"];
+          ai_draft?: boolean;
+          ai_model?: string | null;
+          ai_confidence?: number | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          published_at?: string | null;
+          updated_at?: string;
         };
         Relationships: [
           {
-            foreignKeyName: "votes_body_id_fkey";
-            columns: ["body_id"];
+            foreignKeyName: "votes_meeting_id_fkey";
+            columns: ["meeting_id"];
             isOneToOne: false;
-            referencedRelation: "bodies";
+            referencedRelation: "meetings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "votes_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "admins";
             referencedColumns: ["id"];
           },
         ];
@@ -693,9 +837,12 @@ export type Database = {
       is_admin: { Args: Record<string, never>; Returns: boolean };
     };
     Enums: {
-      document_owner_type: "records_request" | "report" | "listening" | "template";
+      document_owner_type: "records_request" | "report" | "listening" | "template" | "meeting";
       inquiry_kind: "contact" | "council" | "volunteer" | "briefing";
+      job_status: "ok" | "error" | "skipped";
       listening_audience: "teachers" | "parents";
+      meeting_discovery: "watcher" | "admin";
+      meeting_kind: "regular" | "special";
       person_role: "staff" | "board" | "advisory" | "body_member";
       publish_status: "draft" | "published";
       records_request_status: "filed" | "partial" | "fulfilled" | "denied";

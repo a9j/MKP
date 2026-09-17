@@ -23,6 +23,11 @@
   --teal-ink: #145F6A;
   --gold: #D9A441;
   --gold-soft: #FBF3E1;
+  /* Admin only. Marks a draft a machine wrote. 5.86:1 on its own background,
+     and deliberately a different hue from gold, which belongs to sourced
+     numbers alone and never appears in the workspace. */
+  --amber: #8F4C00;
+  --amber-soft: #FDF0E2;
   --card: #FFFFFF;
 
   /* Addition: the call to action block stays navy in both themes. Binding it
@@ -49,6 +54,8 @@
     --teal-ink: #8ED6DF;
     --gold: #E4B45B;
     --gold-soft: #2A2410;
+    --amber: #F0A85A;
+    --amber-soft: #33210B;
     --card: #10233A;
 
     --cta-bg: #0F2A44;
@@ -71,6 +78,8 @@
   --teal-ink: #8ED6DF;
   --gold: #E4B45B;
   --gold-soft: #2A2410;
+  --amber: #F0A85A;
+  --amber-soft: #33210B;
   --card: #10233A;
 
   --cta-bg: #0F2A44;
@@ -575,6 +584,20 @@
 
   .shortcut { margin: 18px 0 8px; }
 
+  /* Dashboard. One action, then what is actually waiting. */
+  .btn-large { min-height: 56px; font-size: 17px; padding: 0 28px; }
+  .nothing-waiting {
+    margin-top: 28px; font-size: 19px; font-weight: 500; color: var(--ink-2);
+  }
+  .review-list { list-style: none; margin-top: 10px; }
+  .review-list li { padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .review-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .review-list a { font-size: 17px; font-weight: 500; display: inline-block; min-height: 30px; }
+  .review-kind {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    font-size: 14px; color: var(--ink-3); margin-top: 4px;
+  }
+
   /* Roll call: one row per member, four way choice, defaulting to yes. */
   .rollcall { border: 0; padding: 0; margin: 0; }
   .rollcall legend { font-size: 13px; color: var(--ink-3); margin-bottom: 10px; }
@@ -597,6 +620,44 @@
     .segmented { width: 100%; }
     .segment { flex: 1; padding: 0 6px; }
   }
+
+  /* A draft a machine wrote. Amber rather than gold: gold means a sourced
+     number and nothing else, and none of this is ever on a public page. */
+  .badge-ai, .badge-draft {
+    display: inline-block; font-size: 13px; font-weight: 600; line-height: 1.3;
+    padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .badge-ai { background: var(--amber-soft); color: var(--amber); }
+  .badge-draft { background: var(--band); color: var(--ink-2); border: 1px solid var(--line); }
+
+  .draft-banner {
+    background: var(--amber-soft); border-left: 3px solid var(--amber);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 4px;
+  }
+  .draft-banner p { font-size: 15px; color: var(--ink-2); }
+  .draft-banner .badge-ai { margin-bottom: 8px; }
+
+  .review-gate {
+    border-top: 1px solid var(--line); padding-top: 18px; margin-top: 4px;
+  }
+  .review-gate h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .check-row {
+    display: flex; align-items: center; gap: 12px; min-height: 44px;
+    font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 10px;
+  }
+  .check-row input { width: 22px; height: 22px; accent-color: var(--teal); }
+
+  /* The secondary save. A button, not a link: it performs an action. */
+  .text-link {
+    font: inherit; font-size: 15px; min-height: 44px; padding: 0 4px;
+    background: none; border: 0; color: var(--teal); cursor: pointer; text-decoration: underline;
+  }
+  .text-link:disabled { color: var(--ink-3); cursor: default; }
+
+  .meeting-links { display: inline-flex; gap: 12px; flex-wrap: wrap; }
+
+  /* The one sentence about using software, on the About page. */
+  .disclosure { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
 
   .dialog-overlay { position: fixed; inset: 0; background: rgba(15, 42, 68, .45); z-index: 40; }
   .dialog {

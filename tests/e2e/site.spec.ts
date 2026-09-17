@@ -232,3 +232,55 @@ test.describe("explorer csv upload", () => {
     await expect(page.locator('button:has-text("Commit")')).toBeVisible();
   });
 });
+
+test.describe("software collects and drafts, a person publishes", () => {
+  // The development seed carries one machine written draft.
+  const DRAFT_TITLE = "Renew transportation services agreement";
+
+  test("an AI draft appears on no public page", async ({ page }) => {
+    for (const path of ["/", "/votes", "/votes/members"]) {
+      await page.goto(path);
+      await expect(
+        page.locator("body"),
+        `${path} showed a vote nobody has reviewed`,
+      ).not.toContainText(DRAFT_TITLE);
+    }
+  });
+
+  test("the dashboard lists it as waiting, marked as unreviewed", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/admin");
+
+    const item = page.locator(".review-list li").filter({ hasText: DRAFT_TITLE });
+    await expect(item).toBeVisible();
+    await expect(item.locator(".badge-ai")).toContainText("AI draft, unreviewed");
+  });
+
+  test("Publish stays disabled until the draft is checked against the document", async ({
+    page,
+  }) => {
+    await signIn(page);
+    await page.goto("/admin");
+    await page.locator(".review-list a").filter({ hasText: DRAFT_TITLE }).click();
+
+    // The banner says what this is before any of the fields are read.
+    await expect(page.locator(".draft-banner .badge-ai")).toContainText("AI draft, unreviewed");
+    await expect(page.locator(".draft-banner")).toContainText("52 percent confidence");
+
+    const publish = page.locator(".vote-form button[type=submit]");
+    await expect(publish).toBeDisabled();
+
+    // The source document is reachable from the gate, which is the thing the
+    // admin is being asked to confirm they opened.
+    await expect(page.locator(".review-gate a")).toHaveAttribute("href", /^https?:\/\//);
+
+    // Saving it as a draft is always available. Publishing is not.
+    await expect(page.locator(".vote-form .text-link")).toBeEnabled();
+
+    await page.locator("#vote-checked").check();
+    await expect(publish).toBeEnabled();
+
+    await page.locator("#vote-checked").uncheck();
+    await expect(publish).toBeDisabled();
+  });
+});

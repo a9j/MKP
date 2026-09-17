@@ -46,10 +46,24 @@ insert into records_requests (agency_id, request_text, date_filed, status, date_
 select id, 'Salary schedule, 2025 to 2026', '2026-09-05', 'fulfilled', '2026-09-12'
 from agencies where name = 'Toledo Public Schools';
 
-insert into votes (body_id, meeting_date, item_title, summary, category, amount, yes_count, no_count)
-select id, '2026-09-09', 'Approve roof replacement',
-       'The board approved a roof replacement at one building.', 'facilities', 1250000, 4, 1
+insert into meetings (body_id, meeting_date, kind, agenda_url)
+select id, '2026-09-09', 'regular', 'https://example.com/agenda.pdf'
 from bodies where slug = 'tps-board';
+
+insert into votes (meeting_id, item_title, summary, category, amount, status, published_at)
+select id, 'Approve roof replacement',
+       'The board approved a roof replacement at one building.', 'facilities', 1250000,
+       'published', now()
+from meetings where meeting_date = '2026-09-09';
+
+-- A draft and an AI draft of the same shape. Neither may reach the feed.
+insert into votes (meeting_id, item_title, summary, category, status)
+select id, 'Unpublished vote', 'x', 'money', 'draft'
+from meetings where meeting_date = '2026-09-09';
+
+insert into votes (meeting_id, item_title, summary, category, status, ai_draft, ai_model, ai_confidence)
+select id, 'Machine drafted vote', 'x', 'contracts', 'draft', true, 'test-model', 0.42
+from meetings where meeting_date = '2026-09-09';
 
 insert into listening_sessions (session_date, audience, attendee_count, summary, status, published_at) values
   ('2026-09-03', 'teachers', 22, 'x', 'published', now()),
@@ -69,8 +83,8 @@ select pg_temp.eq('no null hrefs', (select count(*) from latest_feed where href 
 
 -- 23514 check_violation, 23502 not_null_violation.
 select pg_temp.rejects('201 character vote summary',
-  $q$insert into votes (body_id, meeting_date, item_title, summary)
-     select id, '2026-09-09', 'x', repeat('a', 201) from bodies limit 1$q$, '23514');
+  $q$insert into votes (meeting_id, item_title, summary)
+     select id, 'x', repeat('a', 201) from meetings limit 1$q$, '23514');
 select pg_temp.rejects('salary row with no source_url',
   $q$insert into salary_schedule (school_year, district, lane, step, salary, source_url)
      values ('2025-2026', 'TPS', 'BA', 1, 45000, null)$q$, '23502');
@@ -105,5 +119,42 @@ select pg_temp.rejects('budget row with a blank source_url',
      values ('2026', 'Instruction', 1, '')$q$, '23514');
 select pg_temp.rejects('cpi row with a blank source_url',
   $q$insert into cpi (year, index_value, source_url) values (2012, 1.0, '')$q$, '23514');
+
+-- 0006: drafts stay out of the feed, and a published row must be complete.
+select pg_temp.eq('feed still has one row per published item',
+  (select count(*) from latest_feed), 4::bigint);
+select pg_temp.eq('feed hides the draft vote',
+  (select count(*) from latest_feed where title = 'Unpublished vote'), 0::bigint);
+select pg_temp.eq('feed hides the AI draft',
+  (select count(*) from latest_feed where title = 'Machine drafted vote'), 0::bigint);
+select pg_temp.eq('vote date comes from the meeting',
+  (select date from latest_feed where kind = 'vote'), '2026-09-09'::date);
+
+select pg_temp.rejects('published vote with no publication date',
+  $q$insert into votes (meeting_id, item_title, summary, status)
+     select id, 'x', 'x', 'published' from meetings limit 1$q$, '23514');
+select pg_temp.rejects('draft vote carrying a publication date',
+  $q$insert into votes (meeting_id, item_title, summary, status, published_at)
+     select id, 'x', 'x', 'draft', now() from meetings limit 1$q$, '23514');
+select pg_temp.rejects('an AI draft that claims to be published',
+  $q$insert into votes (meeting_id, item_title, summary, status, published_at, ai_draft)
+     select id, 'x', 'x', 'published', now(), true from meetings limit 1$q$, '23514');
+select pg_temp.rejects('confidence above one',
+  $q$insert into votes (meeting_id, item_title, summary, ai_confidence)
+     select id, 'x', 'x', 1.5 from meetings limit 1$q$, '23514');
+select pg_temp.rejects('two meetings of the same kind on one day',
+  $q$insert into meetings (body_id, meeting_date, kind)
+     select body_id, meeting_date, kind from meetings limit 1$q$, '23505');
+select pg_temp.rejects('two snapshots for one date',
+  $q$insert into vacancy_snapshots (as_of_date, storage_path) values
+     ('2026-09-01', 'a.pdf'), ('2026-09-01', 'b.pdf')$q$, '23505');
+
+-- The voting record counts published votes only.
+insert into people (name, role, active, sort_order, body_id)
+select 'Member One', 'body_member', true, 1, id from bodies where slug = 'tps-board';
+insert into vote_members (vote_id, person_id, vote)
+select v.id, p.id, 'yes' from votes v, people p where p.name = 'Member One';
+select pg_temp.eq('tally counts the published vote only',
+  (select votes_cast from member_vote_tallies where name = 'Member One'), 1::bigint);
 
 \echo 'ALL SCHEMA ASSERTIONS PASSED'

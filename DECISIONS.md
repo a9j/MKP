@@ -608,3 +608,112 @@ correct change to the document outline does not read as a regression.
    says gold is for exactly one thing. The mockup is the approved design and
    both extra uses are about the device itself, so they are kept. Worth a word
    at review if that is not the intent.
+
+## 2026-09-17, the revised brief
+
+The brief arrived again with an eighth phase, Automation and AI, and with
+changes reaching back into phases 2, 4 and 6. Phases 1 to 7 are already built
+and merged, so this is a revision pass across them rather than a fresh start.
+
+### Phase 8 is not started
+
+The brief ends the build order with "Do not start Phase 8 until Phase 7 is
+deployed and I say go." Phase 7 is built but has not been deployed, and there
+is no go. So nothing here fetches a BoardDocs page, calls a model, or serves a
+cron route. No `@anthropic-ai/sdk` dependency, no `/api/cron/*` routes, no
+prompt files, no neutrality guard, no fixture PDFs.
+
+What is here is everything phase 8 will need to exist against: the `meetings`
+table it discovers into, the `jobs` and `ai_runs` tables it writes its audit
+to, the `vacancy_snapshots` table the monthly diff hangs off, the `ai_draft`
+columns on `votes`, the review gate in the admin, and the rule that only a
+person may publish. Switching the collectors on adds routes; it does not
+reshape anything.
+
+### The publish rule is a trigger, not a policy
+
+The brief says the service role should have "a Postgres policy forbidding
+writes where status = 'published'". A policy cannot do this. The Supabase
+service role holds `BYPASSRLS`, so its policies are never consulted, which is
+the whole reason that role exists. The rule is enforced by a trigger on
+`votes`, `reports` and `listening_sessions` instead, which every writer passes
+through, and it raises `insufficient_privilege` so a refusal reads the same way
+a denied policy would.
+
+The database is the right place for this either way. A rule kept only in the
+application is a rule that holds until somebody adds a second caller.
+
+### Meetings became a table, and votes moved onto it
+
+`votes` carried `body_id` and `meeting_date` directly. The revised schema gives
+meetings their own row with an agenda, minutes and video link, which the agenda
+watcher needs in order to recognise a meeting it has already seen. The
+migration builds those rows from the votes already recorded, so nothing is
+lost. The vote keeps `agenda_item_url`, the paper for its own item; the agenda
+and minutes for the meeting as a whole live on the meeting.
+
+On the public page, the "Agenda" link prefers the item link when the vote has
+one and falls back to the meeting agenda. A reader clicking it wants the
+document behind this decision, not a hundred page packet.
+
+### The stored tally is gone
+
+`votes` held `yes_count` and its three siblings beside the roll call they
+summarised. The revised schema does not, and it should not: the roll call
+extractor will write `vote_members` rows without touching a count, and a stored
+total that drifts from the names under it is a published number that is wrong.
+The tally is now counted from the roll call everywhere it is shown.
+
+A vote with no roll call recorded yet reads "No roll call yet" in the admin
+rather than "0 yes, 0 no". That is the honest answer: the tally is not known,
+which is different from being zero.
+
+### Publishing goes through one path
+
+The review gate would be worth little with a second way to publish beside it,
+so there is no one tap publish in the vote list. Opening the draft is the only
+route, and the gate is on that screen. The server checks the confirmation too,
+so the rule does not depend on a disabled button.
+
+### Amber in the admin, gold on the site
+
+The brief asks for "a distinct amber 'AI draft, unreviewed' badge", and design
+rule 2 says gold is used for exactly one thing. Both hold: amber is a separate
+token, a different hue, used only in the admin workspace, and it never appears
+on a published page. Gold still means a sourced number and nothing else.
+`--amber` is 5.86:1 on its own background in light mode and 7.67:1 in dark.
+
+### The dashboard lost its stat tiles
+
+It had four counts of things already finished. The revised brief says the
+screen shows exactly three things and names them: post a vote, what is waiting
+for review, what an agency has not answered. Counts of completed work are not
+work, so they are gone, and the empty state now reads "Nothing waiting on you."
+
+Machine written drafts sort to the top of the review list, because they are the
+only items on it that nobody has read.
+
+### `jobs` and `ai_runs` are not public
+
+Every other table that backs a page is public read. These two are not. A job
+run is operational, and a raw model response is not a document anybody has
+checked. Publishing either would put text on the site that no person approved,
+which is the thing this organization exists not to do. Both are admin read
+only.
+
+`vacancy_snapshots` is public, because the stored PDF is the source every
+vacancy row points at.
+
+### The accessibility check is now a test
+
+The WCAG pass was run by hand in phase 7. It is `tests/e2e/a11y.spec.ts` now:
+axe over every public and admin screen, in light mode, dark mode and at 390px,
+failing on any 2.1 A or AA violation. New screens arrived in this pass, and a
+bar that is only ever checked by hand is a bar that slips.
+
+### Still open
+
+The `claude-sonnet-4-6` model id in the brief is not one this build can
+confirm. Nothing depends on it yet, since no model is called. Worth checking
+against the current model list when phase 8 starts rather than pinning an id
+that may have moved.

@@ -54,6 +54,11 @@ export default async function AboutPage() {
             <li key={principle}>{principle}</li>
           ))}
         </ul>
+        {/* Said plainly, on the page, rather than buried in a policy nobody
+            opens. Editable from /admin/settings, and it ships filled in. */}
+        {settings.ai_disclosure ? (
+          <p className="note disclosure">{settings.ai_disclosure}</p>
+        ) : null}
       </section>
 
       <section className="band">

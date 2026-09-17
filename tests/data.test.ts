@@ -12,6 +12,9 @@ import assert from "node:assert/strict";
 import { getLatestFeed, formatFeedDate } from "../src/lib/queries/feed";
 import { getSiteSettings } from "../src/lib/queries/settings";
 import { createPublicClient } from "../src/lib/supabase/public";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "../src/lib/database.types";
+import { getVotes, getMemberTallies } from "../src/lib/queries/votes";
 
 test("latest feed returns newest first", async () => {
   const feed = await getLatestFeed(6);
@@ -129,4 +132,119 @@ test("the anonymous key cannot write", async () => {
     .from("corrections")
     .insert({ correction_date: "2026-01-01", page_path: "/", what_changed: "x", why: "y" });
   assert.ok(error, "an anonymous write to corrections succeeded");
+});
+
+// ---------------------------------------------------------------------------
+// Software collects and drafts. A person publishes.
+// ---------------------------------------------------------------------------
+
+test("a machine written draft never reaches a public read", async () => {
+  const votes = await getVotes();
+  const titles = votes.map((v) => v.itemTitle);
+  assert.ok(
+    !titles.includes("Renew transportation services agreement"),
+    "an AI draft was returned by the public votes query",
+  );
+
+  // Not merely filtered in the query: the anonymous key cannot see the row.
+  const anon = createPublicClient();
+  const { data } = await anon.from("votes").select("id, item_title, status, ai_draft");
+  assert.ok((data ?? []).length > 0, "expected the seed to have published votes");
+  assert.ok(
+    (data ?? []).every((row) => row.status === "published" && row.ai_draft === false),
+    "a draft row was readable with the anonymous key",
+  );
+
+  const feed = await getLatestFeed(50);
+  assert.ok(
+    !feed.some((e) => e.title === "Renew transportation services agreement"),
+    "an AI draft reached the Latest feed",
+  );
+});
+
+/**
+ * The service role client, built here rather than imported.
+ *
+ * src/lib/supabase/service.ts carries the "server-only" guard, which throws
+ * outside a server component and would fail this file at import time. The key
+ * and the URL are the same, so the boundary being tested is the real one.
+ */
+function serviceClient() {
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}
+
+test("the service role may draft and may not publish", async () => {
+  const service = serviceClient();
+
+  const { data: meeting } = await service.from("meetings").select("id").limit(1).single();
+  assert.ok(meeting, "expected a seeded meeting");
+
+  // Drafting is allowed: this is what a collector does.
+  const { data: draft, error: draftError } = await service
+    .from("votes")
+    .insert({
+      meeting_id: meeting.id,
+      item_title: "Service role draft",
+      summary: "Written by the test, never published.",
+      category: "other",
+      status: "draft",
+      ai_draft: true,
+      ai_model: "test-model",
+      ai_confidence: 0.5,
+    })
+    .select("id")
+    .single();
+  assert.equal(draftError, null, `the service role could not write a draft: ${draftError?.message}`);
+
+  // Publishing is not, on insert or on update.
+  const { error: insertPublished } = await service.from("votes").insert({
+    meeting_id: meeting.id,
+    item_title: "Service role published",
+    summary: "Should never exist.",
+    category: "other",
+    status: "published",
+    published_at: new Date().toISOString(),
+  });
+  assert.ok(insertPublished, "the service role inserted a published vote");
+
+  const { error: updatePublished } = await service
+    .from("votes")
+    .update({ status: "published", published_at: new Date().toISOString(), ai_draft: false })
+    .eq("id", draft!.id);
+  assert.ok(updatePublished, "the service role published an existing draft");
+
+  const { error: publishedReport } = await service.from("reports").insert({
+    slug: `service-role-${Date.now()}`,
+    title: "Should never exist",
+    type: "pay_report",
+    report_date: "2026-01-01",
+    summary: "x",
+    status: "published",
+    published_at: new Date().toISOString(),
+  });
+  assert.ok(publishedReport, "the service role published a report");
+
+  await service.from("votes").delete().eq("id", draft!.id);
+});
+
+test("the voting record counts published votes only", async () => {
+  const tallies = await getMemberTallies();
+  const votes = await getVotes();
+  const published = new Map<string, number>();
+  for (const vote of votes) {
+    for (const member of vote.members) {
+      published.set(member.personId, (published.get(member.personId) ?? 0) + 1);
+    }
+  }
+  for (const tally of tallies) {
+    assert.equal(
+      tally.votesCast,
+      published.get(tally.personId) ?? 0,
+      `${tally.name} shows ${tally.votesCast} votes cast but appears on ${published.get(tally.personId) ?? 0} published votes`,
+    );
+  }
 });

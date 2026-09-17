@@ -41,26 +41,50 @@ select id, 'Lucas County contract file, vendor list', '2026-08-05', 'denied', '2
        'The office cited an exemption for records under active negotiation.'
 from public.agencies where name = 'Lucas County';
 
--- Votes with a full roll call.
+-- Meetings, then the votes taken at them with a full roll call.
+insert into public.meetings (body_id, meeting_date, kind, agenda_url, minutes_url, discovered_by)
+select b.id, '2026-09-12', 'regular',
+       'https://example.com/source.pdf', 'https://example.com/source.pdf', 'admin'
+from public.bodies b where b.slug = 'tps-board';
+
+insert into public.meetings (body_id, meeting_date, kind, agenda_url, discovered_by)
+select b.id, '2026-08-29', 'regular', 'https://example.com/source.pdf', 'admin'
+from public.bodies b where b.slug = 'tps-board';
+
 with v as (
-  insert into public.votes (body_id, meeting_date, item_title, summary, category, amount,
-                            agenda_url, minutes_url, yes_count, no_count, abstain_count, absent_count)
-  select b.id, '2026-09-12', 'Approve HVAC contract for six buildings',
+  insert into public.votes (meeting_id, item_title, summary, category, amount,
+                            agenda_item_url, status, published_at)
+  select m.id, 'Approve HVAC contract for six buildings',
          'The board approved a heating and cooling contract covering six buildings.',
-         'facilities', 4200000, 'https://example.com/source.pdf', 'https://example.com/source.pdf',
-         4, 1, 0, 0
-  from public.bodies b where b.slug = 'tps-board'
+         'facilities', 4200000, 'https://example.com/source.pdf', 'published', now()
+  from public.meetings m where m.meeting_date = '2026-09-12'
   returning id
 )
 insert into public.vote_members (vote_id, person_id, vote)
 select v.id, p.id, case when p.sort_order = 5 then 'no'::vote_choice else 'yes'::vote_choice end
 from v, public.people p where p.role = 'body_member';
 
-insert into public.votes (body_id, meeting_date, item_title, summary, category, yes_count, no_count)
-select b.id, '2026-08-29', 'Add four intervention specialist positions',
-       'The board added four intervention specialist positions for the school year.',
-       'staffing', 5, 0
-from public.bodies b where b.slug = 'tps-board';
+with v as (
+  insert into public.votes (meeting_id, item_title, summary, category, status, published_at)
+  select m.id, 'Add four intervention specialist positions',
+         'The board added four intervention specialist positions for the school year.',
+         'staffing', 'published', now()
+  from public.meetings m where m.meeting_date = '2026-08-29'
+  returning id
+)
+insert into public.vote_members (vote_id, person_id, vote)
+select v.id, p.id, 'yes'::vote_choice
+from v, public.people p where p.role = 'body_member';
+
+-- One machine drafted vote, so the admin review list and the badge have
+-- something to render. It is a draft, so no public page may show it.
+insert into public.votes (meeting_id, item_title, summary, category, amount,
+                          agenda_item_url, status, ai_draft, ai_model, ai_confidence)
+select m.id, 'Renew transportation services agreement',
+       'The board renewed a transportation services agreement for one year.',
+       'contracts', 880000, 'https://example.com/source.pdf', 'draft', true,
+       'claude-sonnet-4-6', 0.52
+from public.meetings m where m.meeting_date = '2026-09-12';
 
 -- Listening sessions: one published, one draft.
 insert into public.listening_sessions (session_date, audience, attendee_count, summary, status, published_at) values
