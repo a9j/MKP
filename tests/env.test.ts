@@ -59,3 +59,22 @@ test("whatever the environment, the site URL parses", () => {
     });
   }
 });
+
+test("a required variable set to whitespace counts as missing", () => {
+  withEnv({ NEXT_PUBLIC_SUPABASE_URL: "   " }, () => {
+    assert.throws(
+      () => env.supabaseUrl,
+      // The message has to name the variable, and has to make sense on a host
+      // where there is no .env.local to copy.
+      (error: Error) =>
+        error.message.includes("NEXT_PUBLIC_SUPABASE_URL") &&
+        /hosting project/i.test(error.message),
+    );
+  });
+});
+
+test("a required variable that is set is returned", () => {
+  withEnv({ NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co" }, () => {
+    assert.equal(env.supabaseUrl, "https://example.supabase.co");
+  });
+});

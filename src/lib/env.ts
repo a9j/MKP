@@ -10,12 +10,23 @@ function optional(name: string): string | null {
   return value && value.trim().length > 0 ? value.trim() : null;
 }
 
+/**
+ * A missing variable reads the same wherever it happens, so the message has to
+ * work in both places it can happen. On a hosting platform there is no
+ * .env.local to copy, and being told to make one sends the reader looking for a
+ * file that will never exist.
+ */
 function required(name: string): string {
   const value = process.env[name];
-  if (!value || value.length === 0) {
+  if (!value || value.trim().length === 0) {
     throw new Error(
-      `${name} is not set. Copy .env.example to .env.local and fill it in. ` +
-        `For local development run "bash scripts/local-supabase.sh" first.`,
+      `${name} is not set. The site reads its content from Supabase at build ` +
+        `time, so NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY and ` +
+        `SUPABASE_SERVICE_ROLE_KEY all have to be set before it can build. ` +
+        `Deploying: set them on the hosting project, for every environment it ` +
+        `builds, Preview as well as Production. Locally: copy .env.example to ` +
+        `.env.local and fill it in, running "bash scripts/local-supabase.sh" ` +
+        `first if you want the local stack. See README.md, "Deploying to Vercel".`,
     );
   }
   return value;
