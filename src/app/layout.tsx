@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
+import { env } from "@/lib/env";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -11,7 +12,9 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  // Through env.siteUrl, not process.env: the guard there is what keeps an
+  // empty variable from failing the build with an unattributable "Invalid URL".
+  metadataBase: new URL(env.siteUrl),
   title: {
     default: "The Mona K Project. Toledo's public records, explained.",
     template: "%s. The Mona K Project",

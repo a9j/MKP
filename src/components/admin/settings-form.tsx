@@ -35,6 +35,11 @@ const GROUPS: { title: string; note?: string; keys: string[] }[] = [
     keys: ["reports_next_report_note", "levy_status_note", "contract_status_note"],
   },
   { title: "Records Desk", keys: ["request_template_path"] },
+  {
+    title: "How we work",
+    note: "Published on the About page, word for word.",
+    keys: ["ai_disclosure"],
+  },
   { title: "Partners", keys: ["partners_note"] },
   {
     title: "Social",
@@ -59,6 +64,7 @@ const LABELS: Record<string, string> = {
   levy_status_note: "Levy status note",
   contract_status_note: "Contract talks status note",
   request_template_path: "Request template file path",
+  ai_disclosure: "What we say about using software",
   partners_note: "Other partners",
   social_facebook: "Facebook",
   social_instagram: "Instagram",
@@ -90,10 +96,21 @@ export function SettingsForm({
     });
   }
 
+  const LONG = new Set(["ai_disclosure", "mailing_address", "explorer_sources_list"]);
+
   const field = (key: string) => (
     <div className="field field-wide" key={key}>
       <label htmlFor={`setting-${key}`}>{LABELS[key] ?? key}</label>
-      <input id={`setting-${key}`} name={`setting.${key}`} defaultValue={byKey.get(key) ?? ""} />
+      {LONG.has(key) ? (
+        <textarea
+          id={`setting-${key}`}
+          name={`setting.${key}`}
+          rows={3}
+          defaultValue={byKey.get(key) ?? ""}
+        />
+      ) : (
+        <input id={`setting-${key}`} name={`setting.${key}`} defaultValue={byKey.get(key) ?? ""} />
+      )}
       <p className="counter">{key}</p>
     </div>
   );

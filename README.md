@@ -26,6 +26,12 @@ Copy `.env.example` to `.env.local` and fill it in.
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL. Confirmation links, council preview links, Open Graph images and the sitemap are all built from it |
 | `EMAIL_FROM` | Optional. The from address on outgoing mail. Defaults to `The Mona K Project <hello@monakproject.org>` |
 | `SUBSCRIBE_TOKEN_SECRET` | Optional. Signs subscriber confirmation links. Defaults to the service role key |
+| `AUTOMATION_ENABLED` | Master switch for the scheduled collectors and every model call. `false` by default, and nothing reads it yet |
+| `ANTHROPIC_API_KEY` | For drafting only, once the collectors land. A model never publishes anything |
+| `CRON_SECRET` | Shared secret the scheduled routes check before doing any work |
+
+The last three are for the collection and drafting work, which is not built
+yet. The site runs completely without them.
 
 Every read of these goes through `src/lib/env.ts`, so a missing variable fails
 with a message naming it rather than showing an empty page.
@@ -88,11 +94,11 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 
 | Command | What it covers |
 | --- | --- |
-| `pnpm test:db` | Applies the migration to a throwaway Postgres and runs 41 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, and the RLS rules for anonymous, non-admin and admin callers |
-| `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
+| `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 67 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, and the RLS rules for anonymous, non-admin, admin and service role callers |
+| `pnpm test:data` | 45 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
 | `pnpm test:lighthouse` | Lighthouse over all 11 public routes in mobile emulation. Fails if any category on any route drops below 95 |
-| `pnpm test:e2e` | Playwright, 39 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, and a publish notice reaches confirmed addresses only |
+| `pnpm test:e2e` | Playwright, 47 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
 and a running app.
@@ -137,6 +143,45 @@ publishes different lane names shows "Not directly comparable" rather than a
 guess. The inflation line needs a 2010 schedule and CPI rows for 2010 and a
 later year; without them the line is hidden rather than estimated.
 
+## Posting a vote
+
+At `/admin/votes`. Choose the meeting, or add one with **New meeting** without
+leaving the screen. Give the agenda item title, one sentence of plain summary
+capped at 200 characters, a category, an amount if the record states one, and a
+link to the paper for that item. The roll call opens with every active member of
+that body set to Yes, so only the exceptions need touching, and the tally is
+counted from the roll call rather than typed, so the two can never disagree.
+
+**Publish** puts it on the site at once. **Save as draft** keeps it in the admin
+until the minutes are out. Drafts appear on the dashboard under "Waiting for
+review" and nowhere public.
+
+## Software collects and drafts, a person publishes
+
+This is the one rule the database enforces rather than trusting the code to
+keep. `status` reaches `published` only from a signed in admin: a trigger on
+`votes`, `reports` and `listening_sessions` refuses the write when the caller is
+the service role, which is what the scheduled collectors and any model call run
+as. A row level policy could not do this, because the Supabase service role
+holds `BYPASSRLS` and policies are never consulted for it.
+
+A vote a machine drafted carries `ai_draft = true`. It is invisible to the
+anonymous key, it is kept out of `latest_feed` and the voting record, and it is
+marked "AI draft, unreviewed" wherever it appears in the admin. The Publish
+button on such a draft stays disabled until the reviewer opens the source
+document and ticks "I checked this against the document", and the server refuses
+the write without that confirmation as well. Publishing records who reviewed it
+and when, and clears the AI flag, because a person has now read it.
+
+The About page carries the disclosure this implies, in one sentence, from
+`site_settings.ai_disclosure`. It ships filled in and is editable at
+`/admin/settings`.
+
+None of the collectors or drafters exist yet. The tables they will write to
+(`meetings`, `jobs`, `ai_runs`, `vacancy_snapshots`), the columns they will set,
+and the rule above are all in place, so switching them on adds routes rather
+than changing the shape of anything.
+
 ## Publishing a report
 
 At `/admin/reports`: title, address (made from the title unless you type one),
@@ -174,6 +219,13 @@ confirmed addresses only.
 Without `RESEND_API_KEY`, every message is written to `.local-storage/emails`
 as JSON instead of being sent, which is how the tests check who a message went
 to. Mail is never silently dropped.
+
+That fallback is for development only. A deployed host serves from a read only
+filesystem, so the write cannot succeed there: the message goes to the server
+log instead and `sendEmail` reports that nothing was sent, rather than throwing
+and taking the form down with it. An inquiry is written to the database before
+any mail is attempted, so a missing key costs the office its notification and
+never costs the person their message. Set `RESEND_API_KEY` in production.
 
 ## Regenerating database types
 
