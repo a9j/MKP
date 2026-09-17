@@ -115,6 +115,20 @@ app's self hosted font files to it. Both pages then render with the same font.
 
 ## Uploading the first salary schedule
 
+The first upload has a circle in it worth knowing about before you hit it. The
+public pages are rendered at build time and the Explorer refuses to build on an
+empty `salary_schedule`, on purpose: a page of blanks where sourced figures
+should be is worse than no page. But the screen that accepts the upload is on
+the site that will not build yet.
+
+Break it by running the app on your own machine against the real database.
+Put the production Supabase values in `.env.local`, run `pnpm dev`, sign in, and
+upload there. The rows land in the same database the deployment reads, so the
+next build has what it needs. Do not paste the files in `data/samples/` into a
+real project to get past this: every one of them carries
+`https://example.com/source.pdf`, and an unsourced figure on the live site is
+the one thing this organization cannot publish.
+
 Sign in at `/admin/login`, then go to `/admin/explorer`. Upload a CSV with these
 columns, in any order:
 
