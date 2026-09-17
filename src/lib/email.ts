@@ -1,6 +1,6 @@
 import "server-only";
-import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { writeEmailToDisk } from "@/lib/email-disk";
 
 /**
  * Outgoing mail.
@@ -37,14 +37,30 @@ export async function sendEmail(email: Email): Promise<SendResult> {
   const key = process.env.RESEND_API_KEY;
 
   if (!key) {
-    const dir = join(process.cwd(), ".local-storage", "emails");
-    mkdirSync(dir, { recursive: true });
-    const name = `${Date.now()}-${email.subject.replace(/[^a-z0-9]+/gi, "-").slice(0, 60)}.json`;
-    writeFileSync(join(dir, name), JSON.stringify({ from: FROM, ...email }, null, 2));
+    const written = writeEmailToDisk(join(process.cwd(), ".local-storage", "emails"), FROM, email);
+    if (written) {
+      return {
+        ok: true,
+        recipients: email.to.length,
+        message: `RESEND_API_KEY is not set, so the message was written to ${written} instead of being sent.`,
+        local: true,
+      };
+    }
+
+    // A deployed host has a read only filesystem, so the development fallback
+    // cannot run there. The message goes to the log rather than nowhere: a
+    // council review that vanished looks exactly like one nobody answered.
+    console.warn(
+      "[email] RESEND_API_KEY is not set and the message could not be written to disk. " +
+        "Nothing was sent.",
+      JSON.stringify({ from: FROM, to: email.to, subject: email.subject, text: email.text }),
+    );
     return {
-      ok: true,
-      recipients: email.to.length,
-      message: `RESEND_API_KEY is not set, so the message was written to .local-storage/emails instead of being sent.`,
+      ok: false,
+      recipients: 0,
+      message:
+        "RESEND_API_KEY is not set and this host has no writable disk, so nothing was sent. " +
+        "The message is in the server log. Set RESEND_API_KEY to send mail.",
       local: true,
     };
   }

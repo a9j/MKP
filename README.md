@@ -95,7 +95,7 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | Command | What it covers |
 | --- | --- |
 | `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 67 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, and the RLS rules for anonymous, non-admin, admin and service role callers |
-| `pnpm test:data` | Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them |
+| `pnpm test:data` | 45 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
 | `pnpm test:lighthouse` | Lighthouse over all 11 public routes in mobile emulation. Fails if any category on any route drops below 95 |
 | `pnpm test:e2e` | Playwright, 47 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
@@ -219,6 +219,13 @@ confirmed addresses only.
 Without `RESEND_API_KEY`, every message is written to `.local-storage/emails`
 as JSON instead of being sent, which is how the tests check who a message went
 to. Mail is never silently dropped.
+
+That fallback is for development only. A deployed host serves from a read only
+filesystem, so the write cannot succeed there: the message goes to the server
+log instead and `sendEmail` reports that nothing was sent, rather than throwing
+and taking the form down with it. An inquiry is written to the database before
+any mail is attempted, so a missing key costs the office its notification and
+never costs the person their message. Set `RESEND_API_KEY` in production.
 
 ## Regenerating database types
 

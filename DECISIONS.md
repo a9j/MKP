@@ -717,3 +717,29 @@ The `claude-sonnet-4-6` model id in the brief is not one this build can
 confirm. Nothing depends on it yet, since no model is called. Worth checking
 against the current model list when phase 8 starts rather than pinning an id
 that may have moved.
+
+### The mail fallback had to survive a host with no writable disk
+
+`sendEmail` without `RESEND_API_KEY` wrote the message to
+`.local-storage/emails` so that development could read it, on the stated
+principle that silently dropping mail is worse than either sending or
+failing loudly. On Vercel the filesystem is read only outside `/tmp`, so that
+write throws, and it threw straight out of `sendEmail`. The first contact form
+submission after a deploy with no Resend key would have stored the inquiry and
+then returned a server error to the person who wrote it.
+
+It now returns rather than throws, logs the message so it is still recoverable,
+and reports that nothing was sent. The inquiry is written before any mail is
+attempted, so a missing key costs the office its notification and never costs
+the sender their message.
+
+Writing it to disk moved to `src/lib/email-disk.ts`. `email.ts` is server only
+because it holds the Resend key, and that guard throws outside a server
+component, which put the one branch that can fail on a real host beyond the
+reach of a test. Nothing in the filesystem half is a secret, so it is testable
+on its own.
+
+Those tests immediately found a second fault: the filename was the timestamp
+plus the subject, so two messages sent in the same millisecond with the same
+subject became one file. A loop over recipients does exactly that. The name now
+carries a random suffix.
