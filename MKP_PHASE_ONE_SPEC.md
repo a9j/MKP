@@ -72,7 +72,7 @@ Files in `supabase/migrations/`:
 1. `0008a_document_owner_type_source.sql` (run first, on its own)
 2. `0008_editorial_system.sql`
 
-Both were dry-run against the live MKP project inside a transaction that was rolled back. All 11 behavior checks passed. Nothing was changed in the database. Apply them yourself when ready.
+Both were dry-run against the live MKP project (all 11 behavior checks passed), then applied on 2026-09-20. The recommended coverage rules for the TPS Board were seeded the same day.
 
 New objects:
 
