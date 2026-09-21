@@ -38,7 +38,12 @@ set role anon;
 select pg_temp.want('anon sees published reports only', (select count(*) from reports), 1);
 select pg_temp.want('anon sees published listening only', (select count(*) from listening_sessions), 1);
 select pg_temp.want('anon sees votes', (select count(*) from votes), 1);
-select pg_temp.want('anon sees public settings only', (select count(*) from site_settings), 22);
+-- These two counts are deliberately exact: a settings key that is public when
+-- it should not be moves the first number without moving the second, which is
+-- the mistake worth catching. Bump them on purpose when a migration adds a
+-- setting, never to make a red test go green.
+-- 0008 added explainer_max_reading_grade, public. 24 total, 1 private.
+select pg_temp.want('anon sees public settings only', (select count(*) from site_settings), 23);
 select pg_temp.want('anon sees latest_feed', (select count(*) from latest_feed), 4);
 select pg_temp.denied('anon read admins',      'select 1 from admins');
 select pg_temp.denied('anon read inquiries',   'select 1 from inquiries');
@@ -71,7 +76,7 @@ select pg_temp.want('admin sees drafts too',   (select count(*) from reports), 2
 select pg_temp.want('admin sees draft votes too', (select count(*) from votes), 3);
 select pg_temp.want('admin sees inquiries',    (select count(*) from inquiries), 2);
 select pg_temp.want('admin sees subscribers',  (select count(*) from subscribers), 2);
-select pg_temp.want('admin sees all settings', (select count(*) from site_settings), 23);
+select pg_temp.want('admin sees all settings', (select count(*) from site_settings), 24);
 insert into votes (meeting_id, item_title, summary, status, published_at)
   select id, 'admin vote', 'x', 'published', now() from meetings limit 1;
 \echo 'OK admin may publish a vote'
