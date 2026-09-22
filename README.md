@@ -95,10 +95,10 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | Command | What it covers |
 | --- | --- |
 | `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 67 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, and the RLS rules for anonymous, non-admin, admin and service role callers |
-| `pnpm test:data` | 45 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
+| `pnpm test:data` | 55 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
-| `pnpm test:lighthouse` | Lighthouse over all 11 public routes in mobile emulation. Fails if any category on any route drops below 95 |
-| `pnpm test:e2e` | Playwright, 47 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
+| `pnpm test:lighthouse` | Lighthouse over all 12 public routes in mobile emulation. Fails if any category on any route drops below 95 |
+| `pnpm test:e2e` | Playwright, 58 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, the city budget loads from a CSV and drives every panel on `/budget`, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
 and a running app.
@@ -115,19 +115,14 @@ app's self hosted font files to it. Both pages then render with the same font.
 
 ## Uploading the first salary schedule
 
-The first upload has a circle in it worth knowing about before you hit it. The
-public pages are rendered at build time and the Explorer refuses to build on an
-empty `salary_schedule`, on purpose: a page of blanks where sourced figures
-should be is worse than no page. But the screen that accepts the upload is on
-the site that will not build yet.
+An empty table is an empty page, not a failed build. Until a schedule is
+loaded, the Explorer reads "The salary schedule has not been loaded yet" and
+every other page carries on as normal, so the site deploys before it has any
+data and the admin screen that takes the upload is reachable on it.
 
-Break it by running the app on your own machine against the real database.
-Put the production Supabase values in `.env.local`, run `pnpm dev`, sign in, and
-upload there. The rows land in the same database the deployment reads, so the
-next build has what it needs. Do not paste the files in `data/samples/` into a
-real project to get past this: every one of them carries
-`https://example.com/source.pdf`, and an unsourced figure on the live site is
-the one thing this organization cannot publish.
+Do not paste the files in `data/samples/` into a real project to fill the page:
+every one of them carries `https://example.com/source.pdf`, and an unsourced
+figure on the live site is the one thing this organization cannot publish.
 
 Sign in at `/admin/login`, then go to `/admin/explorer`. Upload a CSV with these
 columns, in any order:
@@ -156,6 +151,34 @@ named in the `explorer_home_district` setting as "you". A district that
 publishes different lane names shows "Not directly comparable" rather than a
 guess. The inflation line needs a 2010 schedule and CPI rows for 2010 and a
 later year; without them the line is hidden rather than estimated.
+
+## Loading the city budget
+
+`/budget` reads two tables, and both are loaded the same way as the salary
+schedule, from `/admin/explorer`:
+
+```
+fiscal_year,fund,department,category,amount,source_url,source_page
+2026,General Fund,Police,Personnel,96000000,https://toledo.oh.gov/budget.pdf,118
+```
+
+```
+year,population,source_url
+2025,265300,https://example.gov/population.pdf
+```
+
+`source_page` is the page of the budget book the figure sits on. It is optional,
+because a consolidated table sometimes has no single page to point at. The link
+to the document is not optional anywhere.
+
+A department is the sum of its categories within one fund and one year, so the
+categories can stay as granular as the book is while the page a resident reads
+stays readable. Per resident figures divide the fund total by the newest
+population row, which is why the population carries its own source rather than
+sitting in a setting.
+
+Nothing is seeded. Until the budget book is loaded the page reads "The city
+budget has not been loaded yet."
 
 ## Posting a vote
 
@@ -293,15 +316,16 @@ affects, so published work appears within seconds without a rebuild.
 ### What the build needs
 
 The public pages are rendered at build time, so the database has to be
-reachable and the Explorer must have data. A build will stop with a clear
-message if `salary_schedule` is empty, if the home district named in
-`explorer_home_district` has no rows, or if any figure is missing its source
-link. That is deliberate: an unsourced number is the one thing that must never
-reach the site.
+reachable. A build will stop if any figure is missing its source link, which is
+deliberate: an unsourced number is the one thing that must never reach the
+site. It will not stop for missing data. An empty `salary_schedule`, a home
+district named in `explorer_home_district` that has no rows, and an empty
+`city_budget` each render an empty state and log the reason to the build output,
+so one table nobody has filled in yet cannot take the whole site down.
 
 ## Performance and accessibility
 
-`pnpm test:lighthouse` runs all 11 public routes in mobile emulation and fails
+`pnpm test:lighthouse` runs all 12 public routes in mobile emulation and fails
 below 95 in any category. Current scores: Performance 96 to 99, Accessibility
 100, SEO 100, Best Practices 96 locally and 100 in production. The local Best
 Practices cap is the Plausible script, which cannot load in a sandbox without

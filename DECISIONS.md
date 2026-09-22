@@ -849,3 +849,100 @@ own formatting, undoing the switch to the live project's own generator made in
 the previous commit. The five additions from this migration were applied by
 hand instead. Regenerating from the live project after this migration is
 applied there will produce the same result with less noise.
+
+## 2026-09-22, phase 2 step 2: the empty state, and the city budget
+
+Step two of the build order: make an empty table a page rather than a build
+failure, then build `/budget` and the uploader behind it.
+
+### An empty table used to take the whole site down
+
+`getExplorerData` threw when `salary_schedule` was empty, and the public pages
+are rendered at build time, so one unfilled table failed the build for every
+page on the site, Vote Watch and the Records Desk included. The README even
+documented the circle it created: the screen that accepts the first upload was
+on the site that would not build until the upload happened.
+
+It returns null now, and the two pages that render the Explorer say "The salary
+schedule has not been loaded yet." The same holds when the home district named
+in `explorer_home_district` has no rows, which is the more likely fault in
+practice, since it is a misspelling rather than an absence. Both log the reason
+to the build output, because "not loaded yet" and "loaded under a different
+name" read identically to a visitor and are not the same problem for the person
+who has to fix it.
+
+What still stops the build is a figure with no source link. That is the
+difference worth holding: missing data is a state the site has to survive, and
+an unsourced number is not.
+
+### The city budget is its own table, not more budget_categories
+
+`budget_categories` is the school district's budget, one category per row. The
+city's book is a fund, then a department, then a line within it. Bending one
+table to hold both would have meant a fund column that is null for half the
+rows and a reader who could add a school figure to a city figure and get a
+number that means nothing. Two tables, and the page never mixes them.
+
+A department is the sum of its categories within one fund and year. The
+categories stay in the table so a figure can be traced to the line it came
+from; the panel a resident reads is by department, which is the level the
+question is asked at.
+
+### Which document a total links to
+
+A department links to the largest line in it, which is the page somebody
+checking the figure would open first. A fund total links to the budget book
+only when every row in that fund names the same document, and to nothing when
+they do not, since a total assembled from two sources cannot honestly claim
+either.
+
+The per resident figure carries no gold rule at all. It is one sourced number
+divided by another from a different document, so there is no page to open that
+shows it. Both inputs are underlined in the sentence beneath it. This follows
+the rule already set for Scenario B: a figure the organization worked out is
+never dressed as a figure it read.
+
+### The slider says what the slider is set to
+
+The brief fixes the label as "If one percent moved, it would equal" and also
+asks for a slider from 0.5 to 5 percent. Those two cannot both be literal: at
+3 percent a label reading "one percent" is simply wrong, and a wrong number is
+the one thing this site cannot print. The heading stays "What one percent would
+change" and the label tracks the slider, reading exactly the specified sentence
+at its default of 1 percent. Worth a word at review if the fixed wording was
+deliberate.
+
+The panel also says, underneath, that it is a comparison and not a proposal.
+The brief asks for no recommendation language; it seemed worth saying what the
+panel is rather than only avoiding saying what it is not.
+
+### No PDF extraction, because there is none to match
+
+The brief asks for the uploader to use "the same CSV and PDF-extraction flow as
+salary schedules". The salary schedule flow is CSV only: validate, diff,
+preview, commit. There is no PDF extraction anywhere in the site, and building
+one here would be inventing a second way to get figures in, unreviewed, for the
+tool with the largest numbers on it. The budget uses the same flow the salary
+schedule actually has. Extraction belongs with the drafting work, where a
+person still checks the result against the document.
+
+### Four programs, and one thing the mockup no longer fixes
+
+The home page list is four items, so the grid is four columns on a desktop, two
+where four would be too narrow to read, and one on a phone. The heading reads
+"Four things we build" rather than "Three".
+
+`visual-parity.mjs` compared the program card against the mockup, where it is a
+third of the row. It is a quarter now by instruction, so the card was replaced
+in the tracked list by the row it sits in, compared on width alone. The row is
+what the mockup actually fixes: the grid's width and its hairline rules, not
+how many programs the organization happens to run. Ten of the eleven tracked
+elements still match on both dimensions.
+
+### `/budget` is not in the navigation
+
+The brief puts the Budget Explorer in the home page program list and says
+nothing about the nav, and the nav is copy. So the page is reachable from the
+home page, from the Teacher Pay Explorer, and from the sitemap, but not from
+the bar at the top of every page. That is worth a decision rather than a
+default: a tool nobody can find from `/votes` is a tool with one entrance.

@@ -27,6 +27,13 @@ const PROGRAMS = [
     href: "/explorer",
   },
   {
+    tag: "Tool",
+    title: "City Budget Explorer",
+    body: "Where does Toledo's money go? The adopted budget by department, what one percent would change, and what it costs per resident. Every figure sourced.",
+    linkLabel: "Open the budget",
+    href: "/budget",
+  },
+  {
     tag: "Reports",
     title: "Reports",
     body: "The annual Toledo Teacher Pay Report, levy explainers when something is on the ballot, and a contract tracker when talks open. Sourced, reviewed, no recommendations.",
@@ -90,11 +97,17 @@ export default async function HomePage() {
           <p className="pledge">{NEUTRALITY_LINE}</p>
         </div>
 
-        <PayExplorer data={explorer} id="explorer" />
+        {explorer ? (
+          <PayExplorer data={explorer} id="explorer" />
+        ) : (
+          <div className="explorer" id="explorer">
+            <p className="sub">The salary schedule has not been loaded yet.</p>
+          </div>
+        )}
       </header>
 
       <section className="wrap" id="programs">
-        <h2>Three things we build, all from public records.</h2>
+        <h2>Four things we build, all from public records.</h2>
         <div className="programs">
           {PROGRAMS.map((program) => (
             <div className="program" key={program.title}>

@@ -392,6 +392,57 @@ export type Database = {
           },
         ]
       }
+      city_budget: {
+        Row: {
+          amount: number
+          category: string
+          department: string
+          fiscal_year: number
+          fund: string
+          id: string
+          source_page: number | null
+          source_url: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          department: string
+          fiscal_year: number
+          fund: string
+          id?: string
+          source_page?: number | null
+          source_url: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          department?: string
+          fiscal_year?: number
+          fund?: string
+          id?: string
+          source_page?: number | null
+          source_url?: string
+        }
+        Relationships: []
+      }
+      city_population: {
+        Row: {
+          population: number
+          source_url: string
+          year: number
+        }
+        Insert: {
+          population: number
+          source_url: string
+          year: number
+        }
+        Update: {
+          population?: number
+          source_url?: string
+          year?: number
+        }
+        Relationships: []
+      }
       cpi: {
         Row: {
           index_value: number

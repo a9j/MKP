@@ -28,7 +28,12 @@ const ELEMENTS = {
   explorer: ".explorer",
   bigFigure: ".big",
   sectionHeading: "section.wrap h2",
-  program: ".program",
+  // The program card is deliberately no longer the mockup's. Phase 2 makes the
+  // list four items rather than three, so the card is a quarter of the row
+  // instead of a third. The row it sits in is still tracked, since that is what
+  // the mockup fixes: the grid's width and its hairline rules, not how many
+  // columns the organization happens to run.
+  programsRow: { selector: ".programs", compare: "width" },
   step: ".step",
   feedRow: ".item",
   cta: ".cta",
@@ -79,8 +84,8 @@ async function measure(url, injectCss) {
   await page.waitForTimeout(1200);
   const out = await page.evaluate((els) => {
     const r = {};
-    for (const [name, sel] of Object.entries(els)) {
-      const el = document.querySelector(sel);
+    for (const [name, spec] of Object.entries(els)) {
+      const el = document.querySelector(typeof spec === "string" ? spec : spec.selector);
       if (!el) { r[name] = null; continue; }
       const box = el.getBoundingClientRect();
       r[name] = { w: Math.round(box.width), h: Math.round(box.height) };
@@ -106,12 +111,16 @@ for (const name of Object.keys(ELEMENTS)) {
     failed++;
     continue;
   }
-  const same = a.w === b.w && a.h === b.h;
+  // A tracked element may fix its width only, where the page deliberately
+  // carries different content from the mockup and so a different height.
+  const spec = ELEMENTS[name];
+  const widthOnly = typeof spec !== "string" && spec.compare === "width";
+  const same = a.w === b.w && (widthOnly || a.h === b.h);
   if (!same) failed++;
   console.log(
     name.padEnd(16),
-    `${a.w}x${a.h}`.padEnd(12),
-    `${b.w}x${b.h}`.padEnd(12),
+    (widthOnly ? `${a.w} wide` : `${a.w}x${a.h}`).padEnd(12),
+    (widthOnly ? `${b.w} wide` : `${b.w}x${b.h}`).padEnd(12),
     same ? "match" : "DIFFERS",
   );
 }
