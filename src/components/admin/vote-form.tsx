@@ -13,7 +13,7 @@ import {
 import { SUMMARY_MAX } from "@/lib/limits";
 
 type Body = { id: string; name: string; slug: string };
-type Member = { id: string; name: string; title: string | null };
+type Member = { id: string; name: string; title: string | null; district: string | null };
 
 export type MeetingOption = {
   id: string;
@@ -117,6 +117,18 @@ export function VoteForm({
     ...choice,
     count: Object.values(rollCall).filter((v) => v === choice.value).length,
   }));
+
+  // Council is twelve names, half of them at large and half by district. In one
+  // undivided list of twelve a name is easy to lose on a phone, so the two
+  // kinds of seat are separated. A body that does not use districts has one
+  // group and no heading, which is how the school board still reads.
+  const atLarge = members.filter((m) => !m.district);
+  const byDistrict = members.filter((m) => m.district);
+  const groups = [
+    { heading: "At large", members: atLarge },
+    { heading: "By district", members: byDistrict },
+  ].filter((group) => group.members.length > 0);
+  const showHeadings = groups.length > 1;
 
   const remaining = SUMMARY_MAX - summary.length;
 
@@ -292,30 +304,38 @@ export function VoteForm({
         {members.length === 0 ? (
           <p className="admin-help">No active members recorded for this body yet.</p>
         ) : (
-          members.map((member) => (
-            <div className="rollcall-row" key={member.id}>
-              <span className="rollcall-name" id={`member-${member.id}`}>
-                {member.name}
-              </span>
-              <RadioGroup.Root
-                className="segmented"
-                value={rollCall[member.id] ?? "yes"}
-                onValueChange={(value) =>
-                  setRollCall((current) => ({ ...current, [member.id]: value as VoteChoice }))
-                }
-                aria-labelledby={`member-${member.id}`}
-              >
-                {CHOICES.map((choice) => (
-                  <RadioGroup.Item
-                    key={choice.value}
-                    className="segment"
-                    value={choice.value}
-                    id={`${member.id}-${choice.value}`}
+          groups.map((group) => (
+            <div className="rollcall-group" key={group.heading}>
+              {showHeadings ? <p className="rollcall-heading">{group.heading}</p> : null}
+              {group.members.map((member) => (
+                <div className="rollcall-row" key={member.id}>
+                  <span className="rollcall-name" id={`member-${member.id}`}>
+                    {member.name}
+                    {member.district ? (
+                      <small className="rollcall-seat">District {member.district}</small>
+                    ) : null}
+                  </span>
+                  <RadioGroup.Root
+                    className="segmented"
+                    value={rollCall[member.id] ?? "yes"}
+                    onValueChange={(value) =>
+                      setRollCall((current) => ({ ...current, [member.id]: value as VoteChoice }))
+                    }
+                    aria-labelledby={`member-${member.id}`}
                   >
-                    {choice.label}
-                  </RadioGroup.Item>
-                ))}
-              </RadioGroup.Root>
+                    {CHOICES.map((choice) => (
+                      <RadioGroup.Item
+                        key={choice.value}
+                        className="segment"
+                        value={choice.value}
+                        id={`${member.id}-${choice.value}`}
+                      >
+                        {choice.label}
+                      </RadioGroup.Item>
+                    ))}
+                  </RadioGroup.Root>
+                </div>
+              ))}
             </div>
           ))
         )}

@@ -255,6 +255,12 @@ The Supabase CLI's own `gen types` needs Docker. This reads the Postgres catalog
 through `psql` instead and emits the same shape, including foreign keys so
 embedded selects stay typed.
 
+The file currently in the repository came from the live project, and the two
+generators format differently: running the local one rewrites all 1,800 lines
+without changing their meaning. Prefer `supabase gen types typescript
+--project-id <ref>` once the migration is applied to the live project, and use
+the local generator to check a migration before it gets there.
+
 ## Deploying to Vercel
 
 1. **Create the Supabase project.** Run every file in `supabase/migrations/` in

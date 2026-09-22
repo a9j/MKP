@@ -289,6 +289,9 @@
   .vote-section { padding: 32px 24px 72px; }
 
   .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  /* Two filter rows read as two questions, not one long bar of pills. */
+  .filter-label { font-size: 13px; color: var(--ink-3); margin-bottom: 8px; }
+  .filter-label + .filters { margin-bottom: 18px; }
   .filter {
     font: inherit; font-size: 14px; min-height: 44px; padding: 0 16px;
     background: transparent; color: var(--ink-2);
@@ -326,6 +329,10 @@
     display: block; margin-top: 4px; font-weight: 400; font-size: 14px; color: var(--ink-2);
   }
   .doc-link { display: block; }
+
+  /* One table per body on the voting records page. */
+  .member-group + .member-group { margin-top: 44px; }
+  .member-group h2 { font-size: 22px; letter-spacing: -.02em; margin-bottom: 4px; }
 
   /* A wide table scrolls inside its own box, so the page itself never does. */
   .table-scroll { overflow-x: auto; max-width: 100%; }
@@ -484,18 +491,31 @@
     .admin-inner { margin: 0; padding: 0 32px; }
   }
 
-  /* Bottom tab bar on a phone, thumb reachable. */
+  /* Bottom tab bar on a phone, thumb reachable.
+     Eleven screens do not fit across 390px in one row. They were laid out in
+     one anyway, so the last four sat past the right edge of the bar and could
+     only be reached by swiping a 48px strip sideways, with nothing to say they
+     were there. Two rows of six fit every label at a readable size and leave
+     room for the screens still to come. */
   @media (max-width: 899px) {
     .admin-rail {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
       border-top: 1px solid var(--line); border-bottom: 0;
     }
     .admin-rail .admin-brand { display: none; }
-    .admin-rail ul { justify-content: space-between; padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); }
-    .admin-rail li { flex: 1; }
-    .admin-rail li a { justify-content: center; font-size: 13px; padding: 0 4px; min-height: 48px; }
+    .admin-rail ul {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 0; overflow: visible;
+      padding: 2px 4px calc(2px + env(safe-area-inset-bottom));
+    }
+    .admin-rail li a {
+      justify-content: center; font-size: 13px; padding: 0 2px; min-height: 44px;
+      text-align: center;
+    }
     .rail-long { display: none; }
     .rail-short { display: inline; }
+    /* Clear of the two row bar, so the last field of a form is never under it. */
+    .admin-main { padding-bottom: 140px; }
   }
 
   .login { max-width: 420px; margin: 48px auto; padding: 0 20px; }
@@ -606,6 +626,12 @@
     justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line);
   }
   .rollcall-name { font-size: 16px; font-weight: 500; }
+  .rollcall-seat { display: block; font-size: 13px; font-weight: 400; color: var(--ink-3); }
+  .rollcall-group + .rollcall-group { margin-top: 18px; }
+  .rollcall-heading {
+    font-size: 13px; color: var(--ink-3); text-transform: none;
+    padding-top: 8px; margin-bottom: 2px;
+  }
   .segmented { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
   .segment {
     font: inherit; font-size: 14px; min-height: 44px; padding: 0 14px;
@@ -697,6 +723,17 @@
     letter-spacing: -.03em; font-weight: 600; max-width: 18em;
   }
   @media (max-width: 900px) { .page-head { padding: 48px 0 8px; } }
+
+  /* The gutter .wrap sets is wiped out by the padding shorthand on .hero and
+     .page-head, which are the same element. Above the container width nothing
+     shows for it, because the block is centred inside a wider viewport. Below
+     it, the headline and the lede run to the edge of the screen while every
+     section under them keeps 24px, which is what a phone shows as text falling
+     off the left side. The gutter is given back exactly where it is missing,
+     so the desktop rendering the mockup approves is untouched. */
+  @media (max-width: 1167px) {
+    .hero, .page-head { padding-inline: 24px; }
+  }
 
   .explorer-section { padding: 40px 24px 72px; }
   /* Full width so the chart is not squeezed into a hero column. */

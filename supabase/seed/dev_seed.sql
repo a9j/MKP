@@ -15,6 +15,22 @@ from public.bodies b,
              ('Sample Member Four', 4), ('Sample Member Five', 5)) as v(name, ord)
 where b.slug = 'tps-board';
 
+-- Council, so the twelve member roll call and the at large and district
+-- grouping have something to render. Six at large, six by district, which is
+-- how Toledo City Council is made up.
+insert into public.people (name, title, role, body_id, district, term_start, term_end, active, sort_order)
+select v.name, 'Council Member', 'body_member', b.id, v.district,
+       '2024-01-01', '2027-12-31', true, v.ord
+from public.bodies b,
+     (values ('Sample Council At Large One',   null, 11), ('Sample Council At Large Two',   null, 12),
+             ('Sample Council At Large Three', null, 13), ('Sample Council At Large Four',  null, 14),
+             ('Sample Council At Large Five',  null, 15), ('Sample Council At Large Six',   null, 16),
+             ('Sample Council District One',   '1',  21), ('Sample Council District Two',   '2',  22),
+             ('Sample Council District Three', '3',  23), ('Sample Council District Four',  '4',  24),
+             ('Sample Council District Five',  '5',  25), ('Sample Council District Six',   '6',  26))
+       as v(name, district, ord)
+where b.slug = 'toledo-city-council';
+
 -- Reports: one published, one draft that must never reach the public feed.
 insert into public.reports (slug, title, type, report_date, summary, status, published_at) values
   ('2026-toledo-teacher-pay-report', 'The 2026 Toledo Teacher Pay Report', 'pay_report',
@@ -62,7 +78,9 @@ with v as (
 )
 insert into public.vote_members (vote_id, person_id, vote)
 select v.id, p.id, case when p.sort_order = 5 then 'no'::vote_choice else 'yes'::vote_choice end
-from v, public.people p where p.role = 'body_member';
+from v, public.people p
+join public.bodies b on b.id = p.body_id
+where p.role = 'body_member' and b.slug = 'tps-board';
 
 with v as (
   insert into public.votes (meeting_id, item_title, summary, category, status, published_at)
@@ -74,7 +92,32 @@ with v as (
 )
 insert into public.vote_members (vote_id, person_id, vote)
 select v.id, p.id, 'yes'::vote_choice
-from v, public.people p where p.role = 'body_member';
+from v, public.people p
+join public.bodies b on b.id = p.body_id
+where p.role = 'body_member' and b.slug = 'tps-board';
+
+-- A council meeting and one council vote, so the body filter, the grouped
+-- member table and the "City Council vote" feed label have real rows to show.
+insert into public.meetings (body_id, meeting_date, kind, agenda_url, discovered_by)
+select b.id, '2026-09-08', 'regular', 'https://example.com/source.pdf', 'admin'
+from public.bodies b where b.slug = 'toledo-city-council';
+
+with v as (
+  insert into public.votes (meeting_id, item_title, summary, category, amount,
+                            agenda_item_url, status, published_at)
+  select m.id, 'O-625-26 Authorize a street resurfacing contract',
+         'Council authorized a street resurfacing contract for $2,400,000 and declared an emergency.',
+         'contracts', 2400000, 'https://example.com/source.pdf', 'published', now()
+  from public.meetings m
+  join public.bodies b on b.id = m.body_id
+  where b.slug = 'toledo-city-council' and m.meeting_date = '2026-09-08'
+  returning id
+)
+insert into public.vote_members (vote_id, person_id, vote)
+select v.id, p.id, case when p.district = '6' then 'absent'::vote_choice else 'yes'::vote_choice end
+from v, public.people p
+join public.bodies b on b.id = p.body_id
+where p.role = 'body_member' and b.slug = 'toledo-city-council';
 
 -- One machine drafted vote, so the admin review list and the badge have
 -- something to render. It is a draft, so no public page may show it.

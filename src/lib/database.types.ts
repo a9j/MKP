@@ -106,16 +106,19 @@ export type Database = {
       }
       bodies: {
         Row: {
+          agenda_system: Database["public"]["Enums"]["agenda_system"]
           id: string
           name: string
           slug: string
         }
         Insert: {
+          agenda_system?: Database["public"]["Enums"]["agenda_system"]
           id?: string
           name: string
           slug: string
         }
         Update: {
+          agenda_system?: Database["public"]["Enums"]["agenda_system"]
           id?: string
           name?: string
           slug?: string
@@ -1062,6 +1065,7 @@ export type Database = {
           bio: string | null
           body_id: string | null
           created_at: string
+          district: string | null
           email: string | null
           id: string
           name: string
@@ -1077,6 +1081,7 @@ export type Database = {
           bio?: string | null
           body_id?: string | null
           created_at?: string
+          district?: string | null
           email?: string | null
           id?: string
           name: string
@@ -1092,6 +1097,7 @@ export type Database = {
           bio?: string | null
           body_id?: string | null
           created_at?: string
+          district?: string | null
           email?: string | null
           id?: string
           name?: string
@@ -1517,6 +1523,7 @@ export type Database = {
       }
       latest_feed: {
         Row: {
+          body_slug: string | null
           date: string | null
           href: string | null
           kind: string | null
@@ -1532,6 +1539,7 @@ export type Database = {
           active: boolean | null
           body_name: string | null
           body_slug: string | null
+          district: string | null
           name: string | null
           no_count: number | null
           person_id: string | null
@@ -1578,6 +1586,7 @@ export type Database = {
       }
     }
     Enums: {
+      agenda_system: "boarddocs" | "granicus" | "manual"
       capture_method: "upload" | "url" | "paste" | "records_request" | "watcher"
       claim_label: "fact" | "estimate" | "argument" | "unknown"
       coverage_decision: "pending" | "cover" | "skip"
@@ -1763,6 +1772,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      agenda_system: ["boarddocs", "granicus", "manual"],
       capture_method: ["upload", "url", "paste", "records_request", "watcher"],
       claim_label: ["fact", "estimate", "argument", "unknown"],
       coverage_decision: ["pending", "cover", "skip"],

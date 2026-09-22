@@ -743,3 +743,109 @@ Those tests immediately found a second fault: the filename was the timestamp
 plus the subject, so two messages sent in the same millisecond with the same
 subject became one file. A loop over recipients does exactly that. The name now
 carries a random suffix.
+
+## 2026-09-22, phase 2 step 1: the roster past the school board
+
+The second brief widens the site to city council, the ballot and the city
+budget. This is step one of its build order: the roster, the district, and the
+public body filter. Nothing here fetches an agenda or calls a model.
+
+### The automation this brief builds on does not exist yet
+
+The brief says to read "the automation code from Phase 8" before writing
+anything. There is none. Phase 8 was never started, for the reason logged on
+2026-09-17: the brief that introduced it said not to start until phase 7 was
+deployed and there was a go, and neither happened. What exists is the shape it
+will write into: `meetings`, `jobs`, `ai_runs`, the `ai_draft` columns, the
+review gate and the trigger that stops the service role publishing.
+
+So the council watcher in Part A item 2 has no TPS watcher to copy. It will be
+the first `/api/cron/*` route on the site, not a second one. That is a real
+difference in the size of step 4, and it is worth knowing before that step is
+scheduled rather than during it.
+
+### agenda_system is on the body, and it defaults to manual
+
+The brief lists `boarddocs`, `granicus` and `manual`. TPS is set to boarddocs
+and council to granicus; the county keeps manual. Manual is the default for a
+new body because it is the honest answer for one nobody has automated: the
+agendas arrive because a person went and got them.
+
+### district is text, and it is a column grant
+
+A district is an identifier, not a quantity. Nothing sums them, the county and
+the school board name their seats differently from council, and a leading zero
+or a letter would be lost by an integer. Null means no district, which on
+council means at large.
+
+The column had to be granted to the anonymous role by name. 0004 replaced the
+table wide grant on `people` with a column list so that an email address could
+be stored without publishing it, and a column added afterwards is not in that
+list. Without the grant the voting records page fails the build with
+"permission denied for table people", which is exactly what happened. Any
+future column on `people` needs the same decision made out loud: public or not.
+
+### At large is not printed against a body that has no districts
+
+The public voting record shows a Seat column only for a body where at least one
+member holds a district. Printing "At large" against all five school board
+members says nothing, and it costs a column on a phone. The admin roll call
+does the same: council splits into "At large" and "By district", the board
+renders as one ungrouped list exactly as before.
+
+### Short names live in code, keyed by slug
+
+The filter has to read "City Council", not "Toledo City Council", and the feed
+has to read "City Council vote". `bodies.name` is the legal name and stays that
+way on the record, so the short names sit in `src/lib/bodies.ts` keyed by slug,
+with the full name as the fallback. Keying by slug rather than by name means
+renaming a body in the admin cannot silently lose its short name.
+
+`latest_feed` gained a `body_slug` column to carry that lookup, rather than the
+feed matching on the displayed name.
+
+### Two filters need two labels
+
+The body filter goes first, as the brief asks. Two rows of pills with nothing
+between them read as one long bar, especially on a phone where both wrap, so
+each control carries a small label: "Body" and "What it touches". That is UI
+labelling rather than editorial copy, and the labels are what name each group
+for a screen reader too.
+
+### The phone report, which was two faults
+
+"Everything doesn't fit right on the screen when looking at a phone" turned out
+to be two separate things. Both are fixed, and both now have a test.
+
+The first: `.wrap` sets the 24px gutter, and `.hero` and `.page-head` are the
+same element with their own `padding` shorthand, which wipes the horizontal
+half of it. Every interior page's headline, lede and button therefore ran to
+the very edge of the screen while everything below them kept the gutter. The
+gutter is given back only below the container width, so the desktop rendering
+the mockup approves is untouched and `visual-parity.mjs` still matches on all
+eleven tracked elements.
+
+The same misalignment exists on the desktop, where the headline block sits
+24px wider than the sections under it. It is in the mockup, so it is the
+approved design, and it is not what was reported. Left alone, and flagged.
+
+The second: the admin bottom tab bar laid eleven screens across 390px in one
+row. The last four sat past the right edge and could only be reached by
+swiping a 48px strip, with nothing on screen to say they were there. It is two
+rows of six now, which fits every label at a readable size and leaves room for
+the Budget screen that step two adds.
+
+### The Vote Watch lede still says the board
+
+The page copy reads "Every Toledo Public Schools board vote ... As we grow, the
+same treatment extends to city council and county." Council votes now appear
+under it. The sentence is not false, but it is behind the page. Copy is not
+mine to change, so it is left as written and raised here.
+
+### Types are edited by hand, not regenerated
+
+`scripts/gen-types.mjs` rewrote all 1,800 lines of `database.types.ts` in its
+own formatting, undoing the switch to the live project's own generator made in
+the previous commit. The five additions from this migration were applied by
+hand instead. Regenerating from the live project after this migration is
+applied there will produce the same result with less noise.
