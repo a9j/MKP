@@ -134,7 +134,10 @@ export async function commitUpload(key: DatasetKey, text: string): Promise<Commi
     return { ok: false, message: `Nothing was imported: ${error.message}`, problems: [] };
   }
 
-  revalidateFor("explorerData");
+  // The city tables back /budget, the rest back /explorer and the home page.
+  revalidateFor(
+    key === "city_budget" || key === "city_population" ? "cityBudget" : "explorerData",
+  );
   return {
     ok: true,
     message: `${spec.label} updated, ${rows.length} row${rows.length === 1 ? "" : "s"}.`,

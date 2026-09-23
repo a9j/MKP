@@ -295,7 +295,7 @@ export async function getRollCallMembers(meetingId: string) {
 
   const { data } = await supabase
     .from("people")
-    .select("id, name, title")
+    .select("id, name, title, district")
     .eq("body_id", meeting.body_id)
     .eq("role", "body_member")
     .eq("active", true)

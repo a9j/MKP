@@ -1,7 +1,7 @@
 import { parseCsv } from "@/lib/csv";
 
 /**
- * Validation and diffing for the three Explorer CSV uploads.
+ * Validation and diffing for the Explorer and Budget CSV uploads.
  *
  * Kept free of any database or request handling so the rules can be tested
  * directly. The rule that matters most: a row without a source_url is never
@@ -9,7 +9,12 @@ import { parseCsv } from "@/lib/csv";
  * the site will not publish.
  */
 
-export type DatasetKey = "salary_schedule" | "vacancies" | "budget_categories";
+export type DatasetKey =
+  | "salary_schedule"
+  | "vacancies"
+  | "budget_categories"
+  | "city_budget"
+  | "city_population";
 
 type ColumnKind = "text" | "integer" | "money" | "date" | "url";
 
@@ -17,6 +22,10 @@ type ColumnSpec = {
   name: string;
   kind: ColumnKind;
   optional?: boolean;
+  /** Smallest value an integer column accepts. Checked here so a bad row is
+   *  refused in the preview, rather than by the database halfway through a
+   *  commit with a message written for a database administrator. */
+  min?: number;
 };
 
 export type DatasetSpec = {
@@ -68,6 +77,32 @@ export const DATASETS: Record<DatasetKey, DatasetSpec> = {
       { name: "source_url", kind: "url" },
     ],
     identity: ["fiscal_year", "category"],
+  },
+  city_budget: {
+    key: "city_budget",
+    table: "city_budget",
+    label: "City budget",
+    columns: [
+      { name: "fiscal_year", kind: "integer", min: 1900 },
+      { name: "fund", kind: "text" },
+      { name: "department", kind: "text" },
+      { name: "category", kind: "text" },
+      { name: "amount", kind: "money" },
+      { name: "source_url", kind: "url" },
+      { name: "source_page", kind: "integer", optional: true, min: 1 },
+    ],
+    identity: ["fiscal_year", "fund", "department", "category"],
+  },
+  city_population: {
+    key: "city_population",
+    table: "city_population",
+    label: "City population",
+    columns: [
+      { name: "year", kind: "integer", min: 1900 },
+      { name: "population", kind: "integer", min: 1 },
+      { name: "source_url", kind: "url" },
+    ],
+    identity: ["year"],
   },
 };
 
@@ -177,6 +212,13 @@ export function validateCsv(spec: DatasetSpec, text: string): ValidationResult {
           const value = Number(raw);
           if (!Number.isInteger(value)) {
             problems.push({ line, column: column.name, message: `"${raw}" is not a whole number.` });
+            rowOk = false;
+          } else if (column.min !== undefined && value < column.min) {
+            problems.push({
+              line,
+              column: column.name,
+              message: `"${raw}" is below ${column.min}.`,
+            });
             rowOk = false;
           } else {
             row[column.name] = value;

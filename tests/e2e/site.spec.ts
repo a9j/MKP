@@ -31,6 +31,124 @@ test.describe("public pages", () => {
       expect(overflow, `${path} scrolls sideways`).toBe(false);
     }
   });
+
+  /**
+   * Not scrolling sideways is not the same as fitting. The headline block sets
+   * its own padding, which wiped out the gutter .wrap gives everything else, so
+   * on a phone the first thing on every page ran to the edge of the screen
+   * while the content under it did not. This asserts they line up.
+   */
+  test("the headline keeps the same gutter as the page under it", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const { path } of pages) {
+      await page.goto(path);
+      const gutters = await page.evaluate(() => {
+        const left = (selector: string) => {
+          const element = document.querySelector(selector);
+          return element ? Math.round(element.getBoundingClientRect().left) : null;
+        };
+        return { head: left("h1"), body: left(".wrap:not(.page-head):not(.hero) h2, .filters") };
+      });
+      expect(gutters.head, `${path} has no headline`).not.toBeNull();
+      expect(gutters.head!, `${path} headline touches the edge`).toBeGreaterThanOrEqual(16);
+      if (gutters.body !== null) {
+        expect(
+          Math.abs(gutters.head! - gutters.body),
+          `${path} headline and content start at different places`,
+        ).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  /** Eleven admin screens have to be reachable without a sideways swipe. */
+  test("every admin tab is on screen on a phone", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await signIn(page);
+    await page.goto("/admin");
+
+    const tabs = page.locator(".admin-rail li a");
+    const count = await tabs.count();
+    expect(count).toBeGreaterThan(8);
+    for (let i = 0; i < count; i += 1) {
+      const box = await tabs.nth(i).boundingBox();
+      expect(box, `tab ${i} is not rendered`).not.toBeNull();
+      expect(box!.x, `tab ${i} starts off screen`).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width, `tab ${i} runs past the right edge`).toBeLessThanOrEqual(391);
+    }
+  });
+});
+
+test.describe("vote watch covers more than one body", () => {
+  test("the body filter comes first and narrows the log", async ({ page }) => {
+    await page.goto("/votes");
+
+    // Body is the first control on the page, before the category pills.
+    const labels = await page.locator(".filter-label").allTextContents();
+    expect(labels[0]).toBe("Body");
+
+    const groups = page.locator(".filters");
+    await expect(groups.first().locator(".filter").first()).toHaveText("All bodies");
+    await expect(groups.first()).toContainText("City Council");
+
+    // Both bodies are in the log. The board's count depends on what the rest
+    // of the suite has published, so only the council's is exact.
+    await expect(page.locator(".vote-kind").filter({ hasText: "City Council" })).toHaveCount(1);
+    expect(
+      await page.locator(".vote-kind").filter({ hasText: "TPS Board" }).count(),
+    ).toBeGreaterThan(0);
+
+    await page.click('.filter:has-text("City Council")');
+    await expect(page.locator(".vote-kind").filter({ hasText: "TPS Board" })).toHaveCount(0);
+    await expect(page.locator(".vote-kind").filter({ hasText: "City Council" })).toHaveCount(1);
+
+    // The two filters combine rather than replacing one another.
+    await page.click('.filter:has-text("Staffing")');
+    await expect(page.locator(".vote")).toHaveCount(0);
+  });
+
+  test("voting records are grouped by body, with council seats named", async ({ page }) => {
+    await page.goto("/votes/members");
+
+    const groups = page.locator(".member-group");
+    await expect(groups).toHaveCount(2);
+    await expect(groups.nth(0).locator("h2")).toHaveText("TPS Board");
+    await expect(groups.nth(1).locator("h2")).toHaveText("City Council");
+
+    // Council is twelve members, six of them holding a district.
+    await expect(groups.nth(1).locator("tbody tr")).toHaveCount(12);
+    await expect(groups.nth(1)).toContainText("District 3");
+    await expect(groups.nth(1)).toContainText("At large");
+
+    // The board does not use districts, so it has no seat column at all.
+    await expect(groups.nth(0).locator("thead")).not.toContainText("Seat");
+  });
+
+  test("the Latest feed says which body voted", async ({ page }) => {
+    await page.goto("/");
+    // Which votes are in the six newest rows depends on what the rest of the
+    // suite published, so every vote row is checked rather than one of them.
+    const kinds = await page
+      .locator('.latest .item[href="/votes"] .kind')
+      .allTextContents();
+    expect(kinds.length).toBeGreaterThan(0);
+    for (const kind of kinds) {
+      expect(kind).toMatch(/^(TPS Board|City Council|County) vote$/);
+    }
+  });
+
+  test("a council roll call is grouped into at large and district seats", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/admin/votes");
+    await page.waitForSelector(".rollcall-row");
+
+    const council = page.locator("#vote-meeting option", { hasText: "Toledo City Council" });
+    await page.selectOption("#vote-meeting", await council.first().getAttribute("value") ?? "");
+    await expect(page.locator(".rollcall-row")).toHaveCount(12);
+    await expect(page.locator(".rollcall-heading")).toHaveText(["At large", "By district"]);
+    await expect(page.locator(".rollcall-seat").first()).toHaveText("District 1");
+    // Every seat still defaults to yes, council included.
+    await expect(page.locator(".tally-line")).toContainText("12 yes");
+  });
 });
 
 test.describe("explorer", () => {

@@ -1,0 +1,17 @@
+fiscal_year,fund,department,category,amount,source_url,source_page
+2026,General Fund,Police,Personnel,96000000,https://example.com/source.pdf,118
+2026,General Fund,Police,Operations,8000000,https://example.com/source.pdf,119
+2026,General Fund,Fire and Rescue,Personnel,74000000,https://example.com/source.pdf,132
+2026,General Fund,Public Service,Operations,21000000,https://example.com/source.pdf,151
+2026,General Fund,Parks and Recreation,Operations,6400000,https://example.com/source.pdf,168
+2026,General Fund,Forestry,Operations,2100000,https://example.com/source.pdf,172
+2026,General Fund,Clerk of Council,Personnel,940000,https://example.com/source.pdf,44
+2025,General Fund,Police,Personnel,91000000,https://example.com/source.pdf,116
+2025,General Fund,Police,Operations,7600000,https://example.com/source.pdf,117
+2025,General Fund,Fire and Rescue,Personnel,71500000,https://example.com/source.pdf,130
+2025,General Fund,Public Service,Operations,19800000,https://example.com/source.pdf,149
+2025,General Fund,Parks and Recreation,Operations,6100000,https://example.com/source.pdf,166
+2025,General Fund,Forestry,Operations,1950000,https://example.com/source.pdf,170
+2025,General Fund,Clerk of Council,Personnel,910000,https://example.com/source.pdf,42
+2026,Capital Improvements,Streets,Construction,34000000,https://example.com/source.pdf,204
+2026,Capital Improvements,Facilities,Construction,12500000,https://example.com/source.pdf,209
