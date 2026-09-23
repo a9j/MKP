@@ -743,3 +743,31 @@ Those tests immediately found a second fault: the filename was the timestamp
 plus the subject, so two messages sent in the same millisecond with the same
 subject became one file. A loop over recipients does exactly that. The name now
 carries a random suffix.
+
+## 2026-09-23, homepage redesign
+
+### Which photos exist is decided at build
+`next.config.ts` lists `public/photos` into `MKP_PHOTOS`. Any slot whose file
+is missing renders a navy block of the same shape. The list is read at build,
+not at request time, because on Vercel `public/` is not on the function's disk
+and the home page revalidates at runtime. Adding a photo needs a redeploy,
+which pushing it does anyway.
+
+### "See what's on the ballot" reads `explainers_public`
+It shows when a published explainer of kind `ballot_issue` or `levy` has a
+`decision_date` of today or later, Toledo time. It links to `/explainers`,
+the index in the Phase One spec. Until then the button reads "See the latest
+votes" and goes to `/votes`.
+
+### City Budget Explorer card ships switched off
+There is no `/budget` route yet, so the card shows "Loading soon." with no
+link. Flip `CITY_BUDGET_LIVE` in `src/app/(public)/page.tsx` when it lands.
+
+### Alt text is written to the shot list
+The alt text describes the shot list's subject for each file. When the real
+photos arrive, check each one against what is actually in the frame, since
+the hero may be One Government Center or the Thurgood Marshall building.
+
+### The promise band has a visually hidden heading
+The brief gives the band no heading. A hidden "Our promise" h2 keeps the
+heading outline unbroken for screen reader users without changing the page.

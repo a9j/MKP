@@ -1,4 +1,6 @@
 import { test, expect } from "@playwright/test";
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 import { signIn } from "./helpers";
 
 test.describe("public pages", () => {
@@ -29,6 +31,51 @@ test.describe("public pages", () => {
         () => document.documentElement.scrollWidth > window.innerWidth,
       );
       expect(overflow, `${path} scrolls sideways`).toBe(false);
+    }
+  });
+});
+
+test.describe("home page", () => {
+  test("hero, four tools, and the Explorer below Latest", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".home-hero h1")).toHaveText(
+      "The records are public. We make them readable.",
+    );
+    const tools = page.locator("#tools .tool h3");
+    await expect(tools).toHaveText([
+      "Vote Watch",
+      "Teacher Pay Explorer",
+      "City Budget Explorer",
+      "Records Desk",
+    ]);
+    await expect(page.locator("#explorer")).toBeVisible();
+
+    // Document order, not screen position, so it holds at any width.
+    const explorerFollowsLatest = await page.evaluate(() => {
+      const latest = document.querySelector("#latest");
+      const explorer = document.querySelector("#explorer");
+      return Boolean(
+        latest &&
+          explorer &&
+          latest.compareDocumentPosition(explorer) & Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    });
+    expect(explorerFollowsLatest).toBe(true);
+  });
+
+  test("every image has alt text", async ({ page }) => {
+    await page.goto("/");
+    for (const img of await page.locator("img").all()) {
+      const alt = (await img.getAttribute("alt")) ?? "";
+      expect(alt.trim(), await img.getAttribute("src") ?? "img").not.toBe("");
+    }
+  });
+
+  test("no photo is over 400 KB", () => {
+    const dir = join(process.cwd(), "public/photos");
+    for (const file of readdirSync(dir).filter((f) => /\.(jpe?g|png|webp)$/i.test(f))) {
+      const kb = statSync(join(dir, file)).size / 1024;
+      expect(kb, `${file} is ${Math.round(kb)} KB`).toBeLessThanOrEqual(400);
     }
   });
 });
