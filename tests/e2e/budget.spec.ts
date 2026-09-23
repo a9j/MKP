@@ -117,11 +117,12 @@ test.describe("city budget", () => {
     await expect(page.locator(".budget-panel").filter({ hasText: "Year over year" })).toHaveCount(0);
   });
 
-  test("the home page lists four programs, the budget among them", async ({ page }) => {
+  test("the home page lists four tools, the budget among them", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".program")).toHaveCount(4);
-    const budget = page.locator(".program").filter({ hasText: "City Budget Explorer" });
-    await expect(budget).toContainText("Every figure sourced.");
+    await expect(page.locator(".tool")).toHaveCount(4);
+    const budget = page.locator(".tool").filter({ hasText: "City Budget Explorer" });
+    // The seed loads a budget, so the card links through rather than waiting.
+    await expect(budget).not.toContainText("Loading soon.");
     await budget.locator("a.more").click();
     await expect(page).toHaveURL(/\/budget$/);
   });
