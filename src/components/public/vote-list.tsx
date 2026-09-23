@@ -2,16 +2,45 @@
 
 import { useState } from "react";
 import { CATEGORY_FILTERS, CHOICE_LABEL, type Vote } from "@/lib/queries/votes";
+import { BODY_FILTERS } from "@/lib/bodies";
 import { usd } from "@/lib/format";
 
 /** Filter bar plus the vote log, with a per member breakdown on each entry. */
 export function VoteList({ votes }: { votes: Vote[] }) {
+  // Which body first, then which kind of decision. A reader who came for the
+  // school board should not have to read past the council to find it.
+  const [body, setBody] = useState<string>("all");
   const [filter, setFilter] = useState<string>("all");
-  const shown = filter === "all" ? votes : votes.filter((v) => v.category === filter);
+  const shown = votes.filter(
+    (v) =>
+      (body === "all" || v.bodySlug === body) && (filter === "all" || v.category === filter),
+  );
 
   return (
     <>
-      <div className="filters" role="group" aria-label="Filter votes by category">
+      {/* Two rows of pills with nothing between them read as one long bar, so
+          each control says what it filters. */}
+      <p className="filter-label" id="filter-body-label">
+        Body
+      </p>
+      <div className="filters" role="group" aria-labelledby="filter-body-label">
+        {BODY_FILTERS.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            className="filter"
+            aria-pressed={body === option.key}
+            onClick={() => setBody(option.key)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      <p className="filter-label" id="filter-category-label">
+        What it touches
+      </p>
+      <div className="filters" role="group" aria-labelledby="filter-category-label">
         {CATEGORY_FILTERS.map((option) => (
           <button
             key={option.key}
@@ -30,7 +59,7 @@ export function VoteList({ votes }: { votes: Vote[] }) {
       </p>
 
       {shown.length === 0 ? (
-        <p className="sub">No votes in this category yet.</p>
+        <p className="sub">No votes recorded under these filters yet.</p>
       ) : (
         <div className="vote-log">
           {shown.map((vote) => (
@@ -38,7 +67,7 @@ export function VoteList({ votes }: { votes: Vote[] }) {
               <div className="vote-head">
                 <span className="vote-date">{vote.meetingDateLabel}</span>
                 <span className="vote-kind">
-                  {vote.bodyName} &middot; {vote.categoryLabel}
+                  {vote.bodyLabel} &middot; {vote.categoryLabel}
                 </span>
               </div>
               <h2 className="vote-heading">{vote.itemTitle}</h2>

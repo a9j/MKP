@@ -2,6 +2,7 @@ import { getAdminUser } from "@/lib/auth";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { PersonForm } from "@/components/admin/person-form";
 import { NotSignedIn } from "@/components/admin/not-signed-in";
+import { ScrollableTable } from "@/components/public/scrollable-table";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function AdminPeoplePage() {
     supabase.from("bodies").select("id, name").order("name"),
     supabase
       .from("people")
-      .select("id, name, title, role, email, active, sort_order, bodies(name)")
+      .select("id, name, title, role, email, district, active, sort_order, bodies(name)")
       .order("role")
       .order("sort_order"),
   ]);
@@ -44,12 +45,14 @@ export default async function AdminPeoplePage() {
         {(people ?? []).length === 0 ? (
           <p className="admin-help">Nobody yet.</p>
         ) : (
+          <ScrollableTable label="Everyone on the roster">
           <table className="data-table">
             <thead>
               <tr>
                 <th scope="col">Name</th>
                 <th scope="col">Role</th>
                 <th scope="col">Body</th>
+                <th scope="col">Seat</th>
                 <th scope="col">Email</th>
                 <th scope="col">Active</th>
               </tr>
@@ -60,12 +63,20 @@ export default async function AdminPeoplePage() {
                   <th scope="row">{person.name}</th>
                   <td>{ROLE_LABEL[person.role] ?? person.role}</td>
                   <td>{person.bodies?.name ?? ""}</td>
+                  <td>
+                    {person.role === "body_member"
+                      ? person.district
+                        ? `District ${person.district}`
+                        : "At large"
+                      : ""}
+                  </td>
                   <td>{person.email ?? ""}</td>
                   <td>{person.active ? "Yes" : "No"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </ScrollableTable>
         )}
       </section>
     </>

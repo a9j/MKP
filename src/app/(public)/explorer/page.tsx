@@ -63,6 +63,9 @@ export default async function ExplorerPage() {
           <a className="btn teal" href={externalExplorer ? externalExplorer : "#explorer"}>
             Open the Explorer
           </a>
+          <Link className="btn ghost" href="/budget">
+            City Budget Explorer
+          </Link>
           <Link className="btn ghost" href="/reports">
             Read the latest report
           </Link>
@@ -70,7 +73,13 @@ export default async function ExplorerPage() {
       </header>
 
       <section className="wrap explorer-section">
-        <PayExplorer data={data} variant="full" id="explorer" />
+        {data ? (
+          <PayExplorer data={data} variant="full" id="explorer" />
+        ) : (
+          <p className="sub" id="explorer">
+            The salary schedule has not been loaded yet.
+          </p>
+        )}
       </section>
 
       <section className="wrap" id="features">

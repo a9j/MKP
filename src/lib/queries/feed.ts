@@ -1,4 +1,5 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import { bodyVoteKind } from "@/lib/bodies";
 
 export type FeedKind = "report" | "records_request" | "vote" | "listening";
 
@@ -55,7 +56,7 @@ export async function getLatestFeed(limit = 6): Promise<FeedEntry[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("latest_feed")
-    .select("kind, title, subtitle, date, href")
+    .select("kind, title, subtitle, date, href, body_slug")
     .order("date", { ascending: false })
     .limit(limit);
 
@@ -73,7 +74,13 @@ export async function getLatestFeed(limit = 6): Promise<FeedEntry[]> {
 
     entries.push({
       kind: row.kind,
-      kindLabel: KIND_LABEL[row.kind],
+      // A vote says which body took it. Now that more than one body is
+      // covered, "Vote Watch" alone no longer tells a reader what they are
+      // looking at. The subtitle holds the body's full name.
+      kindLabel:
+        row.kind === "vote"
+          ? bodyVoteKind(row.body_slug, row.subtitle ?? "Vote Watch")
+          : KIND_LABEL[row.kind],
       title: row.title,
       subtitle: row.subtitle ?? "",
       date: row.date,

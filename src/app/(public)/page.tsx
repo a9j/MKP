@@ -4,6 +4,7 @@ import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { Photo } from "@/components/photo";
 import { getLatestFeed } from "@/lib/queries/feed";
 import { getExplorerData } from "@/lib/queries/explorer";
+import { getCityBudget } from "@/lib/queries/budget";
 import { hasUpcomingBallotExplainer } from "@/lib/queries/explainers";
 
 /**
@@ -18,13 +19,6 @@ export const metadata: Metadata = {
   description:
     "A Toledo nonprofit that reads school budgets, salary schedules, board votes, and city finances and explains them in plain language. Every number sourced. No positions.",
 };
-
-/**
- * The city budget page has not shipped. Its card stays on the page so the four
- * ways in read as a set, with the link switched off until there is something
- * behind it.
- */
-const CITY_BUDGET_LIVE = false;
 
 const AUDIENCES = [
   {
@@ -52,37 +46,34 @@ type Tool = {
   body: string;
   linkLabel: string;
   href: string;
+  /** False shows "Loading soon." in place of the link. */
   live: boolean;
 };
 
-const TOOLS: Tool[] = [
+const TOOLS: Omit<Tool, "live">[] = [
   {
     title: "Vote Watch",
     body: "Every school board and city council vote that touches money or staffing, in one sentence, with how each member voted.",
     linkLabel: "See the votes",
     href: "/votes",
-    live: true,
   },
   {
     title: "Teacher Pay Explorer",
     body: "Enter your step and lane. See what you make, what each scenario would change, and how nearby districts compare.",
     linkLabel: "Open the Explorer",
     href: "/explorer",
-    live: true,
   },
   {
     title: "City Budget Explorer",
     body: "Where does Toledo's money go? The adopted budget by department, and what one percent would change.",
     linkLabel: "Open the budget",
     href: "/budget",
-    live: CITY_BUDGET_LIVE,
   },
   {
     title: "Records Desk",
     body: "Every public records request we've filed, what came back, and a plain guide to filing your own.",
     linkLabel: "See the requests",
     href: "/records",
-    live: true,
   },
 ];
 
@@ -125,11 +116,19 @@ const PROMISES = [
 ];
 
 export default async function HomePage() {
-  const [latest, explorer, ballotAhead] = await Promise.all([
+  const [latest, explorer, ballotAhead, budget] = await Promise.all([
     getLatestFeed(6),
     getExplorerData(),
     hasUpcomingBallotExplainer(),
+    getCityBudget(),
   ]);
+
+  // Every card links through except the city budget before its first load,
+  // which keeps its place so the four read as a set. Same test as /budget.
+  const tools: Tool[] = TOOLS.map((tool) => ({
+    ...tool,
+    live: tool.href !== "/budget" || budget.fundYears.length > 0,
+  }));
 
   return (
     <>
@@ -192,7 +191,7 @@ export default async function HomePage() {
       <section className="wrap home-section" id="tools">
         <h2>Four ways in.</h2>
         <div className="tools">
-          {TOOLS.map((tool) => (
+          {tools.map((tool) => (
             <div className="tool" key={tool.title}>
               <h3>{tool.title}</h3>
               <p>{tool.body}</p>
@@ -271,7 +270,13 @@ export default async function HomePage() {
       <section className="wrap home-section" id="try">
         <h2>Try it. What does a Toledo teacher make?</h2>
         <div className="home-explorer">
-          <PayExplorer data={explorer} id="explorer" />
+          {explorer ? (
+            <PayExplorer data={explorer} id="explorer" />
+          ) : (
+            <div className="explorer" id="explorer">
+              <p className="sub">The salary schedule has not been loaded yet.</p>
+            </div>
+          )}
         </div>
       </section>
 

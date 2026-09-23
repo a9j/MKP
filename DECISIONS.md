@@ -744,6 +744,209 @@ plus the subject, so two messages sent in the same millisecond with the same
 subject became one file. A loop over recipients does exactly that. The name now
 carries a random suffix.
 
+## 2026-09-22, phase 2 step 1: the roster past the school board
+
+The second brief widens the site to city council, the ballot and the city
+budget. This is step one of its build order: the roster, the district, and the
+public body filter. Nothing here fetches an agenda or calls a model.
+
+### The automation this brief builds on does not exist yet
+
+The brief says to read "the automation code from Phase 8" before writing
+anything. There is none. Phase 8 was never started, for the reason logged on
+2026-09-17: the brief that introduced it said not to start until phase 7 was
+deployed and there was a go, and neither happened. What exists is the shape it
+will write into: `meetings`, `jobs`, `ai_runs`, the `ai_draft` columns, the
+review gate and the trigger that stops the service role publishing.
+
+So the council watcher in Part A item 2 has no TPS watcher to copy. It will be
+the first `/api/cron/*` route on the site, not a second one. That is a real
+difference in the size of step 4, and it is worth knowing before that step is
+scheduled rather than during it.
+
+### agenda_system is on the body, and it defaults to manual
+
+The brief lists `boarddocs`, `granicus` and `manual`. TPS is set to boarddocs
+and council to granicus; the county keeps manual. Manual is the default for a
+new body because it is the honest answer for one nobody has automated: the
+agendas arrive because a person went and got them.
+
+### district is text, and it is a column grant
+
+A district is an identifier, not a quantity. Nothing sums them, the county and
+the school board name their seats differently from council, and a leading zero
+or a letter would be lost by an integer. Null means no district, which on
+council means at large.
+
+The column had to be granted to the anonymous role by name. 0004 replaced the
+table wide grant on `people` with a column list so that an email address could
+be stored without publishing it, and a column added afterwards is not in that
+list. Without the grant the voting records page fails the build with
+"permission denied for table people", which is exactly what happened. Any
+future column on `people` needs the same decision made out loud: public or not.
+
+### At large is not printed against a body that has no districts
+
+The public voting record shows a Seat column only for a body where at least one
+member holds a district. Printing "At large" against all five school board
+members says nothing, and it costs a column on a phone. The admin roll call
+does the same: council splits into "At large" and "By district", the board
+renders as one ungrouped list exactly as before.
+
+### Short names live in code, keyed by slug
+
+The filter has to read "City Council", not "Toledo City Council", and the feed
+has to read "City Council vote". `bodies.name` is the legal name and stays that
+way on the record, so the short names sit in `src/lib/bodies.ts` keyed by slug,
+with the full name as the fallback. Keying by slug rather than by name means
+renaming a body in the admin cannot silently lose its short name.
+
+`latest_feed` gained a `body_slug` column to carry that lookup, rather than the
+feed matching on the displayed name.
+
+### Two filters need two labels
+
+The body filter goes first, as the brief asks. Two rows of pills with nothing
+between them read as one long bar, especially on a phone where both wrap, so
+each control carries a small label: "Body" and "What it touches". That is UI
+labelling rather than editorial copy, and the labels are what name each group
+for a screen reader too.
+
+### The phone report, which was two faults
+
+"Everything doesn't fit right on the screen when looking at a phone" turned out
+to be two separate things. Both are fixed, and both now have a test.
+
+The first: `.wrap` sets the 24px gutter, and `.hero` and `.page-head` are the
+same element with their own `padding` shorthand, which wipes the horizontal
+half of it. Every interior page's headline, lede and button therefore ran to
+the very edge of the screen while everything below them kept the gutter. The
+gutter is given back only below the container width, so the desktop rendering
+the mockup approves is untouched and `visual-parity.mjs` still matches on all
+eleven tracked elements.
+
+The same misalignment exists on the desktop, where the headline block sits
+24px wider than the sections under it. It is in the mockup, so it is the
+approved design, and it is not what was reported. Left alone, and flagged.
+
+The second: the admin bottom tab bar laid eleven screens across 390px in one
+row. The last four sat past the right edge and could only be reached by
+swiping a 48px strip, with nothing on screen to say they were there. It is two
+rows of six now, which fits every label at a readable size and leaves room for
+the Budget screen that step two adds.
+
+### The Vote Watch lede still says the board
+
+The page copy reads "Every Toledo Public Schools board vote ... As we grow, the
+same treatment extends to city council and county." Council votes now appear
+under it. The sentence is not false, but it is behind the page. Copy is not
+mine to change, so it is left as written and raised here.
+
+### Types are edited by hand, not regenerated
+
+`scripts/gen-types.mjs` rewrote all 1,800 lines of `database.types.ts` in its
+own formatting, undoing the switch to the live project's own generator made in
+the previous commit. The five additions from this migration were applied by
+hand instead. Regenerating from the live project after this migration is
+applied there will produce the same result with less noise.
+
+## 2026-09-22, phase 2 step 2: the empty state, and the city budget
+
+Step two of the build order: make an empty table a page rather than a build
+failure, then build `/budget` and the uploader behind it.
+
+### An empty table used to take the whole site down
+
+`getExplorerData` threw when `salary_schedule` was empty, and the public pages
+are rendered at build time, so one unfilled table failed the build for every
+page on the site, Vote Watch and the Records Desk included. The README even
+documented the circle it created: the screen that accepts the first upload was
+on the site that would not build until the upload happened.
+
+It returns null now, and the two pages that render the Explorer say "The salary
+schedule has not been loaded yet." The same holds when the home district named
+in `explorer_home_district` has no rows, which is the more likely fault in
+practice, since it is a misspelling rather than an absence. Both log the reason
+to the build output, because "not loaded yet" and "loaded under a different
+name" read identically to a visitor and are not the same problem for the person
+who has to fix it.
+
+What still stops the build is a figure with no source link. That is the
+difference worth holding: missing data is a state the site has to survive, and
+an unsourced number is not.
+
+### The city budget is its own table, not more budget_categories
+
+`budget_categories` is the school district's budget, one category per row. The
+city's book is a fund, then a department, then a line within it. Bending one
+table to hold both would have meant a fund column that is null for half the
+rows and a reader who could add a school figure to a city figure and get a
+number that means nothing. Two tables, and the page never mixes them.
+
+A department is the sum of its categories within one fund and year. The
+categories stay in the table so a figure can be traced to the line it came
+from; the panel a resident reads is by department, which is the level the
+question is asked at.
+
+### Which document a total links to
+
+A department links to the largest line in it, which is the page somebody
+checking the figure would open first. A fund total links to the budget book
+only when every row in that fund names the same document, and to nothing when
+they do not, since a total assembled from two sources cannot honestly claim
+either.
+
+The per resident figure carries no gold rule at all. It is one sourced number
+divided by another from a different document, so there is no page to open that
+shows it. Both inputs are underlined in the sentence beneath it. This follows
+the rule already set for Scenario B: a figure the organization worked out is
+never dressed as a figure it read.
+
+### The slider says what the slider is set to
+
+The brief fixes the label as "If one percent moved, it would equal" and also
+asks for a slider from 0.5 to 5 percent. Those two cannot both be literal: at
+3 percent a label reading "one percent" is simply wrong, and a wrong number is
+the one thing this site cannot print. The heading stays "What one percent would
+change" and the label tracks the slider, reading exactly the specified sentence
+at its default of 1 percent. Worth a word at review if the fixed wording was
+deliberate.
+
+The panel also says, underneath, that it is a comparison and not a proposal.
+The brief asks for no recommendation language; it seemed worth saying what the
+panel is rather than only avoiding saying what it is not.
+
+### No PDF extraction, because there is none to match
+
+The brief asks for the uploader to use "the same CSV and PDF-extraction flow as
+salary schedules". The salary schedule flow is CSV only: validate, diff,
+preview, commit. There is no PDF extraction anywhere in the site, and building
+one here would be inventing a second way to get figures in, unreviewed, for the
+tool with the largest numbers on it. The budget uses the same flow the salary
+schedule actually has. Extraction belongs with the drafting work, where a
+person still checks the result against the document.
+
+### Four programs, and one thing the mockup no longer fixes
+
+The home page list is four items, so the grid is four columns on a desktop, two
+where four would be too narrow to read, and one on a phone. The heading reads
+"Four things we build" rather than "Three".
+
+`visual-parity.mjs` compared the program card against the mockup, where it is a
+third of the row. It is a quarter now by instruction, so the card was replaced
+in the tracked list by the row it sits in, compared on width alone. The row is
+what the mockup actually fixes: the grid's width and its hairline rules, not
+how many programs the organization happens to run. Ten of the eleven tracked
+elements still match on both dimensions.
+
+### `/budget` is not in the navigation
+
+The brief puts the Budget Explorer in the home page program list and says
+nothing about the nav, and the nav is copy. So the page is reachable from the
+home page, from the Teacher Pay Explorer, and from the sitemap, but not from
+the bar at the top of every page. That is worth a decision rather than a
+default: a tool nobody can find from `/votes` is a tool with one entrance.
+
 ## 2026-09-23, homepage redesign
 
 ### Which photos exist is decided at build
@@ -759,9 +962,10 @@ It shows when a published explainer of kind `ballot_issue` or `levy` has a
 the index in the Phase One spec. Until then the button reads "See the latest
 votes" and goes to `/votes`.
 
-### City Budget Explorer card ships switched off
-There is no `/budget` route yet, so the card shows "Loading soon." with no
-link. Flip `CITY_BUDGET_LIVE` in `src/app/(public)/page.tsx` when it lands.
+### The City Budget Explorer card follows the data
+The card links to `/budget` when `getCityBudget()` returns at least one fund
+year, the same test `/budget` itself uses. With no budget loaded it shows
+"Loading soon." with no link.
 
 ### Alt text is written to the shot list
 The alt text describes the shot list's subject for each file. When the real

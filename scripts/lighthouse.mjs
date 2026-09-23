@@ -19,6 +19,7 @@ const CHROME = process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
 const ROUTES = [
   "/",
   "/explorer",
+  "/budget",
   "/reports",
   "/records",
   "/votes",
