@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
-import { NEUTRALITY_LINE } from "@/lib/nav";
+import { Photo } from "@/components/photo";
 import { getLatestFeed } from "@/lib/queries/feed";
 import { getExplorerData } from "@/lib/queries/explorer";
+import { getCityBudget } from "@/lib/queries/budget";
+import { hasUpcomingBallotExplainer } from "@/lib/queries/explainers";
 
 /**
  * Rebuilt on demand. Every admin save calls revalidatePath for the routes it
@@ -13,38 +15,64 @@ import { getExplorerData } from "@/lib/queries/explorer";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
+  title: { absolute: "The Mona K Project. Toledo's public records, explained." },
   description:
-    "The Mona K Project reads Toledo's school budgets, salary schedules, board votes, and city finances and explains them in plain language. Every number sourced. No positions.",
+    "A Toledo nonprofit that reads school budgets, salary schedules, board votes, and city finances and explains them in plain language. Every number sourced. No positions.",
 };
 
-/** Programs copy from mona-k-project-site-copy.md, Home section. */
-const PROGRAMS = [
+const AUDIENCES = [
   {
-    tag: "Tool",
+    title: "Parents",
+    body: "What your school board voted on, what the levy actually asks for, and what happens if it fails. No spin, no recommendation.",
+    photo: "for-parents.jpg",
+    alt: "A parent and a young child seen from behind, walking up the front steps of a school in morning light.",
+  },
+  {
+    title: "Teachers",
+    body: "What you make at your step, what each raise proposal would mean for you, and how you'd do in the district next door.",
+    photo: "for-teachers.jpg",
+    alt: "A teacher's desk beside an open classroom door, with papers and a coffee mug on it.",
+  },
+  {
+    title: "Residents and taxpayers",
+    body: "Where the city's money goes, who voted for what, and every records request we've filed to find out.",
+    photo: "for-residents.jpg",
+    alt: "The downtown Toledo skyline seen across the Maumee River on a clear day.",
+  },
+];
+
+type Tool = {
+  title: string;
+  body: string;
+  linkLabel: string;
+  href: string;
+  /** False shows "Loading soon." in place of the link. */
+  live: boolean;
+};
+
+const TOOLS: Omit<Tool, "live">[] = [
+  {
+    title: "Vote Watch",
+    body: "Every school board and city council vote that touches money or staffing, in one sentence, with how each member voted.",
+    linkLabel: "See the votes",
+    href: "/votes",
+  },
+  {
     title: "Teacher Pay Explorer",
-    body: "Enter your step, lane, and years. See what you make, what each raise scenario means for you, and how you'd do in the eight surrounding districts.",
+    body: "Enter your step and lane. See what you make, what each scenario would change, and how nearby districts compare.",
     linkLabel: "Open the Explorer",
     href: "/explorer",
   },
   {
-    tag: "Tool",
     title: "City Budget Explorer",
-    body: "Where does Toledo's money go? The adopted budget by department, what one percent would change, and what it costs per resident. Every figure sourced.",
+    body: "Where does Toledo's money go? The adopted budget by department, and what one percent would change.",
     linkLabel: "Open the budget",
     href: "/budget",
   },
   {
-    tag: "Reports",
-    title: "Reports",
-    body: "The annual Toledo Teacher Pay Report, levy explainers when something is on the ballot, and a contract tracker when talks open. Sourced, reviewed, no recommendations.",
-    linkLabel: "Read the reports",
-    href: "/reports",
-  },
-  {
-    tag: "Records",
-    title: "Records Desk and Vote Watch",
-    body: "Every public records request we've filed and what came back. Every school board vote that touches money or staffing, and how each member voted.",
-    linkLabel: "See the records",
+    title: "Records Desk",
+    body: "Every public records request we've filed, what came back, and a plain guide to filing your own.",
+    linkLabel: "See the requests",
     href: "/records",
   },
 ];
@@ -72,72 +100,158 @@ const STEPS = [
   },
 ];
 
+const PROMISES = [
+  {
+    lead: "Every number links to its source.",
+    rest: "If we can't source it, we don't publish it.",
+  },
+  {
+    lead: "We don't take positions.",
+    rest: "We show what the records say and let Toledo decide.",
+  },
+  {
+    lead: "Free, always.",
+    rest: "No paywalls, no memberships, no premium reports.",
+  },
+];
+
 export default async function HomePage() {
-  const [latest, explorer] = await Promise.all([getLatestFeed(6), getExplorerData()]);
+  const [latest, explorer, ballotAhead, budget] = await Promise.all([
+    getLatestFeed(6),
+    getExplorerData(),
+    hasUpcomingBallotExplainer(),
+    getCityBudget(),
+  ]);
+
+  // Every card links through except the city budget before its first load,
+  // which keeps its place so the four read as a set. Same test as /budget.
+  const tools: Tool[] = TOOLS.map((tool) => ({
+    ...tool,
+    live: tool.href !== "/budget" || budget.fundYears.length > 0,
+  }));
 
   return (
     <>
-      <header className="wrap hero">
-        <div>
-          <h1>The records are public. Now they&rsquo;re readable.</h1>
+      <header className="home-hero">
+        <Photo
+          file="hero.jpg"
+          alt="One Government Center in downtown Toledo at golden hour, the tower lit warm against the evening sky."
+          ratio="16 / 9"
+          sizes="100vw"
+          priority
+          className="home-hero-photo"
+        />
+        <div className="home-hero-shade" aria-hidden="true" />
+        <div className="wrap home-hero-text">
+          <p className="eyebrow">A Toledo nonprofit</p>
+          <h1>The records are public. We make them readable.</h1>
           <p className="lede">
-            We read Toledo&rsquo;s school budgets, salary schedules, board votes, and
-            city finances, then explain them in plain language. Every number links
-            to the document it came from. We show what the records say and let
-            Toledo decide.
+            School budgets, salary schedules, board votes, levies, and city
+            finances are all public. They arrive as hundreds of pages nobody has
+            time for. We turn them into something a parent, a teacher, or a
+            taxpayer can understand in four minutes, with every number linked to
+            the document it came from.
           </p>
           <div className="actions">
-            <Link className="btn teal" href="/explorer">
-              See what you make
-            </Link>
-            <Link className="btn ghost" href="/reports">
-              Read the latest report
-            </Link>
+            {ballotAhead ? (
+              <Link className="btn" href="/explainers">
+                See what&rsquo;s on the ballot
+              </Link>
+            ) : (
+              <Link className="btn" href="/votes">
+                See the latest votes
+              </Link>
+            )}
+            <a className="btn ghost" href="#how-we-work">
+              How we work
+            </a>
           </div>
-          <p className="pledge">{NEUTRALITY_LINE}</p>
         </div>
-
-        {explorer ? (
-          <PayExplorer data={explorer} id="explorer" />
-        ) : (
-          <div className="explorer" id="explorer">
-            <p className="sub">The salary schedule has not been loaded yet.</p>
-          </div>
-        )}
       </header>
 
-      <section className="wrap" id="programs">
-        <h2>Four things we build, all from public records.</h2>
-        <div className="programs">
-          {PROGRAMS.map((program) => (
-            <div className="program" key={program.title}>
-              <div className="tag">{program.tag}</div>
-              <h3>{program.title}</h3>
-              <p>{program.body}</p>
-              <Link className="more" href={program.href}>
-                {program.linkLabel}
-              </Link>
+      <section className="wrap home-section" id="for">
+        <h2>Built for the people the numbers are about.</h2>
+        <div className="audiences">
+          {AUDIENCES.map((audience) => (
+            <div className="audience" key={audience.title}>
+              <Photo
+                file={audience.photo}
+                alt={audience.alt}
+                ratio="3 / 2"
+                sizes="(max-width: 820px) calc(100vw - 48px), 340px"
+                className="photo-small"
+              />
+              <h3>{audience.title}</h3>
+              <p>{audience.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="band">
-        <div className="wrap">
-          <h2>How a 400-page PDF becomes a four-minute read.</h2>
-          <div className="steps">
-            {STEPS.map((step) => (
-              <div className="step" key={step.title}>
-                <h3>{step.title}</h3>
-                <p>{step.body}</p>
-              </div>
-            ))}
+      <section className="wrap home-section" id="tools">
+        <h2>Four ways in.</h2>
+        <div className="tools">
+          {tools.map((tool) => (
+            <div className="tool" key={tool.title}>
+              <h3>{tool.title}</h3>
+              <p>{tool.body}</p>
+              {tool.live ? (
+                <Link className="more" href={tool.href}>
+                  {tool.linkLabel}
+                </Link>
+              ) : (
+                <span className="more more-off">Loading soon.</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="tools-reports">
+          Plus reports when the numbers matter: the annual Teacher Pay Report,
+          ballot explainers, and contract trackers.{" "}
+          <Link href="/reports">Read the reports.</Link>
+        </p>
+      </section>
+
+      <section className="wrap home-section" id="how-we-work">
+        <div className="how">
+          <Photo
+            file="how-we-work.jpg"
+            alt="Close up of two hands turning the pages of a thick stapled board packet, with sticky flags marking pages along its edge."
+            ratio="4 / 5"
+            sizes="(max-width: 900px) calc(100vw - 48px), 440px"
+            className="photo-small how-photo"
+          />
+          <div>
+            <h2>How a 400-page PDF becomes a four-minute read.</h2>
+            <ol className="how-steps">
+              {STEPS.map((step) => (
+                <li key={step.title}>
+                  <h3>{step.title}</h3>
+                  <p>{step.body}</p>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
 
-      <section className="wrap">
-        <h2>Latest from The Mona K Project</h2>
+      <section className="band home-band" aria-labelledby="promise-heading">
+        <div className="wrap">
+          <h2 id="promise-heading" className="visually-hidden">
+            Our promise
+          </h2>
+          <ul className="promises">
+            {PROMISES.map((promise) => (
+              <li key={promise.lead}>
+                <strong>{promise.lead}</strong> {promise.rest}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="wrap home-section" id="latest">
+        <h2>Latest.</h2>
         <div className="latest">
           {latest.map((entry) => (
             <Link className="item" href={entry.href} key={`${entry.kind}-${entry.date}-${entry.title}`}>
@@ -153,10 +267,23 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="wrap" id="support">
+      <section className="wrap home-section" id="try">
+        <h2>Try it. What does a Toledo teacher make?</h2>
+        <div className="home-explorer">
+          {explorer ? (
+            <PayExplorer data={explorer} id="explorer" />
+          ) : (
+            <div className="explorer" id="explorer">
+              <p className="sub">The salary schedule has not been loaded yet.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="wrap home-section" id="support">
         <div className="cta">
           <div>
-            <h2>Help us read the next 400 pages.</h2>
+            <h2>Help Toledo read its own records.</h2>
             <p>
               The Mona K Project runs on small donations and volunteer hours. Every
               dollar goes to records requests, review, and publishing.

@@ -946,3 +946,32 @@ nothing about the nav, and the nav is copy. So the page is reachable from the
 home page, from the Teacher Pay Explorer, and from the sitemap, but not from
 the bar at the top of every page. That is worth a decision rather than a
 default: a tool nobody can find from `/votes` is a tool with one entrance.
+
+## 2026-09-23, homepage redesign
+
+### Which photos exist is decided at build
+`next.config.ts` lists `public/photos` into `MKP_PHOTOS`. Any slot whose file
+is missing renders a navy block of the same shape. The list is read at build,
+not at request time, because on Vercel `public/` is not on the function's disk
+and the home page revalidates at runtime. Adding a photo needs a redeploy,
+which pushing it does anyway.
+
+### "See what's on the ballot" reads `explainers_public`
+It shows when a published explainer of kind `ballot_issue` or `levy` has a
+`decision_date` of today or later, Toledo time. It links to `/explainers`,
+the index in the Phase One spec. Until then the button reads "See the latest
+votes" and goes to `/votes`.
+
+### The City Budget Explorer card follows the data
+The card links to `/budget` when `getCityBudget()` returns at least one fund
+year, the same test `/budget` itself uses. With no budget loaded it shows
+"Loading soon." with no link.
+
+### Alt text is written to the shot list
+The alt text describes the shot list's subject for each file. When the real
+photos arrive, check each one against what is actually in the frame, since
+the hero may be One Government Center or the Thurgood Marshall building.
+
+### The promise band has a visually hidden heading
+The brief gives the band no heading. A hidden "Our promise" h2 keeps the
+heading outline unbroken for screen reader users without changing the page.

@@ -21,22 +21,15 @@ const APP = process.env.APP_URL ?? "http://localhost:3100";
 const PORT = Number(process.env.PARITY_PORT ?? 3199);
 const CHROME = process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
 
+// The 2026-09-23 redesign replaced the mockup's hero, program cards and
+// steps, and moved the Explorer to the full content width, so those are no
+// longer tracked. What the new page still takes from the mockup is the column,
+// the type scale, the Latest feed, the call to action and the footer.
 const ELEMENTS = {
-  h1: "h1",
-  lede: ".lede",
-  button: ".actions .btn",
-  explorer: ".explorer",
-  bigFigure: ".big",
-  sectionHeading: "section.wrap h2",
-  // The program card is deliberately no longer the mockup's. Phase 2 makes the
-  // list four items rather than three, so the card is a quarter of the row
-  // instead of a third. The row it sits in is still tracked, since that is what
-  // the mockup fixes: the grid's width and its hairline rules, not how many
-  // columns the organization happens to run.
-  programsRow: { selector: ".programs", compare: "width" },
-  step: ".step",
+  sectionHeading: { selector: "section.wrap h2", compare: "width" },
   feedRow: ".item",
-  cta: ".cta",
+  // Same block, new heading copy, so its height is its own.
+  cta: { selector: ".cta", compare: "width" },
   footer: "footer .foot",
 };
 
