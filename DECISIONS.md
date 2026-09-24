@@ -976,6 +976,11 @@ The three "Who this is for" photos arrived on 2026-09-23 and their alt text
 now describes those frames. They were resized to 1200 x 800. The parents photo
 is portrait, so it is cropped to the band holding all three faces.
 
+The how-we-work photo arrived on 2026-09-24: someone holding a stack of tax
+forms in front of their face. It is cropped to 4:5 at 1200 x 1500 from the
+hair to the belt. On a phone it sits above "How a 400-page PDF becomes a
+four-minute read." and on a desktop it sits to its left, as the brief laid out.
+
 ### The promise band has a visually hidden heading
 The brief gives the band no heading. A hidden "Our promise" h2 keeps the
 heading outline unbroken for screen reader users without changing the page.

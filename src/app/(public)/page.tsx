@@ -216,7 +216,7 @@ export default async function HomePage() {
         <div className="how">
           <Photo
             file="how-we-work.jpg"
-            alt="Close up of two hands turning the pages of a thick stapled board packet, with sticky flags marking pages along its edge."
+            alt="A person holds up a fanned stack of tax forms and instructions in front of their face, standing against a white wall."
             ratio="4 / 5"
             sizes="(max-width: 900px) calc(100vw - 48px), 440px"
             className="photo-small how-photo"
