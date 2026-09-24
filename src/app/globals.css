@@ -903,16 +903,24 @@
   #how-we-work { scroll-margin-top: 60px; }
 
   /* who this is for: hairline dividers, never cards */
-  .audiences { margin-top: 44px; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
-  .audience { padding: 32px 28px 32px 0; border-right: 1px solid var(--line); }
-  .audience:last-child { border-right: 0; }
-  .audience + .audience { padding-left: 28px; }
+  /* Equal columns with the rule drawn in the middle of the gap. Padding each
+     column instead gives the outer two one side of padding and the middle
+     one two, so the photos come out different widths. */
+  .audiences {
+    margin-top: 44px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 56px; border-top: 1px solid var(--line);
+  }
+  .audience { padding: 32px 0; position: relative; }
+  .audience + .audience::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: -28px;
+    border-left: 1px solid var(--line);
+  }
   .audience h3 { font-size: 22px; letter-spacing: -.02em; font-weight: 600; margin: 22px 0 10px; }
   .audience p { color: var(--ink-2); font-size: 16px; }
   @media (max-width: 820px) {
     .audiences { grid-template-columns: 1fr; }
-    .audience { border-right: 0; border-bottom: 1px solid var(--line); padding: 28px 0; }
-    .audience + .audience { padding-left: 0; }
+    .audience { border-bottom: 1px solid var(--line); padding: 28px 0; }
+    .audience + .audience::before { content: none; }
     .audience:last-child { border-bottom: 0; }
   }
 

@@ -25,19 +25,19 @@ const AUDIENCES = [
     title: "Parents",
     body: "What your school board voted on, what the levy actually asks for, and what happens if it fails. No spin, no recommendation.",
     photo: "for-parents.jpg",
-    alt: "A parent and a young child seen from behind, walking up the front steps of a school in morning light.",
+    alt: "A laughing young child rides on a man's shoulders, arms stretched wide and hands held, as a woman reaches up toward the child.",
   },
   {
     title: "Teachers",
     body: "What you make at your step, what each raise proposal would mean for you, and how you'd do in the district next door.",
     photo: "for-teachers.jpg",
-    alt: "A teacher's desk beside an open classroom door, with papers and a coffee mug on it.",
+    alt: "A teacher at the front of a classroom talks to students at wooden desks, in front of bookshelves, a globe and wall maps.",
   },
   {
     title: "Residents and taxpayers",
     body: "Where the city's money goes, who voted for what, and every records request we've filed to find out.",
     photo: "for-residents.jpg",
-    alt: "The downtown Toledo skyline seen across the Maumee River on a clear day.",
+    alt: "A tree-lined residential street with parked cars and townhouses, and two people talking on the sidewalk.",
   },
 ];
 
@@ -178,7 +178,7 @@ export default async function HomePage() {
                 file={audience.photo}
                 alt={audience.alt}
                 ratio="3 / 2"
-                sizes="(max-width: 820px) calc(100vw - 48px), 340px"
+                sizes="(max-width: 820px) calc(100vw - 48px), 320px"
                 className="photo-small"
               />
               <h3>{audience.title}</h3>

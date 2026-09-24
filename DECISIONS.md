@@ -972,6 +972,10 @@ The alt text describes the shot list's subject for each file. When the real
 photos arrive, check each one against what is actually in the frame, since
 the hero may be One Government Center or the Thurgood Marshall building.
 
+The three "Who this is for" photos arrived on 2026-09-23 and their alt text
+now describes those frames. They were resized to 1200 x 800. The parents photo
+is portrait, so it is cropped to the band holding all three faces.
+
 ### The promise band has a visually hidden heading
 The brief gives the band no heading. A hidden "Our promise" h2 keeps the
 heading outline unbroken for screen reader users without changing the page.
