@@ -112,30 +112,6 @@ export default async function HomePage() {
           </div>
           <p className="pledge">{NEUTRALITY_LINE}</p>
         </div>
-        <div className="wrap civic-hero-photos" aria-label="The people we work for">
-          <Photo
-            file="for-teachers.jpg"
-            alt="A teacher leading a classroom of students"
-            ratio="4 / 3"
-            sizes="(max-width: 700px) 100vw, 33vw"
-            priority
-            className="civic-hero-photo"
-          />
-          <Photo
-            file="for-parents.jpg"
-            alt="A family laughing together at home"
-            ratio="4 / 3"
-            sizes="(max-width: 700px) 100vw, 33vw"
-            className="civic-hero-photo"
-          />
-          <Photo
-            file="for-residents.jpg"
-            alt="A quiet residential street lined with houses and trees"
-            ratio="4 / 3"
-            sizes="(max-width: 700px) 100vw, 33vw"
-            className="civic-hero-photo"
-          />
-        </div>
       </header>
 
       <section className="civic-trust" aria-label="Our promises">

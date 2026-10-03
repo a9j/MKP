@@ -1183,24 +1183,6 @@
 
 /* ---- Homepage v2: photos back, mission-wide ---- */
 
-.civic-hero-photos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  padding-bottom: 72px;
-  margin-top: -8px;
-}
-
-.civic-hero-photos > * {
-  min-width: 0;
-}
-
-.civic-hero-photo.photo {
-  width: 100%;
-  border: 6px solid #fff;
-  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
-}
-
 /* The base .photo slot (navy block when the file is missing). */
 .photo {
   position: relative;
@@ -1348,6 +1330,5 @@
 }
 
 @media (max-width: 700px) {
-  .civic-hero-photos { grid-template-columns: 1fr; padding-bottom: 56px; }
   .civic-everything { padding: 64px 0 56px; }
 }
