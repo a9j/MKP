@@ -870,3 +870,304 @@
   * { transition: none !important; animation: none !important; }
   html { scroll-behavior: auto; }
 }
+
+/* ---------------------------------------------------------------------------
+   Bold civic homepage. Fixed campaign colors in both themes (same approach
+   as --cta-bg): these sections are posters, not surfaces.
+   Navy #0F2A44, teal #187585, gold #D9A441.
+   Contrast: white on navy 15:1, navy on gold 8.6:1, white on teal 4.6:1
+   (large/bold text only on teal).
+   --------------------------------------------------------------------------- */
+
+.civic-hero {
+  background: #0F2A44;
+  color: #FFFFFF;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Giant ghost section mark. Decorative only. */
+.civic-hero::after {
+  content: "\00A7";
+  position: absolute;
+  right: -30px;
+  bottom: -120px;
+  font-family: var(--font-sans);
+  font-size: clamp(280px, 34vw, 520px);
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+  user-select: none;
+}
+
+.civic-hero-inner {
+  padding-top: 104px;
+  padding-bottom: 96px;
+  position: relative;
+  z-index: 1;
+}
+
+.civic-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #D9A441;
+  margin-bottom: 30px;
+}
+
+.civic-kicker-dark {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--teal-ink);
+  margin-bottom: 18px;
+}
+
+.civic-hero h1 {
+  font-size: clamp(54px, 8.4vw, 116px);
+  line-height: 0.98;
+  letter-spacing: -0.032em;
+  font-weight: 700;
+  max-width: 11em;
+  margin-bottom: 30px;
+  text-wrap: balance;
+}
+
+/* Highlighter swipe behind the key word. */
+.civic-hero h1 .hl {
+  background: linear-gradient(
+    to top,
+    rgba(217, 164, 65, 0.9) 0%,
+    rgba(217, 164, 65, 0.9) 34%,
+    transparent 34%
+  );
+  padding: 0 0.08em;
+  margin: 0 -0.08em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.civic-hero .lede {
+  font-size: 20px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.84);
+  max-width: 34em;
+}
+
+.civic-hero .actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.civic-hero .pledge {
+  margin-top: 34px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.62);
+  max-width: 44em;
+}
+
+/* Chunky buttons. */
+.btn-gold {
+  background: #D9A441;
+  color: #0F2A44;
+  border: 2px solid #D9A441;
+  font-weight: 700;
+}
+.btn-gold:hover {
+  background: #E4B45B;
+  border-color: #E4B45B;
+  transform: translateY(-2px);
+}
+.btn-outline-w {
+  background: transparent;
+  color: #FFFFFF;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  font-weight: 700;
+}
+.btn-outline-w:hover {
+  border-color: #FFFFFF;
+  transform: translateY(-2px);
+}
+
+/* Gold trust band. */
+.civic-trust {
+  background: #D9A441;
+  color: #0F2A44;
+}
+.civic-trust-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  padding-top: 34px;
+  padding-bottom: 34px;
+}
+.civic-trust-inner p {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+/* Explorer intro. */
+.civic-explorer {
+  padding-top: 88px;
+  padding-bottom: 88px;
+}
+.civic-explorer h2 {
+  font-size: clamp(34px, 4.4vw, 56px);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin-bottom: 36px;
+  text-wrap: balance;
+}
+
+/* Programs as hard color blocks. Full bleed, square corners, no cards. */
+.civic-programs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.civic-program {
+  padding: 56px 40px 60px;
+  color: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  min-height: 380px;
+}
+.civic-program.tone-navy { background: #0F2A44; }
+.civic-program.tone-teal { background: #187585; }
+.civic-program.tone-gold { background: #D9A441; color: #0F2A44; }
+.civic-program-n {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  opacity: 0.65;
+  margin-bottom: 26px;
+}
+.civic-program .tag {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.75;
+  margin-bottom: 14px;
+}
+.civic-program h3 {
+  font-size: 32px;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  line-height: 1.05;
+  margin-bottom: 16px;
+  text-wrap: balance;
+}
+.civic-program p {
+  font-size: 17px;
+  line-height: 1.55;
+  opacity: 0.88;
+  flex: 1;
+}
+.civic-program .more {
+  display: inline-block;
+  margin-top: 28px;
+  font-weight: 700;
+  font-size: 17px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+.civic-program .more:hover { text-decoration-thickness: 3px; }
+
+/* Process as giant numerals on navy. */
+.civic-steps {
+  background: #0F2A44;
+  color: #FFFFFF;
+  padding: 96px 0;
+}
+.civic-steps h2 {
+  font-size: clamp(34px, 4.4vw, 60px);
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  line-height: 1.02;
+  max-width: 14em;
+  margin-bottom: 56px;
+  text-wrap: balance;
+}
+.civic-steps ol {
+  list-style: none;
+  display: grid;
+  gap: 0;
+  border-top: 2px solid rgba(255, 255, 255, 0.18);
+}
+.civic-steps li {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 28px;
+  align-items: baseline;
+  padding: 30px 0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.18);
+}
+.civic-step-n {
+  font-size: clamp(44px, 5vw, 72px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 2px #D9A441;
+}
+.civic-steps li h3 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.civic-steps li p {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 40em;
+}
+
+/* Closing CTA band. */
+.civic-cta {
+  background: #187585;
+  color: #FFFFFF;
+  padding: 104px 0;
+  margin-top: 88px;
+}
+.civic-cta h2 {
+  font-size: clamp(40px, 6vw, 84px);
+  letter-spacing: -0.032em;
+  font-weight: 700;
+  line-height: 0.98;
+  max-width: 12em;
+  margin-bottom: 24px;
+  text-wrap: balance;
+}
+.civic-cta p {
+  font-size: 19px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 36em;
+}
+.civic-cta .actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+@media (max-width: 900px) {
+  .civic-hero-inner { padding-top: 72px; padding-bottom: 72px; }
+  .civic-trust-inner { grid-template-columns: 1fr; gap: 18px; }
+  .civic-programs { grid-template-columns: 1fr; }
+  .civic-program { min-height: 0; padding: 44px 28px 48px; }
+  .civic-steps li { grid-template-columns: 76px 1fr; gap: 18px; }
+  .civic-cta { padding: 72px 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-gold:hover, .btn-outline-w:hover { transform: none; }
+}

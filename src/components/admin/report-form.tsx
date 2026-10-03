@@ -22,6 +22,7 @@ const TYPES = [
   { value: "pay_report", label: "Pay Report" },
   { value: "levy_explainer", label: "Levy Explainer" },
   { value: "contract_tracker", label: "Contract Tracker" },
+  { value: "ballot_explainer", label: "Ballot Explainer" },
 ];
 
 type SourceRow = { label: string; url: string };

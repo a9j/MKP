@@ -21,17 +21,15 @@ const APP = process.env.APP_URL ?? "http://localhost:3100";
 const PORT = Number(process.env.PARITY_PORT ?? 3199);
 const CHROME = process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
 
+// The 2026-09-23 redesign replaced the mockup's hero, program cards and
+// steps, and moved the Explorer to the full content width, so those are no
+// longer tracked. What the new page still takes from the mockup is the column,
+// the type scale, the Latest feed, the call to action and the footer.
 const ELEMENTS = {
-  h1: "h1",
-  lede: ".lede",
-  button: ".actions .btn",
-  explorer: ".explorer",
-  bigFigure: ".big",
-  sectionHeading: "section.wrap h2",
-  program: ".program",
-  step: ".step",
+  sectionHeading: { selector: "section.wrap h2", compare: "width" },
   feedRow: ".item",
-  cta: ".cta",
+  // Same block, new heading copy, so its height is its own.
+  cta: { selector: ".cta", compare: "width" },
   footer: "footer .foot",
 };
 
@@ -79,8 +77,8 @@ async function measure(url, injectCss) {
   await page.waitForTimeout(1200);
   const out = await page.evaluate((els) => {
     const r = {};
-    for (const [name, sel] of Object.entries(els)) {
-      const el = document.querySelector(sel);
+    for (const [name, spec] of Object.entries(els)) {
+      const el = document.querySelector(typeof spec === "string" ? spec : spec.selector);
       if (!el) { r[name] = null; continue; }
       const box = el.getBoundingClientRect();
       r[name] = { w: Math.round(box.width), h: Math.round(box.height) };
@@ -106,12 +104,16 @@ for (const name of Object.keys(ELEMENTS)) {
     failed++;
     continue;
   }
-  const same = a.w === b.w && a.h === b.h;
+  // A tracked element may fix its width only, where the page deliberately
+  // carries different content from the mockup and so a different height.
+  const spec = ELEMENTS[name];
+  const widthOnly = typeof spec !== "string" && spec.compare === "width";
+  const same = a.w === b.w && (widthOnly || a.h === b.h);
   if (!same) failed++;
   console.log(
     name.padEnd(16),
-    `${a.w}x${a.h}`.padEnd(12),
-    `${b.w}x${b.h}`.padEnd(12),
+    (widthOnly ? `${a.w} wide` : `${a.w}x${a.h}`).padEnd(12),
+    (widthOnly ? `${b.w} wide` : `${b.w}x${b.h}`).padEnd(12),
     same ? "match" : "DIFFERS",
   );
 }

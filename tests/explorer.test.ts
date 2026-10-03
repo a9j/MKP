@@ -11,21 +11,32 @@ import {
   getVacancies,
 } from "../src/lib/queries/explorer";
 
-test("reads the latest school year and the home district", async () => {
+/**
+ * The Explorer returns null when nothing is loaded, so that an empty table is
+ * an empty page rather than a failed build. The development seed does load a
+ * schedule, so every test below is entitled to the data and says so once here.
+ */
+async function loadedExplorerData() {
   const data = await getExplorerData();
+  assert.ok(data, "the seed should have loaded a salary schedule");
+  return data;
+}
+
+test("reads the latest school year and the home district", async () => {
+  const data = await loadedExplorerData();
   assert.equal(data.schoolYear, "2026-2027");
   assert.equal(data.homeDistrict, "Toledo Public Schools");
   assert.ok(!data.districts.includes(data.homeDistrict), "home district listed as a comparison");
 });
 
 test("lanes and steps come from the home district", async () => {
-  const data = await getExplorerData();
+  const data = await loadedExplorerData();
   assert.deepEqual(data.lanes, ["BA", "BA+15", "MA", "MA+30"]);
   assert.deepEqual(data.steps, [1, 3, 7, 10, 15, 20]);
 });
 
 test("every salary figure carries a source url", async () => {
-  const data = await getExplorerData();
+  const data = await loadedExplorerData();
   let checked = 0;
   for (const table of Object.values(data.byDistrict)) {
     for (const lane of Object.values(table)) {
@@ -40,7 +51,7 @@ test("every salary figure carries a source url", async () => {
 });
 
 test("a district with different lane names is not comparable", async () => {
-  const data = await getExplorerData();
+  const data = await loadedExplorerData();
   assert.ok(data.districts.includes("Springfield"));
   const springfield = data.byDistrict.Springfield;
   // Springfield publishes Bachelors and Masters, so asking for BA must miss
@@ -50,7 +61,7 @@ test("a district with different lane names is not comparable", async () => {
 });
 
 test("a comparable district answers on the same lane and step", async () => {
-  const data = await getExplorerData();
+  const data = await loadedExplorerData();
   const cell = data.byDistrict.Sylvania?.["BA+15"]?.[7];
   assert.ok(cell, "expected Sylvania to share the home lane names");
   assert.ok(cell.value > 0);
@@ -58,13 +69,13 @@ test("a comparable district answers on the same lane and step", async () => {
 });
 
 test("scenarios come from site settings", async () => {
-  const data = await getExplorerData();
+  const data = await loadedExplorerData();
   assert.equal(data.scenarioAPct, 3);
   assert.equal(data.scenarioBFlat, 2000);
 });
 
 test("the inflation basis uses 2010 and the newest CPI", async () => {
-  const data = await getExplorerData();
+  const data = await loadedExplorerData();
   assert.ok(data.inflation, "expected an inflation basis from the seed");
   const inflation = data.inflation!;
   assert.equal(inflation.baseSchoolYear, "2010-2011");

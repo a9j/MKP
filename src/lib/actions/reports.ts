@@ -86,7 +86,11 @@ export async function saveReport(form: FormData): Promise<SaveResult> {
   const row = {
     slug,
     title,
-    type: type as "pay_report" | "levy_explainer" | "contract_tracker",
+    type: type as
+      | "pay_report"
+      | "levy_explainer"
+      | "contract_tracker"
+      | "ballot_explainer",
     report_date: reportDate,
     summary,
     status,

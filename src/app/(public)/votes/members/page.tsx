@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMemberTallies } from "@/lib/queries/votes";
+import { getMemberTallies, groupTalliesByBody } from "@/lib/queries/votes";
 import { ScrollableTable } from "@/components/public/scrollable-table";
 
 export const revalidate = 3600;
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export default async function MembersPage() {
   const members = await getMemberTallies();
+  const groups = groupTalliesByBody(members);
 
   return (
     <>
@@ -33,35 +34,50 @@ export default async function MembersPage() {
         {members.length === 0 ? (
           <p className="sub">No members have been added yet.</p>
         ) : (
-          <ScrollableTable label="Voting records by member">
-          <table className="data-table">
-            <caption>{members.length} members.</caption>
-            <thead>
-              <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Term</th>
-                <th scope="col" className="num">Votes cast</th>
-                <th scope="col" className="num">Yes</th>
-                <th scope="col" className="num">No</th>
-                <th scope="col" className="num">Abstain</th>
-                <th scope="col" className="num">Absent</th>
-              </tr>
-            </thead>
-            <tbody>
-              {members.map((member) => (
-                <tr key={member.personId}>
-                  <th scope="row">{member.name}</th>
-                  <td>{member.term}</td>
-                  <td className="num">{member.votesCast}</td>
-                  <td className="num">{member.yes}</td>
-                  <td className="num">{member.no}</td>
-                  <td className="num">{member.abstain}</td>
-                  <td className="num">{member.absent}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </ScrollableTable>
+          groups.map((group) => {
+            // A body that does not divide itself into districts gets no seat
+            // column. Printing "At large" against every name on the school
+            // board says nothing and costs a column on a phone.
+            const hasDistricts = group.members.some((member) => member.district);
+            return (
+            <div className="member-group" key={group.slug ?? group.label}>
+              <h2>{group.label}</h2>
+              <ScrollableTable label={`Voting records, ${group.label}`}>
+                <table className="data-table">
+                  <caption>
+                    {group.members.length} {group.members.length === 1 ? "member" : "members"}.
+                  </caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Name</th>
+                      {hasDistricts ? <th scope="col">Seat</th> : null}
+                      <th scope="col">Term</th>
+                      <th scope="col" className="num">Votes cast</th>
+                      <th scope="col" className="num">Yes</th>
+                      <th scope="col" className="num">No</th>
+                      <th scope="col" className="num">Abstain</th>
+                      <th scope="col" className="num">Absent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.members.map((member) => (
+                      <tr key={member.personId}>
+                        <th scope="row">{member.name}</th>
+                        {hasDistricts ? <td>{member.seat}</td> : null}
+                        <td>{member.term}</td>
+                        <td className="num">{member.votesCast}</td>
+                        <td className="num">{member.yes}</td>
+                        <td className="num">{member.no}</td>
+                        <td className="num">{member.abstain}</td>
+                        <td className="num">{member.absent}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </ScrollableTable>
+            </div>
+            );
+          })
         )}
       </section>
     </>

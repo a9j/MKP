@@ -117,6 +117,7 @@ export async function savePerson(form: FormData): Promise<SaveResult> {
     | "advisory"
     | "body_member";
   const bodyId = String(form.get("bodyId") ?? "").trim();
+  const district = String(form.get("district") ?? "").trim();
   const email = String(form.get("email") ?? "").trim();
   const termStart = String(form.get("termStart") ?? "").trim();
   const termEnd = String(form.get("termEnd") ?? "").trim();
@@ -151,6 +152,9 @@ export async function savePerson(form: FormData): Promise<SaveResult> {
     title: title || null,
     role,
     body_id: role === "body_member" ? bodyId : null,
+    // A district belongs to a seat on a body. Nobody else can hold one, so it
+    // is cleared rather than carried over if the role changes.
+    district: role === "body_member" ? district || null : null,
     email: email || null,
     term_start: termStart || null,
     term_end: termEnd || null,

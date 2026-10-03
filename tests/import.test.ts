@@ -155,3 +155,71 @@ test("a numeric string from the database matches a parsed number", () => {
   assert.equal(diff.changed.length, 0, "numeric formatting was treated as a change");
   assert.equal(diff.unchanged, 1);
 });
+
+// ---------------------------------------------------------------------------
+// The city budget, added in phase 2. Same validator, two new shapes.
+// ---------------------------------------------------------------------------
+
+const cityBudget = DATASETS.city_budget;
+const cityPopulation = DATASETS.city_population;
+
+test("accepts the sample city budget CSV, page number and all", () => {
+  const text = readFileSync("data/samples/city_budget.csv", "utf8");
+  const { rows, problems } = validateCsv(cityBudget, text);
+  assert.deepEqual(problems, []);
+  assert.equal(rows.length, 16);
+  assert.equal(rows[0].fiscal_year, 2026);
+  assert.equal(rows[0].amount, 96000000);
+  assert.equal(rows[0].source_page, 118);
+});
+
+test("a city budget row with no source link is refused", () => {
+  const text = readFileSync("data/samples/city_budget_missing_source.csv", "utf8");
+  const { rows, problems } = validateCsv(cityBudget, text);
+  // The validator reports the problem and drops the offending row. Refusing
+  // the file whole is the caller's rule, and the end to end suite covers it
+  // through the screen an administrator actually uses.
+  assert.equal(problems.length, 1);
+  assert.equal(problems[0].column, "source_url");
+  assert.match(problems[0].message, /link to the document/);
+  assert.equal(rows.length, 1, "only the sound row survives validation");
+  assert.equal(rows[0].department, "Police");
+});
+
+test("a page number is optional, but not a page number of zero", () => {
+  const header = "fiscal_year,fund,department,category,amount,source_url,source_page\n";
+  const url = "https://example.com/budget.pdf";
+
+  const blank = validateCsv(cityBudget, `${header}2026,General Fund,Police,Personnel,10,${url},\n`);
+  assert.deepEqual(blank.problems, []);
+  assert.equal(blank.rows[0].source_page, null);
+
+  const zero = validateCsv(cityBudget, `${header}2026,General Fund,Police,Personnel,10,${url},0\n`);
+  assert.equal(zero.rows.length, 0);
+  assert.equal(zero.problems[0].column, "source_page");
+});
+
+test("two rows for the same fund, department and category are a duplicate", () => {
+  const header = "fiscal_year,fund,department,category,amount,source_url,source_page\n";
+  const url = "https://example.com/budget.pdf";
+  const { rows, problems } = validateCsv(
+    cityBudget,
+    `${header}2026,General Fund,Police,Personnel,10,${url},1\n` +
+      `2026,General Fund,Police,Personnel,20,${url},2\n`,
+  );
+  assert.equal(rows.length, 1);
+  assert.match(problems[0].message, /Same fiscal_year, fund, department, category/);
+});
+
+test("a population has to be a positive whole number", () => {
+  const header = "year,population,source_url\n";
+  const url = "https://example.com/census.pdf";
+
+  const ok = validateCsv(cityPopulation, `${header}2025,265300,${url}\n`);
+  assert.deepEqual(ok.problems, []);
+  assert.equal(ok.rows[0].population, 265300);
+
+  const negative = validateCsv(cityPopulation, `${header}2025,-5,${url}\n`);
+  assert.equal(negative.rows.length, 0);
+  assert.equal(negative.problems[0].column, "population");
+});

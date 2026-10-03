@@ -107,7 +107,22 @@ function daysBetween(from: string, to: string): number {
   return Math.round(ms / 86_400_000);
 }
 
-export async function getExplorerData(): Promise<ExplorerData> {
+/**
+ * Null when there is nothing to show, never an exception.
+ *
+ * This used to throw, which failed the whole build: a site with no salary
+ * schedule loaded yet could not be deployed at all, and one page's missing data
+ * took down every other page with it. An empty table is a page that says so.
+ * The reason is logged for whoever is loading the data, since "not loaded yet"
+ * and "loaded under a different district name" look the same to a reader and
+ * are not the same problem.
+ */
+function nothingToShow(reason: string): null {
+  console.warn(`Explorer has nothing to show: ${reason}`);
+  return null;
+}
+
+export async function getExplorerData(): Promise<ExplorerData | null> {
   const supabase = createPublicClient();
   const settings = await getSiteSettings();
   const homeDistrict = settings.explorer_home_district ?? "Toledo Public Schools";
@@ -121,9 +136,8 @@ export async function getExplorerData(): Promise<ExplorerData> {
   const rows = (salaryRows ?? []) as SalaryRow[];
   const schoolYear = latestOf(rows.map((r) => r.school_year));
   if (!schoolYear) {
-    throw new Error(
-      "The salary_schedule table is empty. Upload a salary schedule CSV from /admin/explorer " +
-        "before building, since the Explorer has nothing to show without one.",
+    return nothingToShow(
+      "the salary_schedule table is empty. Upload a salary schedule CSV from /admin/explorer.",
     );
   }
 
@@ -132,8 +146,8 @@ export async function getExplorerData(): Promise<ExplorerData> {
 
   const home = byDistrict[homeDistrict];
   if (!home) {
-    throw new Error(
-      `No ${schoolYear} rows for "${homeDistrict}". Either the CSV spells the district ` +
+    return nothingToShow(
+      `no ${schoolYear} rows for "${homeDistrict}". Either the CSV spells the district ` +
         `differently or explorer_home_district is set wrong in site_settings.`,
     );
   }

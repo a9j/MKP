@@ -57,6 +57,20 @@ export default async function AdminExplorerPage() {
         help="One row per fiscal year and category. The Explorer shows the most recent fiscal year."
       />
 
+      <CsvUploader
+        dataset="city_budget"
+        label={DATASETS.city_budget.label}
+        columns={DATASETS.city_budget.columns.map((c) => c.name)}
+        help="The adopted budget book from toledo.oh.gov. One row per fiscal year, fund, department and category. source_page is the page of the book the figure is on, and may be left empty."
+      />
+
+      <CsvUploader
+        dataset="city_population"
+        label={DATASETS.city_population.label}
+        columns={DATASETS.city_population.columns.map((c) => c.name)}
+        help="One row per year. The most recent year is what per resident figures on /budget divide by, so it carries its own source."
+      />
+
       <CpiEditor rows={(cpi ?? []).map((r) => ({ ...r, index_value: Number(r.index_value) }))} />
     </>
   );

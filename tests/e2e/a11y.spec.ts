@@ -14,6 +14,7 @@ const axeSource = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
 const PUBLIC_PAGES = [
   "/",
   "/explorer",
+  "/budget",
   "/reports",
   "/records",
   "/votes",

@@ -17,6 +17,7 @@ const ROUTES = {
   correction: ["/corrections"],
   settings: ["/", "/explorer", "/records", "/get-involved", "/about", "/contact"],
   explorerData: ["/", "/explorer"],
+  cityBudget: ["/", "/budget"],
 } as const;
 
 export type SaveKind = keyof typeof ROUTES;

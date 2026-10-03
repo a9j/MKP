@@ -16,6 +16,8 @@ export const OG_CONTENT_TYPE = "image/png";
 const NAVY = "#0F2A44";
 const GOLD = "#D9A441";
 const WHITE = "#FFFFFF";
+/** The hero photo's height when drawn at the card's width. */
+const HERO_HEIGHT = Math.round((OG_SIZE.width * 9) / 16);
 const MUTED = "rgba(255, 255, 255, 0.72)";
 
 async function font(file: string): Promise<ArrayBuffer> {
@@ -25,10 +27,33 @@ async function font(file: string): Promise<ArrayBuffer> {
   return Uint8Array.from(buffer).buffer;
 }
 
-export async function renderOgImage(title: string, kicker?: string) {
-  const [regular, semibold] = await Promise.all([
+/**
+ * A photograph from public/photos as a data URI, or null when the file has not
+ * arrived. Read at build like the fonts.
+ */
+async function photo(file: string): Promise<string | null> {
+  try {
+    const buffer = await readFile(join(process.cwd(), "public/photos", file));
+    return `data:image/jpeg;base64,${buffer.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
+type Options = {
+  /** A file in public/photos to set behind the title, under the hero gradient. */
+  backgroundPhoto?: string;
+};
+
+export async function renderOgImage(
+  title: string,
+  kicker?: string,
+  { backgroundPhoto }: Options = {},
+) {
+  const [regular, semibold, background] = await Promise.all([
     font("InstrumentSans-Regular.ttf"),
     font("InstrumentSans-SemiBold.ttf"),
+    backgroundPhoto ? photo(backgroundPhoto) : Promise.resolve(null),
   ]);
 
   return new ImageResponse(
@@ -40,7 +65,19 @@ export async function renderOgImage(title: string, kicker?: string) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: NAVY,
+          backgroundColor: NAVY,
+          // The hero photo under the site's hero gradient, a little heavier so
+          // the title holds at thumbnail size. Background layers rather than
+          // positioned children, which Satori places inside the padding.
+          ...(background
+            ? {
+                backgroundImage: `linear-gradient(to top, rgba(15,42,68,.92) 0%, rgba(15,42,68,.6) 55%, rgba(15,42,68,.2) 100%), url(${background})`,
+                // The hero is 16:9 and the card is wider, so the photo is sized
+                // to the card's width and centered, trimming its top and bottom.
+                backgroundSize: `${OG_SIZE.width}px ${OG_SIZE.height}px, ${OG_SIZE.width}px ${HERO_HEIGHT}px`,
+                backgroundPosition: `0 0, 0 ${-Math.round((HERO_HEIGHT - OG_SIZE.height) / 2)}px`,
+              }
+            : {}),
           padding: "72px 80px",
           fontFamily: "Instrument Sans",
         }}

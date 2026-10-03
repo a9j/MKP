@@ -66,17 +66,28 @@ export function PersonForm({ bodies }: { bodies: Body[] }) {
 
         {/* Only elected members sit on a body, so the field only appears then. */}
         {role === "body_member" ? (
-          <div className="field">
-            <label htmlFor="person-body">Body</label>
-            <select id="person-body" name="bodyId" defaultValue={bodies[0]?.id}>
-              {bodies.map((body) => (
-                <option key={body.id} value={body.id}>
-                  {body.name}
-                </option>
-              ))}
-            </select>
-            {errors.bodyId ? <p className="field-error">{errors.bodyId}</p> : null}
-          </div>
+          <>
+            <div className="field">
+              <label htmlFor="person-body">Body</label>
+              <select id="person-body" name="bodyId" defaultValue={bodies[0]?.id}>
+                {bodies.map((body) => (
+                  <option key={body.id} value={body.id}>
+                    {body.name}
+                  </option>
+                ))}
+              </select>
+              {errors.bodyId ? <p className="field-error">{errors.bodyId}</p> : null}
+            </div>
+
+            <div className="field">
+              <label htmlFor="person-district">District</label>
+              <input id="person-district" name="district" placeholder="Leave empty for at large" />
+              <p className="counter">
+                The district number as the body writes it. Empty means the seat is at
+                large, which is how half of city council is elected.
+              </p>
+            </div>
+          </>
         ) : null}
 
         <div className="field">
