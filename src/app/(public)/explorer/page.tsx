@@ -50,54 +50,61 @@ export default async function ExplorerPage() {
 
   return (
     <>
-      <header className="wrap page-head">
-        <h1>What do you actually make? And what would a raise actually cost?</h1>
-        <p className="lede">
-          The Toledo Teacher Pay Explorer turns Toledo Public Schools&rsquo; salary,
-          staffing, and finance data into tools built for the people the numbers
-          are about.
-        </p>
-        <div className="actions">
-          {/* Links out when the Explorer has its own home, otherwise scrolls to
-              the full widget embedded below. */}
-          <a className="btn teal" href={externalExplorer ? externalExplorer : "#explorer"}>
-            Open the Explorer
-          </a>
-          <Link className="btn ghost" href="/budget">
-            City Budget Explorer
-          </Link>
-          <Link className="btn ghost" href="/reports">
-            Read the latest report
-          </Link>
+      <header className="civic-page-hero">
+        <div className="wrap civic-page-hero-inner">
+          <p className="civic-kicker">Explorer</p>
+          <h1>What do you actually make? And what would a raise actually cost?</h1>
+          <p className="lede">
+            The Toledo Teacher Pay Explorer turns Toledo Public Schools&rsquo; salary,
+            staffing, and finance data into tools built for the people the numbers
+            are about.
+          </p>
+          <div className="actions">
+            {/* Links out when the Explorer has its own home, otherwise scrolls to
+                the full widget embedded below. */}
+            <a className="btn btn-gold" href={externalExplorer ? externalExplorer : "#explorer"}>
+              Open the Explorer
+            </a>
+            <Link className="btn btn-outline-w" href="/budget">
+              City Budget Explorer
+            </Link>
+            <Link className="btn btn-outline-w" href="/reports">
+              Read the latest report
+            </Link>
+          </div>
         </div>
       </header>
 
-      <section className="wrap explorer-section">
+      <section className="wrap civic-section">
         {data ? (
           <PayExplorer data={data} variant="full" id="explorer" />
         ) : (
-          <p className="sub" id="explorer">
+          <p className="civic-empty" id="explorer">
             The salary schedule has not been loaded yet.
           </p>
         )}
       </section>
 
-      <section className="wrap" id="features">
+      <section className="wrap civic-section" id="features">
+        <p className="civic-kicker-dark">Features</p>
         <h2>What the Explorer shows you.</h2>
-        <div className="features">
-          {FEATURES.map((feature) => (
-            <div className="feature" key={feature.title}>
-              <h3>{feature.title}</h3>
-              <p>{feature.body}</p>
-            </div>
+        <ol className="civic-numbered">
+          {FEATURES.map((feature, i) => (
+            <li key={feature.title}>
+              <span className="n">{String(i + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{feature.title}</h3>
+                <p>{feature.body}</p>
+              </div>
+            </li>
           ))}
-        </div>
-        <p className="note">
+        </ol>
+        <p className="civic-note">
           Every figure in the Explorer links to the public document it came from.
         </p>
       </section>
 
-      <section className="band">
+      <section className="civic-band civic-band-paper">
         <div className="wrap">
           <h2>The district budget in plain categories.</h2>
           <BudgetCategories
@@ -108,19 +115,21 @@ export default async function ExplorerPage() {
         </div>
       </section>
 
-      <section className="wrap">
+      <section className="wrap civic-section">
+        <p className="civic-kicker-dark">Staffing</p>
         <h2>Open positions and how long they stay open.</h2>
         <VacanciesTable asOf={vacancies.asOf} vacancies={vacancies.vacancies} />
       </section>
 
-      <section className="wrap">
+      <section className="wrap civic-section">
+        <p className="civic-kicker-dark">Sources</p>
         <h2>Where this comes from.</h2>
-        <p className="sub">
+        <p className="civic-section-lede">
           The Explorer is built and maintained by TeacherRaise and licensed to The
           Mona K Project at no cost. We supply the public records. They supply the
           software.
         </p>
-        <p className="note">
+        <p className="civic-note">
           Data current as of {settings.explorer_data_asof ?? "[MONTH YEAR]"}. Sources:
           TPS salary schedules, TPS Five-Year Forecast, Ohio Department of Education
           and Workforce, and {settings.explorer_sources_list ?? "[list]"}.
