@@ -7,12 +7,17 @@
  * came to exist.
  */
 
-export type ReportType = "pay_report" | "levy_explainer" | "contract_tracker";
+export type ReportType =
+  | "pay_report"
+  | "levy_explainer"
+  | "contract_tracker"
+  | "ballot_explainer";
 
 export const REPORT_TYPE_LABEL: Record<ReportType, string> = {
   pay_report: "Pay Report",
   levy_explainer: "Levy Explainer",
   contract_tracker: "Contract Tracker",
+  ballot_explainer: "Ballot Explainer",
 };
 
 /** The filter bar on /reports. */
@@ -21,6 +26,7 @@ export const REPORT_FILTERS = [
   { key: "pay_report", label: "Pay Report" },
   { key: "levy_explainer", label: "Levy Explainer" },
   { key: "contract_tracker", label: "Contract Tracker" },
+  { key: "ballot_explainer", label: "Ballot Explainer" },
 ] as const;
 
 export type ReportSource = { label: string; url: string };
