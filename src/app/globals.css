@@ -927,7 +927,7 @@
 }
 
 .civic-hero h1 {
-  font-size: clamp(54px, 8.4vw, 116px);
+  font-size: clamp(44px, 8.4vw, 116px);
   line-height: 0.98;
   letter-spacing: -0.032em;
   font-weight: 700;
