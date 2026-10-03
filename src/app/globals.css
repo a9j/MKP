@@ -1356,7 +1356,7 @@
 }
 
 .civic-page-hero-inner {
-  padding: 88px 0 80px;
+  padding: 72px 0 64px;
   position: relative;
   z-index: 1;
 }
@@ -1373,7 +1373,7 @@
   font-size: clamp(19px, 2.4vw, 24px);
   line-height: 1.55;
   max-width: 44rem;
-  opacity: 0.94;
+  color: #fff;
   margin: 0 0 32px;
 }
 
@@ -1384,7 +1384,7 @@
 }
 
 .civic-section {
-  padding: 80px 0;
+  padding: 60px 0;
 }
 
 .civic-section h2 {
@@ -1404,7 +1404,7 @@
 }
 
 .civic-band {
-  padding: 80px 0;
+  padding: 60px 0;
 }
 
 .civic-band-navy { background: #0F2A44; color: #fff; }
@@ -1547,8 +1547,8 @@
 .civic-note a { color: #0F2A44; font-weight: 700; }
 
 @media (max-width: 700px) {
-  .civic-page-hero-inner { padding: 64px 0 60px; }
-  .civic-section, .civic-band { padding: 56px 0; }
+  .civic-page-hero-inner { padding: 56px 0 48px; }
+  .civic-section, .civic-band { padding: 44px 0; }
   .civic-card { padding: 32px 26px; }
   .civic-numbered li { grid-template-columns: 56px 1fr; gap: 14px; }
   .civic-numbered .n { font-size: 32px; }
@@ -1568,3 +1568,11 @@
   background: transparent;
 }
 .btn-outline-navy:hover { background: #0F2A44; color: #fff; }
+
+/* Full-bleed photo band: an editorial break between sections. */
+.civic-photo-band.photo {
+  width: 100%;
+  max-height: 440px;
+  border-top: 3px solid #0F2A44;
+  border-bottom: 3px solid #0F2A44;
+}
