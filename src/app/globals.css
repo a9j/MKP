@@ -1191,7 +1191,12 @@
   margin-top: -8px;
 }
 
+.civic-hero-photos > * {
+  min-width: 0;
+}
+
 .civic-hero-photo.photo {
+  width: 100%;
   border: 6px solid #fff;
   box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
 }
@@ -1249,12 +1254,16 @@
   box-shadow: 10px 10px 0 rgba(15, 42, 68, 0.9);
 }
 
+.civic-program-card > * {
+  min-width: 0;
+}
+
 .civic-program-card:nth-child(even) .civic-program-photo {
   order: 2;
 }
 
 .civic-program-photo.photo {
-  height: 100%;
+  width: 100%;
   min-height: 320px;
 }
 
@@ -1314,6 +1323,7 @@
 }
 
 .civic-steps-photo {
+  width: 100%;
   border: 6px solid #fff;
   box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.35);
   position: sticky;
