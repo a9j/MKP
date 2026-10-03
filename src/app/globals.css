@@ -1576,3 +1576,37 @@
   border-top: 3px solid #0F2A44;
   border-bottom: 3px solid #0F2A44;
 }
+
+/* Photo hero: full-bleed image with a dark scrim so text stays readable. */
+.civic-hero-photo .civic-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.civic-hero-photo .civic-hero-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.civic-hero-photo .civic-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 42, 68, 0.92) 0%,
+    rgba(15, 42, 68, 0.78) 45%,
+    rgba(15, 42, 68, 0.9) 100%
+  );
+}
+
+.civic-hero-photo .civic-hero-inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide the ghost mark when a photo is behind it. */
+.civic-hero-photo::after {
+  display: none;
+}

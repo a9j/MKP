@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { Photo } from "@/components/photo";
@@ -88,7 +89,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <header className="civic-hero">
+      <header className="civic-hero civic-hero-photo">
+        <div className="civic-hero-bg" aria-hidden="true">
+          <Image
+            src="/photos/how-we-work.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <div className="civic-hero-scrim" />
+        </div>
         <div className="wrap civic-hero-inner">
           <p className="civic-kicker">The Mona K Project &mdash; Toledo, Ohio</p>
           <h1>
