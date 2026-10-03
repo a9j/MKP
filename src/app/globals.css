@@ -1180,3 +1180,164 @@
   padding: 40px 32px;
   text-align: center;
 }
+
+/* ---- Homepage v2: photos back, mission-wide ---- */
+
+.civic-hero-photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding-bottom: 72px;
+  margin-top: -8px;
+}
+
+.civic-hero-photo.photo {
+  border: 6px solid #fff;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* The base .photo slot (navy block when the file is missing). */
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: #0F2A44;
+}
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.civic-everything {
+  padding: 96px 0 80px;
+}
+
+.civic-everything h2 {
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 18px 0 20px;
+  color: #0F2A44;
+}
+
+.hl-dark {
+  background: linear-gradient(transparent 55%, #D9A441 55%, #D9A441 95%, transparent 95%);
+  padding: 0 6px;
+}
+
+.civic-everything-lede {
+  font-size: 21px;
+  line-height: 1.55;
+  max-width: 46rem;
+  color: var(--ink-2);
+  margin: 0 0 48px;
+}
+
+.civic-programs-photo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.civic-program-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 3px solid #0F2A44;
+  box-shadow: 10px 10px 0 rgba(15, 42, 68, 0.9);
+}
+
+.civic-program-card:nth-child(even) .civic-program-photo {
+  order: 2;
+}
+
+.civic-program-photo.photo {
+  height: 100%;
+  min-height: 320px;
+}
+
+.civic-program-card-body {
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.civic-program-card.tone-navy .civic-program-card-body { background: #0F2A44; color: #fff; }
+.civic-program-card.tone-teal .civic-program-card-body { background: #187585; color: #fff; }
+.civic-program-card.tone-gold .civic-program-card-body { background: #D9A441; color: #0F2A44; }
+
+.civic-program-card .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 6px 12px;
+  margin: 14px 0 18px;
+}
+
+.civic-program-card h3 {
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+}
+
+.civic-program-card p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+  opacity: 0.92;
+}
+
+.civic-program-card .more {
+  font-weight: 800;
+  font-size: 18px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  color: inherit;
+}
+
+.civic-program-card .more:hover { text-decoration-thickness: 4px; }
+
+.civic-steps-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.civic-steps-photo {
+  border: 6px solid #fff;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.35);
+  position: sticky;
+  top: 32px;
+}
+
+.civic-explorer-lede {
+  font-size: 20px;
+  line-height: 1.55;
+  max-width: 44rem;
+  color: var(--ink-2);
+  margin: 0 0 36px;
+}
+
+@media (max-width: 900px) {
+  .civic-steps-grid { grid-template-columns: 1fr; }
+  .civic-steps-photo { position: static; max-width: 420px; }
+  .civic-program-card { grid-template-columns: 1fr; }
+  .civic-program-card:nth-child(even) .civic-program-photo { order: 0; }
+  .civic-program-photo.photo { min-height: 240px; }
+  .civic-program-card-body { padding: 36px 28px; }
+}
+
+@media (max-width: 700px) {
+  .civic-hero-photos { grid-template-columns: 1fr; padding-bottom: 56px; }
+  .civic-everything { padding: 64px 0 56px; }
+}
