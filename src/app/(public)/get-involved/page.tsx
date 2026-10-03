@@ -17,31 +17,40 @@ export default async function GetInvolvedPage() {
 
   return (
     <>
-      <header className="wrap page-head">
-        <h1>Help Toledo read its own records.</h1>
+      <header className="civic-page-hero">
+        <div className="wrap civic-page-hero-inner">
+          <p className="civic-kicker">Get involved</p>
+          <h1>Help Toledo read its own records.</h1>
+          <p className="lede">
+            Four ways in. Pick the one that fits.
+          </p>
+        </div>
       </header>
 
-      <section className="wrap vote-section">
-        <div className="features">
-          <div className="feature">
-            <h2>Donate</h2>
+      <section className="wrap civic-section">
+        <div className="civic-cards">
+          <div className="civic-card tone-gold">
+            <div className="tag">Give</div>
+            <h3>Donate</h3>
             <p>
               The Mona K Project runs on small donations. Records requests, review time,
               and publishing are all we spend on.
             </p>
-            <p className="report-actions">
+            <div className="civic-card-foot">
               {settings.donate_url ? (
                 <>
-                  {amounts.map((amount) => (
-                    <a
-                      key={amount}
-                      className="btn ghost"
-                      href={`${settings.donate_url}?amount=${amount}`}
-                    >
-                      ${amount}
-                    </a>
-                  ))}
-                  <a className="btn" href={settings.donate_url}>
+                  <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 16 }}>
+                    {amounts.map((amount) => (
+                      <a
+                        key={amount}
+                        className="btn btn-outline-navy"
+                        href={`${settings.donate_url}?amount=${amount}`}
+                      >
+                        ${amount}
+                      </a>
+                    ))}
+                  </div>
+                  <a className="btn btn-gold" style={{ background: "#0F2A44", color: "#fff", borderColor: "#0F2A44" }} href={settings.donate_url}>
                     Donate
                   </a>
                 </>
@@ -50,61 +59,71 @@ export default async function GetInvolvedPage() {
                   The donation page has not been set up yet.
                 </span>
               )}
-            </p>
+            </div>
           </div>
 
-          <div className="feature">
-            <h2>Join the advisory council</h2>
+          <div className="civic-card tone-navy">
+            <div className="tag">Review</div>
+            <h3>Join the advisory council</h3>
             <p>
               Council members review each report before it goes out. We are looking for
               current and retired teachers, parents, accountants, and anyone who has read
               a school budget and wanted to throw it across the room. Two to three hours a
               quarter.
             </p>
-            <InquiryForm
-              kind="council"
-              idPrefix="council"
-              submitLabel="Apply"
-              messageLabel="Why you would like to join, and what you would bring"
-            />
+            <div className="civic-card-foot">
+              <InquiryForm
+                kind="council"
+                idPrefix="council"
+                submitLabel="Apply"
+                messageLabel="Why you would like to join, and what you would bring"
+              />
+            </div>
           </div>
 
-          <div className="feature">
-            <h2>Volunteer</h2>
+          <div className="civic-card tone-teal">
+            <div className="tag">Help</div>
+            <h3>Volunteer</h3>
             <p>
               We need people to read documents, check sources, and attend board meetings.
               No experience required, just patience with PDFs.
             </p>
-            <InquiryForm
-              kind="volunteer"
-              idPrefix="volunteer"
-              submitLabel="Tell us how you can help"
-              messageLabel="How you can help"
-            />
+            <div className="civic-card-foot">
+              <InquiryForm
+                kind="volunteer"
+                idPrefix="volunteer"
+                submitLabel="Tell us how you can help"
+                messageLabel="How you can help"
+              />
+            </div>
           </div>
 
-          <div className="feature">
-            <h2>For organizations</h2>
+          <div className="civic-card">
+            <div className="tag">Brief us in</div>
+            <h3>For organizations</h3>
             <p>
               Unions, boards, newsrooms, and community groups can request a briefing on
               any report. We present the numbers and take questions. We do not advise on
               strategy.
             </p>
-            <InquiryForm
-              kind="briefing"
-              idPrefix="briefing"
-              submitLabel="Request a briefing"
-              messageLabel="Which report, and who would be in the room"
-            />
+            <div className="civic-card-foot">
+              <InquiryForm
+                kind="briefing"
+                idPrefix="briefing"
+                submitLabel="Request a briefing"
+                messageLabel="Which report, and who would be in the room"
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="band">
+      <section className="civic-band civic-band-navy">
         <div className="wrap">
-          <h2>Stay updated</h2>
+          <p className="civic-kicker">Stay updated</p>
+          <h2>One email when we publish.</h2>
           <p className="sub">
-            One email when we publish. That is the only time you will hear from us.
+            That is the only time you will hear from us.
           </p>
           <SubscribeForm />
         </div>

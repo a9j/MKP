@@ -1332,3 +1332,239 @@
 @media (max-width: 700px) {
   .civic-everything { padding: 64px 0 56px; }
 }
+
+/* ---- Shared civic page styles (Reports, Votes, Explorer, Records, About, Get Involved) ---- */
+
+.civic-page-hero {
+  background: #0F2A44;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.civic-page-hero::after {
+  content: "\00A7";
+  position: absolute;
+  right: -30px;
+  bottom: -120px;
+  font-size: clamp(280px, 34vw, 520px);
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+  user-select: none;
+}
+
+.civic-page-hero-inner {
+  padding: 88px 0 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.civic-page-hero h1 {
+  font-size: clamp(42px, 6.5vw, 88px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 24px;
+  max-width: 16em;
+}
+
+.civic-page-hero .lede {
+  font-size: clamp(19px, 2.4vw, 24px);
+  line-height: 1.55;
+  max-width: 44rem;
+  opacity: 0.94;
+  margin: 0 0 32px;
+}
+
+.civic-page-hero .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.civic-section {
+  padding: 80px 0;
+}
+
+.civic-section h2 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #0F2A44;
+  margin: 0 0 20px;
+}
+
+.civic-section .civic-section-lede {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 44rem;
+  margin: 0 0 40px;
+}
+
+.civic-band {
+  padding: 80px 0;
+}
+
+.civic-band-navy { background: #0F2A44; color: #fff; }
+.civic-band-teal { background: #187585; color: #fff; }
+.civic-band-gold { background: #D9A441; color: #0F2A44; }
+.civic-band-paper { background: #F7F4EC; color: #0F2A44; }
+
+.civic-band h2 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0 0 20px;
+}
+
+.civic-band-navy h2, .civic-band-teal h2 { color: #fff; }
+.civic-band-gold h2, .civic-band-paper h2 { color: #0F2A44; }
+
+.civic-band .sub {
+  font-size: 19px;
+  line-height: 1.6;
+  opacity: 0.92;
+  max-width: 44rem;
+  margin: 0 0 24px;
+}
+
+.civic-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.civic-card {
+  border: 3px solid #0F2A44;
+  box-shadow: 8px 8px 0 rgba(15, 42, 68, 0.9);
+  padding: 40px 36px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.civic-card > * { min-width: 0; }
+
+.civic-card.tone-navy { background: #0F2A44; color: #fff; }
+.civic-card.tone-teal { background: #187585; color: #fff; border-color: #0F2A44; }
+.civic-card.tone-gold { background: #D9A441; color: #0F2A44; }
+
+.civic-card .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 6px 12px;
+  margin-bottom: 18px;
+}
+
+.civic-card h3 {
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+
+.civic-card p {
+  font-size: 17px;
+  line-height: 1.6;
+  opacity: 0.92;
+  margin: 0 0 20px;
+}
+
+.civic-card .civic-card-foot {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.civic-card .more {
+  font-weight: 800;
+  font-size: 17px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.civic-card .more:hover { text-decoration-thickness: 4px; }
+
+.civic-card .unavailable {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.civic-numbered {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+
+.civic-numbered li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.civic-numbered .n {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  color: #D9A441;
+  letter-spacing: -0.02em;
+}
+
+.civic-numbered h3 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: #0F2A44;
+}
+
+.civic-numbered p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.civic-note {
+  border-left: 6px solid #D9A441;
+  padding: 4px 0 4px 24px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 46rem;
+  margin: 32px 0 0;
+}
+
+.civic-note a { color: #0F2A44; font-weight: 700; }
+
+@media (max-width: 700px) {
+  .civic-page-hero-inner { padding: 64px 0 60px; }
+  .civic-section, .civic-band { padding: 56px 0; }
+  .civic-card { padding: 32px 26px; }
+  .civic-numbered li { grid-template-columns: 56px 1fr; gap: 14px; }
+  .civic-numbered .n { font-size: 32px; }
+}
+
+.civic-band-navy .civic-numbered p { color: #fff; opacity: 0.94; }
+.civic-band-navy .civic-numbered h3 { color: #fff; }
+.civic-band-navy a { color: #D9A441; }
+.civic-band-navy .officers-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.civic-band-navy .officers-list li { font-size: 18px; }
+.civic-band-navy .officers-list .agency-name { font-weight: 700; }
+.civic-band-navy h3.civic-h3 { margin-top: 48px; margin-bottom: 20px; font-size: 24px; color: #fff; }
+
+.btn-outline-navy {
+  border: 3px solid #0F2A44;
+  color: #0F2A44;
+  background: transparent;
+}
+.btn-outline-navy:hover { background: #0F2A44; color: #fff; }

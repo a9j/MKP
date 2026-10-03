@@ -32,120 +32,135 @@ export default async function AboutPage() {
 
   return (
     <>
-      <header className="wrap page-head">
-        <h1>We read what nobody has time to read.</h1>
-        <p className="lede">
-          School budgets, salary schedules, board votes, levies, and city finances are
-          all public. But they arrive as hundreds of pages nobody has time for. The
-          Mona K Project reads them and turns them into a page a teacher, a parent, or
-          a taxpayer can understand in four minutes, with every number linked to the
-          document it came from.
-        </p>
-        <p className="lede">
-          We do not take positions, endorse candidates, or recommend how to vote. We
-          show what the records say and let Toledo decide.
-        </p>
+      <header className="civic-page-hero">
+        <div className="wrap civic-page-hero-inner">
+          <p className="civic-kicker">About</p>
+          <h1>We read what nobody has time to read.</h1>
+          <p className="lede">
+            School budgets, salary schedules, board votes, levies, and city finances are
+            all public. But they arrive as hundreds of pages nobody has time for. The
+            Mona K Project reads them and turns them into a page a teacher, a parent, or
+            a taxpayer can understand in four minutes, with every number linked to the
+            document it came from.
+          </p>
+          <p className="lede">
+            We do not take positions, endorse candidates, or recommend how to vote. We
+            show what the records say and let Toledo decide.
+          </p>
+        </div>
       </header>
 
-      <section className="wrap vote-section">
-        <h2>Principles</h2>
-        <ul className="listening-list principles">
-          {PRINCIPLES.map((principle) => (
-            <li key={principle}>{principle}</li>
+      <section className="wrap civic-section">
+        <p className="civic-kicker-dark">Principles</p>
+        <h2>What we will not bend on.</h2>
+        <ol className="civic-numbered">
+          {PRINCIPLES.map((principle, i) => (
+            <li key={principle}>
+              <span className="n">{String(i + 1).padStart(2, "0")}</span>
+              <div>
+                <p style={{ fontSize: 20, fontWeight: 600, color: "#0F2A44" }}>{principle}</p>
+              </div>
+            </li>
           ))}
-        </ul>
+        </ol>
         {/* Said plainly, on the page, rather than buried in a policy nobody
             opens. Editable from /admin/settings, and it ships filled in. */}
         {settings.ai_disclosure ? (
-          <p className="note disclosure">{settings.ai_disclosure}</p>
+          <p className="civic-note">{settings.ai_disclosure}</p>
         ) : null}
       </section>
 
-      <section className="band">
+      <section className="civic-band civic-band-teal">
         <div className="wrap">
-          <h2>Listening</h2>
+          <p className="civic-kicker">Listening</p>
+          <h2>We listen before we publish.</h2>
           <p className="sub">
             Three times a year we hold listening sessions with teachers, and once a year
             with parents. What we hear is published and shapes what we build next.
           </p>
-          <p className="report-actions">
+          <div className="actions">
             {latestSession ? (
-              <Link href="/listening">
-                Read the most recent listening summary, {latestSession.sessionDateLabel}
+              <Link className="btn btn-gold" href="/listening">
+                Read the most recent listening summary
               </Link>
             ) : (
               <span className="unavailable">No listening summary published yet.</span>
             )}
-          </p>
+          </div>
         </div>
       </section>
 
-      <section className="wrap vote-section">
-        <h2>People</h2>
+      <section className="wrap civic-section">
+        <p className="civic-kicker-dark">People</p>
+        <h2>Who does the reading.</h2>
         {people.staff.length === 0 ? (
-          <p className="sub">Staff are not listed yet.</p>
+          <p className="civic-empty">Staff are not listed yet.</p>
         ) : (
-          <div className="people">
+          <div className="civic-cards">
             {people.staff.map((person) => (
-              <div className="person" key={person.id}>
+              <div className="civic-card" key={person.id}>
                 <h3>{person.name}</h3>
-                {person.title ? <p className="person-title">{person.title}</p> : null}
+                {person.title ? <p><strong>{person.title}</strong></p> : null}
                 <p>
-                  {person.bio ?? "[One or two sentences: Toledo-area, recruiting and workforce background, why he started this.]"}
+                  {person.bio ?? "Toledo-area, recruiting and workforce background."}
                 </p>
               </div>
             ))}
           </div>
         )}
 
-        <h2 className="section-gap">Advisory Council</h2>
+        <h2 style={{ marginTop: 64 }}>Advisory Council</h2>
+        <p className="civic-section-lede">
+          Council members review every report before release. They serve as individuals,
+          not as representatives of their employers.
+        </p>
         {people.advisory.length === 0 ? (
-          <p className="sub">[Forming.]</p>
+          <p className="civic-empty">The council is forming. Names will appear here.</p>
         ) : (
-          <div className="people">
+          <div className="civic-cards">
             {people.advisory.map((person) => (
-              <div className="person" key={person.id}>
+              <div className="civic-card" key={person.id}>
                 <h3>{person.name}</h3>
-                {person.title ? <p className="person-title">{person.title}</p> : null}
+                {person.title ? <p><strong>{person.title}</strong></p> : null}
                 {person.bio ? <p>{person.bio}</p> : null}
               </div>
             ))}
           </div>
         )}
-        <p className="note">
-          Council members review every report before release. They serve as individuals,
-          not as representatives of their employers.
-        </p>
       </section>
 
-      <section className="band">
+      <section className="civic-band civic-band-paper">
         <div className="wrap">
-          <h2>Partners</h2>
+          <p className="civic-kicker-dark">Partners</p>
+          <h2>Built with help.</h2>
           <p className="sub">
             The Toledo Teacher Pay Explorer is built and maintained by TeacherRaise and
             licensed to The Mona K Project at no cost.
           </p>
-          <p className="note">{settings.partners_note ?? "[Other partners as confirmed]"}</p>
+          <p className="civic-note">{settings.partners_note ?? "Other partners as confirmed."}</p>
         </div>
       </section>
 
-      <section className="wrap vote-section">
-        <h2>The organization</h2>
-        <p className="sub">
+      <section className="wrap civic-section">
+        <p className="civic-kicker-dark">The organization</p>
+        <h2>A nonprofit, in the open.</h2>
+        <p className="civic-section-lede">
           The Mona K Project is a 501(c)(3) nonprofit based in Toledo, Ohio. EIN{" "}
           {settings.org_ein ?? "[XX-XXXXXXX]"}. Donations are tax-deductible to the
           extent allowed by law.
         </p>
-        <p className="report-actions">
+        <div className="actions" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           {settings.form_990_url ? (
-            <a href={settings.form_990_url} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-gold" href={settings.form_990_url} target="_blank" rel="noopener noreferrer">
               Form 990 and financials
             </a>
           ) : (
             <span className="unavailable">[Link: Form 990 / financials]</span>
           )}
-          <Link href="/corrections">Corrections log</Link>
-        </p>
+          <Link className="btn btn-outline-navy" href="/corrections">
+            Corrections log
+          </Link>
+        </div>
       </section>
     </>
   );

@@ -31,17 +31,22 @@ export default async function RecordsPage() {
 
   return (
     <>
-      <header className="wrap page-head">
-        <h1>Everything we build starts with a public records request.</h1>
-        <p className="lede">
-          This is every request we have filed, when we filed it, what came back, and
-          the document itself. If a request was denied, you will see why.
-        </p>
+      <header className="civic-page-hero">
+        <div className="wrap civic-page-hero-inner">
+          <p className="civic-kicker">Records Desk</p>
+          <h1>Everything we build starts with a public records request.</h1>
+          <p className="lede">
+            This is every request we have filed, when we filed it, what came back, and
+            the document itself. If a request was denied, you will see why.
+          </p>
+        </div>
       </header>
 
-      <section className="wrap vote-section">
+      <section className="wrap civic-section">
+        <p className="civic-kicker-dark">The log</p>
+        <h2>Our requests, in the open.</h2>
         {requests.length === 0 ? (
-          <p className="sub">No requests have been filed yet.</p>
+          <p className="civic-empty">No requests have been filed yet. The first ones will appear here.</p>
         ) : (
           <ScrollableTable label="Public records request log">
           <table className="data-table records-table">
@@ -101,8 +106,9 @@ export default async function RecordsPage() {
         )}
       </section>
 
-      <section className="band">
+      <section className="civic-band civic-band-navy">
         <div className="wrap">
+          <p className="civic-kicker">File your own</p>
           <h2>You can do this too.</h2>
           <p className="sub">
             Ohio&rsquo;s Public Records Act gives every person the right to request public
@@ -110,17 +116,23 @@ export default async function RecordsPage() {
             you want them. Here is how it works in Toledo.
           </p>
 
-          <ol className="steps-list">
-            {STEPS.map((step) => (
-              <li key={step}>{step}</li>
+          <ol className="civic-numbered">
+            {STEPS.map((step, i) => (
+              <li key={step}>
+                <span className="n">{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <p>{step}</p>
+                </div>
+              </li>
             ))}
           </ol>
 
-          <h3 className="officers-head">Records officer addresses</h3>
-          <ul className="officers">
+          <h3 className="civic-h3">Records officer addresses</h3>
+          <ul className="officers-list">
             {agencies.map((agency) => (
               <li key={agency.id}>
-                <span>{agency.name}</span>
+                <span className="agency-name">{agency.name}</span>
+                {" — "}
                 {agency.records_officer_email ? (
                   <a href={`mailto:${agency.records_officer_email}`}>
                     {agency.records_officer_email}
@@ -132,9 +144,9 @@ export default async function RecordsPage() {
             ))}
           </ul>
 
-          <div className="actions">
+          <div className="actions" style={{ marginTop: 32 }}>
             {templatePath ? (
-              <a className="btn" href={documentUrl(templatePath)} download>
+              <a className="btn btn-gold" href={documentUrl(templatePath)} download>
                 Download our request template
               </a>
             ) : (
