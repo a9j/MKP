@@ -1249,6 +1249,16 @@
   min-height: 320px;
 }
 
+@media (min-width: 901px) {
+  /* In the 2-column card, force the photo to fill the full row height.
+     Without this, aspect-ratio keeps it short when the text runs long,
+     leaving a white gap. !important beats the inline aspect-ratio. */
+  .civic-program-photo.photo {
+    height: 100%;
+    aspect-ratio: auto !important;
+  }
+}
+
 .civic-program-card-body {
   padding: 48px 44px;
   display: flex;
