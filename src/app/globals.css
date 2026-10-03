@@ -1577,6 +1577,15 @@
   border-bottom: 3px solid #0F2A44;
 }
 
+@media (max-width: 700px) {
+  /* Inline aspect-ratio is 21/8 (cinematic); on phones that is a sliver,
+     so force a taller frame. !important beats the inline style. */
+  .civic-photo-band.photo {
+    aspect-ratio: 16 / 10 !important;
+    max-height: 320px;
+  }
+}
+
 /* Photo hero: full-bleed image with a dark scrim so text stays readable. */
 .civic-hero-photo .civic-hero-bg {
   position: absolute;
