@@ -119,7 +119,13 @@ export default async function HomePage() {
       <section className="wrap civic-explorer" id="explorer">
         <p className="civic-kicker-dark">Start with your paycheck</p>
         <h2>What do you actually make?</h2>
-        <PayExplorer data={explorer} id="explorer" />
+        {explorer ? (
+          <PayExplorer data={explorer} id="explorer" />
+        ) : (
+          <p className="civic-empty">
+            The pay data hasn&rsquo;t been published yet. Check back soon.
+          </p>
+        )}
       </section>
 
       <section className="civic-programs" aria-label="What we build">

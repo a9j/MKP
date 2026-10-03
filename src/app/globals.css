@@ -1171,3 +1171,12 @@
 @media (prefers-reduced-motion: reduce) {
   .btn-gold:hover, .btn-outline-w:hover { transform: none; }
 }
+
+/* Empty state for the explorer when pay data is not published yet. */
+.civic-empty {
+  font-size: 18px;
+  color: var(--ink-2);
+  border: 2px dashed var(--line);
+  padding: 40px 32px;
+  text-align: center;
+}
