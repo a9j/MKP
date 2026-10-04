@@ -1624,10 +1624,16 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(15, 42, 68, 0.92) 0%,
-    rgba(15, 42, 68, 0.78) 45%,
-    rgba(15, 42, 68, 0.9) 100%
+    rgba(15, 42, 68, 0.96) 0%,
+    rgba(15, 42, 68, 0.92) 45%,
+    rgba(15, 42, 68, 0.96) 100%
   );
+}
+
+/* Extra definition for headline over photo. */
+.civic-hero-photo .civic-hero-inner h1,
+.civic-hero-photo .civic-hero-inner .lede {
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
 .civic-hero-photo .civic-hero-inner {
