@@ -7,6 +7,10 @@
    --------------------------------------------------------------------------- */
 
 :root {
+  /* The civic design uses hardcoded light-mode colors throughout.
+     Force light rendering so phones in dark mode don't get dark
+     backgrounds behind navy text. */
+  color-scheme: light;
   --bg: #FFFFFF;
   --band: #F4F6F8;
   --ink: #0F2A44;
