@@ -187,8 +187,8 @@ export default async function HomePage() {
             </ol>
           </div>
           <Photo
-            file="how-we-work.jpg"
-            alt="A person holding a stack of printed tax and records documents"
+            file="records-folders.jpg"
+            alt="Stacks of manila folders holding public records"
             ratio="3 / 4"
             sizes="(max-width: 900px) 100vw, 40vw"
             className="civic-steps-photo"
