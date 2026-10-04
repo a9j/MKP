@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/photo";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { BudgetCategories } from "@/components/explorer/budget-categories";
@@ -74,6 +75,13 @@ export default async function ExplorerPage() {
           </div>
         </div>
       </header>
+      <Photo
+        src="for-teachers.jpg"
+        alt="A teacher in a Toledo classroom"
+        ratio="21 / 8"
+        className="civic-photo-band"
+        eager
+      />
 
       <section className="wrap civic-section">
         {data ? (

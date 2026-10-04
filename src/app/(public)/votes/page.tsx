@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/photo";
 import Link from "next/link";
 import { VoteList } from "@/components/public/vote-list";
 import { getVotes } from "@/lib/queries/votes";
@@ -32,6 +33,13 @@ export default async function VotesPage() {
           </div>
         </div>
       </header>
+      <Photo
+        src="for-residents.jpg"
+        alt="Toledo residents in their neighborhood"
+        ratio="21 / 8"
+        className="civic-photo-band"
+        eager
+      />
 
       <section className="wrap civic-section">
         <VoteList votes={votes} />

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/photo";
 import { getRecordsRequests, getAgencies, documentUrl } from "@/lib/queries/records";
 import { getSiteSettings } from "@/lib/queries/settings";
 import { ScrollableTable } from "@/components/public/scrollable-table";
@@ -41,6 +42,13 @@ export default async function RecordsPage() {
           </p>
         </div>
       </header>
+      <Photo
+        src="how-we-work.jpg"
+        alt="Hands holding printed public records and reports"
+        ratio="21 / 8"
+        className="civic-photo-band"
+        eager
+      />
 
       <section className="wrap civic-section">
         <p className="civic-kicker-dark">The log</p>

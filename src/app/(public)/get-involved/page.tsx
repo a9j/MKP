@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/photo";
 import { InquiryForm } from "@/components/public/inquiry-form";
 import { SubscribeForm } from "@/components/public/subscribe-form";
 import { getSiteSettings } from "@/lib/queries/settings";
@@ -26,6 +27,13 @@ export default async function GetInvolvedPage() {
           </p>
         </div>
       </header>
+      <Photo
+        src="for-residents.jpg"
+        alt="Toledo residents in their neighborhood"
+        ratio="21 / 8"
+        className="civic-photo-band"
+        eager
+      />
 
       <section className="wrap civic-section">
         <div className="civic-cards">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/photo";
 import Link from "next/link";
 import { getPeople } from "@/lib/queries/site";
 import { getListeningSessions } from "@/lib/queries/site";
@@ -49,6 +50,13 @@ export default async function AboutPage() {
           </p>
         </div>
       </header>
+      <Photo
+        src="for-parents.jpg"
+        alt="Toledo parents with their children"
+        ratio="21 / 8"
+        className="civic-photo-band"
+        eager
+      />
 
       <section className="wrap civic-section">
         <p className="civic-kicker-dark">Principles</p>

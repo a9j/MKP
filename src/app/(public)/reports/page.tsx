@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Photo } from "@/components/photo";
 import { ReportList } from "@/components/public/report-list";
 import { getPublishedReports } from "@/lib/queries/reports";
 import { getSiteSettings } from "@/lib/queries/settings";
@@ -66,6 +67,13 @@ export default async function ReportsPage() {
           </p>
         </div>
       </header>
+      <Photo
+        src="how-we-work.jpg"
+        alt="Hands holding printed public records and reports"
+        ratio="21 / 8"
+        className="civic-photo-band"
+        eager
+      />
 
       <section className="wrap civic-section">
         <div className="civic-cards">
