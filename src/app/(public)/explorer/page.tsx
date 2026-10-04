@@ -76,11 +76,12 @@ export default async function ExplorerPage() {
         </div>
       </header>
       <Photo
-        src="for-teachers.jpg"
+        file="for-teachers.jpg"
         alt="A teacher in a Toledo classroom"
         ratio="21 / 8"
+        sizes="100vw"
         className="civic-photo-band"
-        eager
+        priority
       />
 
       <section className="wrap civic-section">

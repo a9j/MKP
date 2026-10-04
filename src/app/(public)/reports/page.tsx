@@ -68,11 +68,12 @@ export default async function ReportsPage() {
         </div>
       </header>
       <Photo
-        src="how-we-work.jpg"
+        file="how-we-work.jpg"
         alt="Hands holding printed public records and reports"
         ratio="21 / 8"
+        sizes="100vw"
         className="civic-photo-band"
-        eager
+        priority
       />
 
       <section className="wrap civic-section">

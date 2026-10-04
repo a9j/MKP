@@ -28,11 +28,12 @@ export default async function GetInvolvedPage() {
         </div>
       </header>
       <Photo
-        src="for-residents.jpg"
+        file="for-residents.jpg"
         alt="Toledo residents in their neighborhood"
         ratio="21 / 8"
+        sizes="100vw"
         className="civic-photo-band"
-        eager
+        priority
       />
 
       <section className="wrap civic-section">

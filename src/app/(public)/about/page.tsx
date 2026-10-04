@@ -51,11 +51,12 @@ export default async function AboutPage() {
         </div>
       </header>
       <Photo
-        src="for-parents.jpg"
+        file="for-parents.jpg"
         alt="Toledo parents with their children"
         ratio="21 / 8"
+        sizes="100vw"
         className="civic-photo-band"
-        eager
+        priority
       />
 
       <section className="wrap civic-section">
