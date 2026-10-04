@@ -1436,6 +1436,12 @@
 .civic-band-navy h2, .civic-band-teal h2 { color: #fff; }
 .civic-band-gold h2, .civic-band-paper h2 { color: #0F2A44; }
 
+/* The generic .sub and .unavailable set dark ink; override for colored bands. */
+.civic-band-navy .sub, .civic-band-teal .sub { color: #fff; }
+.civic-band-gold .sub, .civic-band-paper .sub { color: #0F2A44; }
+.civic-band-navy .unavailable, .civic-band-teal .unavailable { color: rgba(255, 255, 255, 0.8); }
+.civic-band-gold .unavailable, .civic-band-paper .unavailable { color: rgba(15, 42, 68, 0.75); }
+
 .civic-band .sub {
   font-size: 19px;
   line-height: 1.6;
