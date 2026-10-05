@@ -17,11 +17,12 @@ type Row = {
   type: string;
   report_date: string;
   summary: string | null;
+  body: string | null;
   status: string;
   report_sources?: { label: string; url: string; sort_order: number }[] | null;
 };
 
-const SELECT = "id, slug, title, type, report_date, summary, status, report_sources(label, url, sort_order)";
+const SELECT = "id, slug, title, type, report_date, summary, body, status, report_sources(label, url, sort_order)";
 
 async function attachDocuments(
   client: ReturnType<typeof createPublicClient>,
@@ -49,6 +50,7 @@ async function attachDocuments(
       reportDate: row.report_date,
       reportDateLabel: formatDay(row.report_date),
       summary: row.summary ?? "",
+      body: row.body ?? "",
       status: row.status as "draft" | "published",
       pdfUrl: document ? documentUrl(document.storage_path) : null,
       pdfName: document?.file_name ?? null,

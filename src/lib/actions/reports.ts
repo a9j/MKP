@@ -35,6 +35,7 @@ export async function saveReport(form: FormData): Promise<SaveResult> {
   const type = String(form.get("type") ?? "pay_report");
   const reportDate = String(form.get("reportDate") ?? "");
   const summary = String(form.get("summary") ?? "").trim();
+  const body = String(form.get("body") ?? "").trim();
   const status = String(form.get("status") ?? "draft") as "draft" | "published";
 
   const labels = form.getAll("sourceLabel").map((v) => String(v).trim());
@@ -93,6 +94,7 @@ export async function saveReport(form: FormData): Promise<SaveResult> {
       | "ballot_explainer",
     report_date: reportDate,
     summary,
+    body: body.length > 0 ? body : null,
     status,
     // Set the first time it goes out, and left alone afterwards so an edit
     // does not rewrite the publication date.

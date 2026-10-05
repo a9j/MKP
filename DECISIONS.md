@@ -1057,3 +1057,18 @@ The `/explainers` index lists only templated explainers. The Phase One spec's
 `/explainers/[slug]` page for claim-based explainers is still not built. The
 Reports page still describes ballot, levy and contract work in its own cards
 and was left alone.
+## 2026-10-05
+
+### Reports read on the page; the PDF is a download
+Explainers were only reachable as an embedded PDF. `reports.body` (migration
+0013) holds the full explainer in markdown and renders on `/reports/[slug]`.
+The summary stays capped at 600 characters as the lede and card text. The PDF
+is offered as a download: the attached file when there is one, otherwise a
+"Download as PDF" button that prints the page with a print stylesheet that
+strips the site chrome. A report with no body still falls back to the inline
+PDF. Markdown tables are not used because react-markdown runs without GFM.
+
+### Levy card links to the levy explainers
+The Levy Explainers card on `/reports` now links to published
+`levy_explainer` reports, and the status-note fallbacks use `||` so an empty
+setting no longer renders a blank label.

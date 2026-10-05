@@ -1475,6 +1475,7 @@ export type Database = {
       }
       reports: {
         Row: {
+          body: string | null
           created_at: string
           id: string
           preview_token: string
@@ -1488,6 +1489,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          body?: string | null
           created_at?: string
           id?: string
           preview_token?: string
@@ -1501,6 +1503,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          body?: string | null
           created_at?: string
           id?: string
           preview_token?: string
