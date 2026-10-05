@@ -885,6 +885,23 @@
 
 /* Home hero: off-white, navy type #1B2A3A, layout in Tailwind utilities on
    the element. This is the gold swipe under "readable." */
+/* Light off-white wash over the hero photo, never a dark one: the navy text
+   sits on top. Phones put the text over the whole photo, so the wash is even;
+   from 768px it fades out toward the person on the right. */
+.home-hero-wash {
+  background: rgba(247, 245, 240, 0.78);
+}
+@media (min-width: 768px) {
+  .home-hero-wash {
+    background: linear-gradient(
+      90deg,
+      rgba(247, 245, 240, 0.85) 0%,
+      rgba(247, 245, 240, 0.6) 45%,
+      rgba(247, 245, 240, 0) 65%
+    );
+  }
+}
+
 .home-hero-hl {
   background: linear-gradient(to top, #D4A84B 0%, #D4A84B 30%, transparent 30%);
   padding: 0 0.06em;
