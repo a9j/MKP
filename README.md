@@ -26,12 +26,14 @@ Copy `.env.example` to `.env.local` and fill it in.
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL. Confirmation links, council preview links, Open Graph images and the sitemap are all built from it |
 | `EMAIL_FROM` | Optional. The from address on outgoing mail. Defaults to `The Mona K Project <hello@monakproject.org>` |
 | `SUBSCRIBE_TOKEN_SECRET` | Optional. Signs subscriber confirmation links. Defaults to the service role key |
-| `AUTOMATION_ENABLED` | Master switch for the scheduled collectors and every model call. `false` by default, and nothing reads it yet |
+| `AUTOMATION_ENABLED` | Master switch for every scheduled route, collector and model call. `false` by default. With it unset or false the scheduled routes still answer, record that they declined, and do nothing |
+| `AUTOMATION_BODIES` | Which public bodies the collectors are allowed to watch, comma separated: `tps`, `council`, `county`. Defaults to `tps` alone. An unrecognised name is dropped with a warning rather than guessed at |
 | `ANTHROPIC_API_KEY` | For drafting only, once the collectors land. A model never publishes anything |
-| `CRON_SECRET` | Shared secret the scheduled routes check before doing any work |
+| `CRON_SECRET` | Shared secret the scheduled routes check before doing any work. With it unset every scheduled route refuses every caller, rather than standing open |
 
-The last three are for the collection and drafting work, which is not built
-yet. The site runs completely without them.
+`ANTHROPIC_API_KEY` is for the drafting work, which is not built yet. The site
+runs completely without any of these; the daily digest needs `CRON_SECRET` and
+`AUTOMATION_ENABLED`, and the collectors will need the rest.
 
 Every read of these goes through `src/lib/env.ts`, so a missing variable fails
 with a message naming it rather than showing an empty page.
@@ -94,13 +96,19 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | Command | What it covers |
 | --- | --- |
 | `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 67 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, and the RLS rules for anonymous, non-admin, admin and service role callers |
-| `pnpm test:data` | 56 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
+| `pnpm test:data` | 61 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL, the mail fallback, the digest's grouping and ordering, the house mail template, and the guards on the scheduled routes, none of which needs the database |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
 | `pnpm test:lighthouse` | Lighthouse over all 12 public routes in mobile emulation. Fails if any category on any route drops below 95 |
-| `pnpm test:e2e` | Playwright, 66 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, the city budget loads from a CSV and drives every panel on `/budget`, a draft report stays off the public site while its preview link opens without a login, a ballot explainer will not save without its three answers and reaches the ballot grouping, the home page strip and its own three part page, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
+| `pnpm test:e2e` | Playwright, 69 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, the city budget loads from a CSV and drives every panel on `/budget`, a draft report stays off the public site while its preview link opens without a login, a ballot explainer will not save without its three answers and reaches the ballot grouping, the home page strip and its own three part page, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document, the daily digest refuses a caller without the shared secret and otherwise writes a mail that links into each waiting form, and the dashboard says when each scheduled job last ran. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
 and a running app.
+
+The end to end tests post real rows and leave them behind, and the Latest feed
+on the home page shows a fixed number of items. Run `scripts/local-supabase.sh`
+again to reseed before a second run, or the feed assertions will eventually
+fail on a database full of earlier test votes rather than on anything in the
+code.
 
 The local stack includes a small stand in for the Supabase auth server, so the
 end to end tests sign in through the real sign in screen rather than forging a
@@ -218,7 +226,55 @@ The About page carries the disclosure this implies, in one sentence, from
 None of the collectors or drafters exist yet. The tables they will write to
 (`meetings`, `jobs`, `ai_runs`, `vacancy_snapshots`), the columns they will set,
 and the rule above are all in place, so switching them on adds routes rather
-than changing the shape of anything.
+than changing the shape of anything. The daily digest below is the first
+scheduled route, and it shows the shape the rest will take: it checks the
+shared secret, it checks `AUTOMATION_ENABLED`, and it writes a row to `jobs`
+whatever it decides.
+
+## The daily digest
+
+One mail a day saying what is waiting on a person, at `/api/cron/digest`.
+`vercel.json` schedules it, and nothing else calls it.
+
+It reads the same queue the admin dashboard shows, so the two can never
+disagree about what "waiting" means: draft votes, draft reports, draft
+listening sessions, and records requests past the response window. The lines
+are grouped by public body in the site's order, then by type, then newest
+first, and each one is a link into the form for it. A machine written draft is
+marked "AI draft, unreviewed" in the mail as well as in the admin. The closing
+line is "Nothing publishes until you approve it."
+
+**A day with nothing waiting sends nothing.** A message that arrives every
+morning whether or not it matters is a message people stop opening, and the
+whole value of this one is that its arrival means something.
+
+There are four ways it declines to send, and it records each in `jobs` so the
+silence is never a mystery:
+
+| Condition | What it does |
+| --- | --- |
+| `CRON_SECRET` missing, or a caller without it | 401, and no row in `jobs`. An unauthenticated caller is not a run of this job, and letting one write to the log would be a way to fill it with noise |
+| `AUTOMATION_ENABLED` is not `true` | A `skipped` row naming the switch |
+| `site_settings.digest_enabled` is `false` | A `skipped` row naming the setting |
+| Nothing waiting | A `skipped` row with `items: 0` |
+
+`digest_enabled` is a key and value row rather than a column, because it is an
+operational switch for the whole site and not a property of any one person. It
+is private, so the anonymous key never sees it. It ships `true`.
+
+It goes to every address in `admins`. Set `admins.digest_email` to send a
+person's digest somewhere other than the address they sign in with; left empty,
+the sign in address is used.
+
+The admin dashboard carries the other half of this: a line for each scheduled
+job saying when it last ran, read from `jobs`. A job that has not been heard
+from in 48 hours, or has never run at all, is marked in amber. A `skipped` run
+counts as having been heard from, since deciding not to act is still the job
+working.
+
+Vercel cron is UTC only, with no timezone field, so `0 11 * * *` is 7am in
+Toledo in summer and 6am in winter. The hour drifts by one across daylight
+saving rather than the mail failing to arrive.
 
 ## Publishing a report
 
@@ -310,6 +366,12 @@ the local generator to check a migration before it gets there.
    the sign in link will not arrive.
 8. **Check Plausible** is receiving traffic for `monakproject.org`. The script
    is on public pages only, never on the admin panel.
+9. **Set `CRON_SECRET`** to a long random string, and `AUTOMATION_ENABLED` to
+   `true` when you want the daily digest to start arriving. Vercel sends the
+   secret on its own scheduled calls. Without it the route refuses every
+   caller, including Vercel, which is the safe way round. The schedule lives in
+   `vercel.json` and is UTC, so change the hour there rather than in the
+   dashboard.
 
 Public pages use ISR. Every admin save calls `revalidatePath` for the routes it
 affects, so published work appears within seconds without a rebuild.

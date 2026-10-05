@@ -76,7 +76,10 @@ select pg_temp.want('admin sees drafts too',   (select count(*) from reports), 2
 select pg_temp.want('admin sees draft votes too', (select count(*) from votes), 3);
 select pg_temp.want('admin sees inquiries',    (select count(*) from inquiries), 2);
 select pg_temp.want('admin sees subscribers',  (select count(*) from subscribers), 2);
-select pg_temp.want('admin sees all settings', (select count(*) from site_settings), 24);
+-- 25 since 0012 added digest_enabled. The count is what proves an administrator
+-- sees the operational settings as well as the public ones, so it moves with
+-- the seeded rows rather than being loosened to "more than none".
+select pg_temp.want('admin sees all settings', (select count(*) from site_settings), 25);
 insert into votes (meeting_id, item_title, summary, status, published_at)
   select id, 'admin vote', 'x', 'published', now() from meetings limit 1;
 \echo 'OK admin may publish a vote'

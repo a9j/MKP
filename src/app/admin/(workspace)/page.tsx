@@ -3,16 +3,11 @@ import { getAdminUser } from "@/lib/auth";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { OVERDUE_BUSINESS_DAYS } from "@/lib/limits";
 import { formatDay } from "@/lib/queries/records";
+import { getReviewQueue, unreadFirst } from "@/lib/queries/review-queue";
+import { getWatcherStatus, STALE_AFTER_HOURS } from "@/lib/queries/watchers";
 
 export const dynamic = "force-dynamic";
 
-type ReviewItem = {
-  key: string;
-  href: string;
-  title: string;
-  kind: string;
-  aiDraft: boolean;
-};
 
 /**
  * Three things, and nothing else.
@@ -38,53 +33,19 @@ export default async function AdminDashboard() {
 
   const supabase = await createServerSupabase();
 
-  const [votes, reports, listening, overdue] = await Promise.all([
-    supabase
-      .from("votes")
-      .select("id, item_title, ai_draft, created_at, meetings(meeting_date)")
-      .eq("status", "draft")
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("reports")
-      .select("id, title, updated_at")
-      .eq("status", "draft")
-      .order("updated_at", { ascending: false }),
-    supabase
-      .from("listening_sessions")
-      .select("id, session_date, audience")
-      .eq("status", "draft")
-      .order("session_date", { ascending: false }),
+  const [items, overdue, watchers] = await Promise.all([
+    getReviewQueue(supabase),
     supabase
       .from("records_request_log")
       .select("id, agency_name, request_text, date_filed, open_business_days")
       .gt("open_business_days", OVERDUE_BUSINESS_DAYS)
       .order("open_business_days", { ascending: false }),
+    getWatcherStatus(supabase),
   ]);
 
-  // Machine written drafts first: they are the ones nobody has read yet.
-  const reviewItems: ReviewItem[] = [
-    ...(votes.data ?? []).map((v) => ({
-      key: `vote-${v.id}`,
-      href: `/admin/votes/${v.id}`,
-      title: v.item_title,
-      kind: v.meetings ? `Vote, ${formatDay(v.meetings.meeting_date)}` : "Vote",
-      aiDraft: v.ai_draft,
-    })),
-    ...(reports.data ?? []).map((r) => ({
-      key: `report-${r.id}`,
-      href: `/admin/reports/${r.id}`,
-      title: r.title,
-      kind: "Report draft",
-      aiDraft: false,
-    })),
-    ...(listening.data ?? []).map((l) => ({
-      key: `listening-${l.id}`,
-      href: "/admin/listening",
-      title: `Listening session, ${formatDay(l.session_date)}`,
-      kind: l.audience === "teachers" ? "Teachers" : "Parents",
-      aiDraft: false,
-    })),
-  ].sort((a, b) => Number(b.aiDraft) - Number(a.aiDraft));
+  // The records requests have their own section below, so they are not also
+  // listed among the things waiting to be read.
+  const reviewItems = unreadFirst(items.filter((item) => item.reviewKind !== "records"));
 
   const overdueRows = overdue.data ?? [];
   const nothingWaiting = reviewItems.length === 0 && overdueRows.length === 0;
@@ -113,7 +74,7 @@ export default async function AdminDashboard() {
                   <li key={item.key}>
                     <Link href={item.href}>{item.title}</Link>
                     <span className="review-kind">
-                      {item.kind}
+                      {item.detail}
                       {item.aiDraft ? <span className="badge-ai">AI draft, unreviewed</span> : null}
                     </span>
                   </li>
@@ -140,6 +101,42 @@ export default async function AdminDashboard() {
           ) : null}
         </>
       )}
+
+      {/* Under the review list, deliberately: it is operational, not work. A
+          collector that quietly stopped looks exactly like a quiet fortnight,
+          so it says when each one was last heard from rather than leaving that
+          to be noticed. */}
+      <section className="watcher-status">
+        <h2>Scheduled jobs</h2>
+        <ul>
+          {watchers.map((watcher) => (
+            <li key={watcher.name} className={watcher.stale ? "stale" : undefined}>
+              <span className="watcher-name">{watcher.label}</span>
+              <span className="watcher-when">
+                {watcher.lastRun
+                  ? `last run ${formatWhen(watcher.lastRun)}, ${watcher.lastStatus}`
+                  : "has never run"}
+                {watcher.stale ? (
+                  <strong>
+                    {" "}
+                    nothing has succeeded in {STALE_AFTER_HOURS} hours
+                  </strong>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
     </>
   );
+}
+
+/** "Oct 5, 7:02 am", which is what you want when checking a daily job. */
+function formatWhen(iso: string): string {
+  return new Date(iso).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }

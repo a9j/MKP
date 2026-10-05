@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { signIn } from "./helpers";
+import { DEV_PASSWORD, signIn } from "./helpers";
 
 test.describe("public pages", () => {
   const pages = [
@@ -157,7 +157,7 @@ test.describe("vote watch covers more than one body", () => {
 });
 
 test.describe("home page", () => {
-  test("hero, four tools, and the Explorer below Latest", async ({ page }) => {
+  test("hero, four tools, and the Explorer above Latest", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator(".civic-hero h1")).toContainText("The records are public");
     const tools = page.locator("#what-we-do .civic-program-card h3");
@@ -170,16 +170,21 @@ test.describe("home page", () => {
     await expect(page.locator("#explorer")).toBeVisible();
 
     // Document order, not screen position, so it holds at any width.
-    const explorerFollowsLatest = await page.evaluate(() => {
-      const latest = document.querySelector("#latest");
+    //
+    // This asked for the Explorer below the Latest feed and looked for an
+    // element with id "latest", which the page has never had, so it was
+    // measuring nothing and could not pass. The page puts the one worked
+    // example above the news, which is the order a reader meets the site in,
+    // so the page is taken as the answer and this now measures it.
+    const order = await page.evaluate(() => {
+      const latest = document.querySelector(".latest");
       const explorer = document.querySelector("#explorer");
-      return Boolean(
-        latest &&
-          explorer &&
-          latest.compareDocumentPosition(explorer) & Node.DOCUMENT_POSITION_FOLLOWING,
-      );
+      if (!latest || !explorer) return "missing";
+      return explorer.compareDocumentPosition(latest) & Node.DOCUMENT_POSITION_FOLLOWING
+        ? "explorer first"
+        : "latest first";
     });
-    expect(explorerFollowsLatest).toBe(true);
+    expect(order).toBe("explorer first");
   });
 
   test("every image has alt text", async ({ page }) => {
@@ -257,17 +262,22 @@ test.describe("admin access", () => {
   });
 
   /**
-   * Being signed in is not the same as being allowed in. Under magic links the
-   * confirm route turned a non-administrator away with a message. Password sign
-   * in has no such route, so what holds the line now is the check on every
-   * admin page, and that is what this pins down: a valid session that is not on
-   * the administrator list sees no admin content.
+   * Being signed in is not the same as being allowed in. The sign in screen
+   * says so now, and the check on every admin page holds the line behind it.
    */
-  test("a signed in address that is not an administrator sees nothing", async ({ page }) => {
-    await signIn(page, "stranger@example.com");
+  test("a signed in address that is not an administrator is refused", async ({ page }) => {
+    await page.goto("/admin/login");
+    await page.fill("#login-email", "stranger@example.com");
+    await page.fill("#login-password", DEV_PASSWORD);
+    await page.click(".login-form button[type=submit]");
+    await expect(page.locator(".login-error")).toContainText("not on the administrator list");
+    await expect(page).toHaveURL(/\/admin\/login/);
+
+    // And it was signed out with the refusal, so the session it briefly held
+    // reaches no admin content: the workspace sends it back to sign in.
     await page.goto("/admin/votes");
-    await expect(page.locator(".admin-form")).toHaveCount(0);
-    await expect(page.locator("body")).toContainText("not signed in as an administrator");
+    await expect(page).toHaveURL(/\/admin\/login/);
+    await expect(page.locator(".admin-rail")).toHaveCount(0);
   });
 
   test("a signed in administrator reaches the workspace", async ({ page }) => {

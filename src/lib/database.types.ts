@@ -23,18 +23,21 @@ export type Database = {
       admins: {
         Row: {
           created_at: string
+          digest_email: string | null
           email: string
           id: string
           name: string | null
         }
         Insert: {
           created_at?: string
+          digest_email?: string | null
           email: string
           id?: string
           name?: string | null
         }
         Update: {
           created_at?: string
+          digest_email?: string | null
           email?: string
           id?: string
           name?: string | null

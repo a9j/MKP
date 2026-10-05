@@ -33,6 +33,22 @@ export function LoginForm({ next }: { next: string }) {
       return;
     }
 
+    // Being signed in is not the same as being allowed in. Under magic links
+    // the confirm route turned a non-administrator away here, with a message;
+    // password sign in has no such route, so the check happens now. The admins
+    // table is readable only to an administrator, so an empty read is the
+    // answer: no row, not on the list.
+    //
+    // This is a courtesy, not the boundary. Every admin page and every server
+    // action checks for itself, and RLS refuses the write regardless.
+    const { data: rows } = await supabase.from("admins").select("id").limit(1);
+    if (!rows || rows.length === 0) {
+      await supabase.auth.signOut();
+      setState("error");
+      setMessage("That address is not on the administrator list.");
+      return;
+    }
+
     window.location.href = next;
   }
 

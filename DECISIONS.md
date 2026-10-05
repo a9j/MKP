@@ -1116,3 +1116,130 @@ The home page feed is ordered by date alone, so items published on the same day
 tie in an arbitrary order. It makes one test fragile once a development
 database has collected a few same day rows. A tiebreak column on `latest_feed`
 would fix it properly.
+
+## 2026-10-05, phase 2 steps 5 and 6: the daily digest and the status line
+
+The two leftovers from step 3, then Part B and the parts of Part E that do not
+wait on the council watcher. Step 4 is deliberately not here: the brief says
+not to start it until a council meeting has been posted by hand, and none has.
+
+### The two leftovers
+
+The sign in screen turns away an address that is not on the administrator list
+again, with the sentence it used to use. Under magic links the confirm route
+did that; password sign in has no confirm route, so the check happens in the
+form: sign in, read `admins`, and sign straight back out when it comes back
+empty. The table is readable only to an administrator, so an empty read is the
+answer. This is a courtesy and not the boundary, which is still the check on
+every page and RLS underneath it.
+
+The home page test asked for the Explorer below the Latest feed and looked for
+an element with id `latest`, which the page has never had. It was measuring
+nothing and could not pass. The page puts the one worked example above the
+news, which is the order a reader meets the site in, so the page is taken as
+the answer and the test now measures that.
+
+### Two of the digest's six categories have nothing to count
+
+The brief lists six things the digest counts. Four exist: AI draft votes,
+report drafts, listening drafts, and records requests past ten business days.
+Two do not.
+
+"Flagged roll-call disagreements" needs the roll call extractor, which is step
+4. "Forecasts waiting to be entered" needs a forecasts table, which no
+migration has ever created. Rather than invent either, the digest counts the
+four that exist and is built so a fifth is a few lines: everything comes from
+one list in `src/lib/review-queue.ts`.
+
+### The dashboard and the digest read the same queue
+
+They have to agree about what "waiting" means. A count on a screen and a count
+in an email that disagree is worse than either alone, so both read
+`getReviewQueue`, and the dashboard filters out the records requests only
+because it shows them in their own section underneath.
+
+### Nothing waiting sends nothing
+
+A message that arrives every morning whether or not it matters is a message
+people stop opening, and the whole value of this one is that its arrival means
+something. A day with an empty queue writes a `skipped` job row and sends no
+mail. So does a day when `digest_enabled` is false, or when the master switch
+is off, and each row says which of those it was.
+
+### Three ways the digest declines to run, and all of them are recorded
+
+A caller without the shared secret gets a 401 and no job row: an
+unauthenticated request is not a run of the job, and letting one write to the
+log would be a way to fill it with noise. Everything else writes a row.
+
+A route with no `CRON_SECRET` set refuses every caller rather than being left
+open. An unauthenticated endpoint that writes to the database is worse than one
+nobody can reach. The comparison is constant time over equal lengths, so a
+wrong secret cannot be found one character at a time by timing the refusal.
+
+### site_settings is a key and value table, so digest_enabled is a row
+
+The brief asks for "a `digest_enabled` boolean on `site_settings`". That table
+has been key and value since 0001, so the switch is a row whose value is the
+string "false" when off. Reading it treats anything other than "false" as on,
+which means a typo leaves the digest running rather than silently stopping it.
+
+### AUTOMATION_BODIES defaults to the school board alone
+
+Switching the master on should not also start fetching a body whose output
+nobody has checked. An unrecognised name in the list is dropped with a warning
+rather than guessed at, because the cost of guessing is a collector reading the
+wrong agenda. `automationEnabledFor` is what a watcher asks, and it is false
+unless both switches agree.
+
+### `automation.ts` carries no server-only guard, on purpose
+
+`email.ts` has one because it holds the Resend key, and that guard is what put
+its template beyond the reach of a test until `email-disk.ts` was split out. The
+same split is made twice more here: `email-template.ts` holds the layout, and
+`review-queue.ts` holds the sorting and grouping rules. Nothing in any of the
+three is a secret, and all three are now tested directly.
+
+`automation.ts` reads `CRON_SECRET` but never returns it, so it is testable as
+it stands. What it would do in a browser is return false, which is the safe
+answer.
+
+### A skipped run still counts as the watcher being heard from
+
+The status line marks a job amber when nothing has succeeded in 48 hours, and
+a skipped run counts as success for that purpose. A watcher that found nothing
+new, or one deliberately switched off, has still been heard from; what the
+amber is for is a job that has stopped reporting at all.
+
+### The cron hour is UTC, so it moves with daylight saving
+
+Vercel's scheduler has no timezone. The brief asks for 7:00 am, and
+`0 11 * * *` is 7:00 am in Toledo while daylight saving is in effect and 6:00
+am outside it. An hour early in winter seemed better than an hour late, but it
+is worth knowing the digest does not stay at 7:00 all year.
+
+### The RLS suite counts settings rows
+
+`admin sees all settings` asserts an exact count, which 0012 moved from 24 to
+25. The count is what proves an administrator sees the operational settings as
+well as the public ones, so it was updated rather than loosened to "more than
+none".
+
+### Three em dashes removed, two of them from copy I did not write
+
+The house rule is no em dashes anywhere. The digest's own "AI draft,
+unreviewed" marker had one, which became a full stop. Two more were already on
+the site from the redesign: the home page meta description and the separator
+between an agency and its records officer address on `/records`. The rule is
+not about those two lines in particular, so they were fixed as well: a colon in
+both places, no wording changed. The home page description is metadata and
+never rendered, so visual parity is untouched.
+
+### The end to end suite needs a freshly seeded database
+
+Two feed assertions failed on a second run against the same local database and
+passed again after reseeding. Nothing was wrong with the code: the tests post
+real votes and leave them behind, the home page feed shows a fixed number of
+items, and after enough runs a new vote no longer fits on it. The fix is a note
+in README rather than a change to the tests, because the thing the test is
+checking, that a saved vote reaches the feed, is the right thing to check.

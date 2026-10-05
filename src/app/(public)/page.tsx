@@ -17,7 +17,7 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   description:
-    "The Mona K Project reads Toledo's public records — school budgets, board votes, salaries, city finances, ballot issues — and explains them in plain language. Every number sourced. No positions.",
+    "The Mona K Project reads Toledo's public records: school budgets, board votes, salaries, city finances, ballot issues. We explain them in plain language. Every number sourced. No positions.",
 };
 
 const PROGRAMS = [
