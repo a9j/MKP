@@ -81,24 +81,24 @@ const STEPS = [
 const HERO_ALT = "A person holding up a stack of tax and records forms in front of their face.";
 
 /**
- * The hero photo is art directed: a 6:5 crop under the text on phones, a 2:3
- * portrait beside it from 768px. One <picture> so a phone never downloads the
- * desktop file, and the reverse.
+ * The hero photo sits behind the words, art directed: the portrait on phones,
+ * a widened 16:9 version from 768px with the person on the right and open wall
+ * on the left under the text. One <picture> so each width downloads one file.
  */
 const { props: heroMobile } = getImageProps({
-  src: "/photos/hero-records-mobile.webp",
-  alt: HERO_ALT,
-  width: 1200,
-  height: 1000,
-  sizes: "calc(100vw - 48px)",
-  priority: true,
-});
-const { props: heroDesktop } = getImageProps({
   src: "/photos/hero-records-desktop.webp",
   alt: HERO_ALT,
   width: 1200,
   height: 1800,
-  sizes: "(min-width: 1120px) 480px, 42vw",
+  sizes: "100vw",
+  priority: true,
+});
+const { props: heroWide } = getImageProps({
+  src: "/photos/hero-records-wide.webp",
+  alt: HERO_ALT,
+  width: 2400,
+  height: 1350,
+  sizes: "100vw",
   priority: true,
 });
 
@@ -113,9 +113,18 @@ export default async function HomePage() {
 
   return (
     <>
-      <header className="home-hero bg-[#F7F5F0] text-[#1B2A3A]">
-        <div className="wrap grid items-center gap-10 pt-28 pb-16 md:min-h-[90svh] md:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] md:gap-12 md:py-16">
-          <div>
+      <header className="home-hero relative isolate overflow-hidden bg-[#F7F5F0] text-[#1B2A3A]">
+        <picture>
+          <source media="(min-width: 768px)" srcSet={heroWide.srcSet} sizes={heroWide.sizes} />
+          <img
+            {...heroMobile}
+            alt={HERO_ALT}
+            className="absolute inset-0 -z-20 h-full w-full object-cover object-[center_70%] md:object-[72%_center]"
+          />
+        </picture>
+        <div className="home-hero-wash absolute inset-0 -z-10" aria-hidden="true" />
+        <div className="wrap flex items-center pt-28 pb-16 md:min-h-[90svh] md:py-16">
+          <div className="md:w-[55%]">
             <h1 className="text-[clamp(2.5rem,9vw,5rem)] leading-[1.05] font-bold tracking-[-0.02em] text-balance text-[#1B2A3A]">
               The records are public. We make them{" "}
               <span className="home-hero-hl">readable.</span>
@@ -142,14 +151,6 @@ export default async function HomePage() {
             </div>
             <p className="mt-6 max-w-[44em] text-[14px] text-[#1B2A3A]/60">{NEUTRALITY_LINE}</p>
           </div>
-          <picture>
-            <source media="(min-width: 768px)" srcSet={heroDesktop.srcSet} sizes={heroDesktop.sizes} />
-            <img
-              {...heroMobile}
-              alt={HERO_ALT}
-              className="aspect-[6/5] h-auto w-full rounded-2xl object-cover md:aspect-[2/3] md:rounded-3xl"
-            />
-          </picture>
         </div>
       </header>
 
