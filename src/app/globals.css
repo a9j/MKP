@@ -880,19 +880,10 @@
    --------------------------------------------------------------------------- */
 
 .civic-hero {
-  background: #0F2A44 url('/photos/hero-main.jpg') center 30%/cover no-repeat;
+  background: #0F2A44;
   color: #FFFFFF;
   position: relative;
   overflow: hidden;
-}
-
-/* Dark scrim over the hero photo so white text stays readable. */
-.civic-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(10, 26, 44, 0.88) 0%, rgba(10, 26, 44, 0.72) 55%, rgba(10, 26, 44, 0.88) 100%);
-  pointer-events: none;
 }
 
 /* Giant ghost section mark. Decorative only. */
