@@ -6,9 +6,18 @@ import {
   getPublishedExplainers,
   getPublishedLevySlugs,
 } from "@/lib/queries/explainers";
+import { getPublishedReport } from "@/lib/queries/reports";
+import { reportForLevyPage } from "@/lib/levy-pairs";
 import { explainerPath, type Template } from "@/lib/explainer-types";
 
 type Params = { params: Promise<{ slug: string }> };
+
+/** The paired written report, only when it is paired and published. */
+async function publishedCompanionReport(levySlug: string): Promise<string | null> {
+  const reportSlug = reportForLevyPage(levySlug);
+  if (!reportSlug) return null;
+  return (await getPublishedReport(reportSlug)) ? reportSlug : null;
+}
 
 /**
  * /ballot/[slug], /levy/[slug] and /contract/[slug] differ only in which
@@ -41,13 +50,22 @@ export function explainerRoute(template: Template) {
 
   async function Page({ params }: Params) {
     const { slug } = await params;
-    const [explainer, levySlugs] = await Promise.all([
+    const [explainer, levySlugs, companionReportSlug] = await Promise.all([
       getPublishedExplainer(template, slug),
       template === "ballot" ? getPublishedLevySlugs() : Promise.resolve(new Set<string>()),
+      // The written explainer for the same issue, when it is published. Read
+      // here rather than in the body so the admin preview stays a pure render.
+      template === "levy" ? publishedCompanionReport(slug) : Promise.resolve(null),
     ]);
     if (!explainer) notFound();
 
-    return <ExplainerView explainer={explainer} publishedLevySlugs={levySlugs} />;
+    return (
+      <ExplainerView
+        explainer={explainer}
+        publishedLevySlugs={levySlugs}
+        companionReportSlug={companionReportSlug}
+      />
+    );
   }
 
   return { generateStaticParams, generateMetadata, Page };
