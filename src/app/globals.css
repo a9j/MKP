@@ -410,6 +410,22 @@
   .report-summary a { text-decoration: underline; text-underline-offset: 2px; }
   .report-page .actions { margin-top: 24px; }
 
+  /* full explainer body: one section per ## heading */
+  .report-full { margin-top: 36px; }
+  .report-full h1 { font-size: clamp(26px, 3vw, 34px); margin: 0 0 16px; }
+  .report-full h2 {
+    font-size: clamp(22px, 2.4vw, 28px); margin: 44px 0 14px; padding-top: 28px;
+    border-top: 1px solid var(--line); color: var(--ink);
+  }
+  .report-full h3 { font-size: 19px; margin: 24px 0 10px; color: var(--ink); }
+  .report-full hr { display: none; }
+  .report-full blockquote {
+    margin: 0 0 16px; padding: 12px 18px; border-left: 3px solid var(--teal);
+    background: var(--band); border-radius: 0 10px 10px 0;
+  }
+  .report-full blockquote p { margin-bottom: 0; }
+  .report-full a { overflow-wrap: anywhere; }
+
   .pdf-embed {
     display: block; width: 100%; height: min(70vh, 720px); margin-top: 28px;
     border: 1px solid var(--line); border-radius: 12px; background: var(--band);
@@ -1701,3 +1717,11 @@
 .admin-form label.check-row { display: flex; align-items: flex-start; gap: 12px; color: var(--ink); font-size: 16px; }
 .admin-form label.check-row input { width: 22px; height: 22px; min-height: 0; flex: none; margin-top: 2px; padding: 0; }
 .explainer-editor > fieldset > legend { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
+/* Print / Save as PDF: just the report, no site chrome. */
+@media print {
+  .site-nav, .site-footer, .no-print, .civic-photo-band, .preview-banner { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .report-summary p, .report-summary li { color: #000 !important; font-size: 12pt !important; }
+  .report-full h2 { break-after: avoid; }
+  .report-full a::after { content: " (" attr(href) ")"; font-size: 9pt; word-break: break-all; }
+}

@@ -13,6 +13,7 @@ export type EditableReport = {
   type: string;
   report_date: string;
   summary: string | null;
+  body?: string | null;
   status: string;
   preview_token: string;
   sources: { label: string; url: string }[];
@@ -158,6 +159,21 @@ export function ReportForm({
             {remaining} characters left of {SUMMARY_MARKDOWN_MAX}
           </p>
           {errors.summary ? <p className="field-error">{errors.summary}</p> : null}
+        </div>
+
+        <div className="field field-wide">
+          <label htmlFor="report-body">Full explainer, markdown</label>
+          <textarea
+            id="report-body"
+            name="body"
+            rows={18}
+            defaultValue={report?.body ?? ""}
+            aria-describedby="report-body-help"
+          />
+          <p id="report-body-help" className="admin-help">
+            The whole explainer, shown on the report page. Use ## for each issue heading.
+            The PDF, if you attach one, is offered as a download alongside it.
+          </p>
         </div>
 
         <fieldset className="field-wide rollcall">

@@ -40,6 +40,8 @@ export type Report = {
   reportDate: string;
   reportDateLabel: string;
   summary: string;
+  /** Full explainer text, markdown. Empty when the report is PDF only. */
+  body: string;
   status: "draft" | "published";
   pdfUrl: string | null;
   pdfName: string | null;
