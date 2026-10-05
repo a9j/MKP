@@ -19,8 +19,7 @@ export default async function LoginPage({
     <div className="login">
       <h1>Sign in</h1>
       <p className="admin-help">
-        We email you a link. There is no password to remember, and none to lose.
-        Only addresses on the administrator list can sign in.
+        Sign in with your administrator email and password.
       </p>
       {params.error ? (
         <p className="login-error" role="alert">
