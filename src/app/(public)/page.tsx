@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
+import { Photo } from "@/components/photo";
 import { NEUTRALITY_LINE } from "@/lib/nav";
 import { getLatestFeed } from "@/lib/queries/feed";
 import { getExplorerData } from "@/lib/queries/explorer";
@@ -14,10 +16,9 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   description:
-    "The Mona K Project reads Toledo's school budgets, salary schedules, board votes, and city finances and explains them in plain language. Every number sourced. No positions.",
+    "The Mona K Project reads Toledo's public records — school budgets, board votes, salaries, city finances, ballot issues — and explains them in plain language. Every number sourced. No positions.",
 };
 
-/** Programs copy from mona-k-project-site-copy.md, Home section. */
 const PROGRAMS = [
   {
     n: "01",
@@ -27,15 +28,19 @@ const PROGRAMS = [
     body: "Enter your step, lane, and years. See what you make, what each raise scenario means for you, and how you'd do in the eight surrounding districts.",
     linkLabel: "Open the Explorer",
     href: "/explorer",
+    photo: "for-teachers.jpg",
+    alt: "A teacher leading a classroom of students",
   },
   {
     n: "02",
     tone: "teal",
     tag: "Reports",
     title: "Reports",
-    body: "The annual Toledo Teacher Pay Report, levy explainers when something is on the ballot, and a contract tracker when talks open. Sourced, reviewed, no recommendations.",
+    body: "The annual Toledo Teacher Pay Report, plain-language explainers for every ballot issue, and a contract tracker when talks open. Sourced, reviewed, no recommendations.",
     linkLabel: "Read the reports",
     href: "/reports",
+    photo: "for-parents.jpg",
+    alt: "A family laughing together at home",
   },
   {
     n: "03",
@@ -45,6 +50,8 @@ const PROGRAMS = [
     body: "Every public records request we've filed and what came back. Every school board vote that touches money or staffing, and how each member voted.",
     linkLabel: "See the records",
     href: "/records",
+    photo: "for-residents.jpg",
+    alt: "A quiet residential street lined with houses and trees",
   },
 ] as const;
 
@@ -82,7 +89,17 @@ export default async function HomePage() {
 
   return (
     <>
-      <header className="civic-hero">
+      <header className="civic-hero civic-hero-photo">
+        <div className="civic-hero-bg" aria-hidden="true">
+          <Image
+            src="/photos/how-we-work.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+          />
+          <div className="civic-hero-scrim" />
+        </div>
         <div className="wrap civic-hero-inner">
           <p className="civic-kicker">The Mona K Project &mdash; Toledo, Ohio</p>
           <h1>
@@ -91,17 +108,17 @@ export default async function HomePage() {
             We make them <span className="hl">readable.</span>
           </h1>
           <p className="lede">
-            We read Toledo&rsquo;s school budgets, salary schedules, board votes, and
-            city finances, then explain them in plain language. Every number links
-            to the document it came from. We show what the records say and let
-            Toledo decide.
+            School budgets. Board votes. Salary schedules. City finances. Ballot
+            issues. We read Toledo&rsquo;s public records, explain them in plain
+            language, and link every number to the document it came from. Then
+            Toledo decides.
           </p>
           <div className="actions">
-            <Link className="btn btn-gold btn-large" href="/explorer">
-              See what you make
+            <Link className="btn btn-gold btn-large" href="#what-we-do">
+              See what we do
             </Link>
             <Link className="btn btn-outline-w btn-large" href="/reports">
-              Read the latest report
+              Read the latest
             </Link>
           </div>
           <p className="pledge">{NEUTRALITY_LINE}</p>
@@ -116,42 +133,84 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="wrap civic-explorer" id="explorer">
-        <p className="civic-kicker-dark">Start with your paycheck</p>
-        <h2>What do you actually make?</h2>
-        <PayExplorer data={explorer} id="explorer" />
-      </section>
-
-      <section className="civic-programs" aria-label="What we build">
-        {PROGRAMS.map((program) => (
-          <div className={`civic-program tone-${program.tone}`} key={program.title}>
-            <div className="civic-program-n">{program.n}</div>
-            <div className="tag">{program.tag}</div>
-            <h3>{program.title}</h3>
-            <p>{program.body}</p>
-            <Link className="more" href={program.href}>
-              {program.linkLabel} <span aria-hidden="true">&rarr;</span>
-            </Link>
-          </div>
-        ))}
+      <section className="wrap civic-everything" id="what-we-do" aria-label="What we do">
+        <p className="civic-kicker-dark">What we do</p>
+        <h2>
+          Not just teacher pay.
+          <br />
+          <span className="hl-dark">Everything.</span>
+        </h2>
+        <p className="civic-everything-lede">
+          Teacher pay is where we started, because it&rsquo;s where the records
+          were clearest. But the mission is bigger: any public record that
+          affects Toledo, explained so anyone can understand it.
+        </p>
+        <div className="civic-programs civic-programs-photo">
+          {PROGRAMS.map((program) => (
+            <article className={`civic-program-card tone-${program.tone}`} key={program.title}>
+              <Photo
+                file={program.photo}
+                alt={program.alt}
+                ratio="16 / 10"
+                sizes="(max-width: 700px) 100vw, 50vw"
+                className="civic-program-photo"
+              />
+              <div className="civic-program-card-body">
+                <div className="civic-program-n">{program.n}</div>
+                <div className="tag">{program.tag}</div>
+                <h3>{program.title}</h3>
+                <p>{program.body}</p>
+                <Link className="more" href={program.href}>
+                  {program.linkLabel} <span aria-hidden="true">&rarr;</span>
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
       <section className="civic-steps">
-        <div className="wrap">
-          <p className="civic-kicker">How it works</p>
-          <h2>How a 400-page PDF becomes a four-minute read.</h2>
-          <ol>
-            {STEPS.map((step, i) => (
-              <li key={step.title}>
-                <span className="civic-step-n">{String(i + 1).padStart(2, "0")}</span>
-                <div>
-                  <h3>{step.title}</h3>
-                  <p>{step.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+        <div className="wrap civic-steps-grid">
+          <div>
+            <p className="civic-kicker">How it works</p>
+            <h2>How a 400-page PDF becomes a four-minute read.</h2>
+            <ol>
+              {STEPS.map((step, i) => (
+                <li key={step.title}>
+                  <span className="civic-step-n">{String(i + 1).padStart(2, "0")}</span>
+                  <div>
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+          <Photo
+            file="records-folders.jpg"
+            alt="Stacks of manila folders holding public records"
+            ratio="3 / 4"
+            sizes="(max-width: 900px) 100vw, 40vw"
+            className="civic-steps-photo"
+          />
         </div>
+      </section>
+
+      <section className="wrap civic-explorer" id="explorer">
+        <p className="civic-kicker-dark">One example</p>
+        <h2>Start with a paycheck.</h2>
+        <p className="civic-explorer-lede">
+          The Teacher Pay Explorer is the first tool. More are coming: the city
+          budget, board votes, ballot issues. This is what &ldquo;readable&rdquo;
+          looks like.
+        </p>
+        {explorer ? (
+          <PayExplorer data={explorer} id="explorer" />
+        ) : (
+          <p className="civic-empty">
+            The pay data hasn&rsquo;t been published yet. Check back soon.
+          </p>
+        )}
       </section>
 
       <section className="wrap">

@@ -1679,7 +1679,7 @@ export type Database = {
       person_role: "staff" | "board" | "advisory" | "body_member"
       publish_status: "draft" | "published"
       records_request_status: "filed" | "partial" | "fulfilled" | "denied"
-      report_type: "pay_report" | "levy_explainer" | "contract_tracker"
+      report_type: "pay_report" | "levy_explainer" | "contract_tracker" | "ballot_explainer"
       source_kind:
         | "bill_text"
         | "fiscal_note"
@@ -1869,7 +1869,7 @@ export const Constants = {
       person_role: ["staff", "board", "advisory", "body_member"],
       publish_status: ["draft", "published"],
       records_request_status: ["filed", "partial", "fulfilled", "denied"],
-      report_type: ["pay_report", "levy_explainer", "contract_tracker"],
+      report_type: ["pay_report", "levy_explainer", "contract_tracker", "ballot_explainer"],
       source_kind: [
         "bill_text",
         "fiscal_note",
