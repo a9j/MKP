@@ -26,4 +26,5 @@ done
 echo "Migration applied."
 $PSQL -d mkp_test -q -f "$ROOT/supabase/tests/schema_test.sql"
 $PSQL -d mkp_test -q -f "$ROOT/supabase/tests/rls_test.sql"
+$PSQL -d mkp_test -q -f "$ROOT/supabase/tests/explainers_test.sql"
 echo "All database tests passed."

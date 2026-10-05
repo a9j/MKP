@@ -6,6 +6,8 @@ import { Photo } from "@/components/photo";
 import { NEUTRALITY_LINE } from "@/lib/nav";
 import { getLatestFeed } from "@/lib/queries/feed";
 import { getExplorerData } from "@/lib/queries/explorer";
+import { getLatestExplainers } from "@/lib/queries/explainers";
+import { ExplainerCards } from "@/components/explainers/explainer-cards";
 
 /**
  * Rebuilt on demand. Every admin save calls revalidatePath for the routes it
@@ -109,7 +111,11 @@ const TRUST_ITEMS = [
 ];
 
 export default async function HomePage() {
-  const [latest, explorer] = await Promise.all([getLatestFeed(6), getExplorerData()]);
+  const [latest, explorer, explainers] = await Promise.all([
+    getLatestFeed(6),
+    getExplorerData(),
+    getLatestExplainers(3),
+  ]);
 
   return (
     <>
@@ -197,6 +203,23 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* Fills itself from the newest published explainers, and is absent
+          until there is one, so publishing never needs a home page edit. */}
+      {explainers.length > 0 ? (
+        <section className="civic-band civic-band-paper" aria-labelledby="home-explainers">
+          <div className="wrap">
+            <p className="civic-kicker-dark">Explainers</p>
+            <h2 id="home-explainers">On the ballot and at the table</h2>
+            <ExplainerCards explainers={explainers} />
+            <p className="explainer-all">
+              <Link className="more" href="/explainers">
+                All explainers <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </p>
+          </div>
+        </section>
+      ) : null}
 
       <section className="civic-steps">
         <div className="wrap civic-steps-grid">

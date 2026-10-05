@@ -1,8 +1,10 @@
 import type { MetadataRoute } from "next";
 import { env } from "@/lib/env";
 import { getPublishedReports } from "@/lib/queries/reports";
+import { getPublishedExplainers } from "@/lib/queries/explainers";
+import { explainerPath } from "@/lib/explainer-types";
 
-/** Every public page, plus one entry per published report. */
+/** Every public page, plus one entry per published report and explainer. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
@@ -11,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/explorer", priority: 0.9 },
     { path: "/budget", priority: 0.9 },
     { path: "/reports", priority: 0.9 },
+    { path: "/explainers", priority: 0.9 },
     { path: "/records", priority: 0.8 },
     { path: "/votes", priority: 0.8 },
     { path: "/votes/members", priority: 0.6 },
@@ -33,5 +36,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...pages, ...reports];
+  const explainers = (await getPublishedExplainers()).map((explainer) => ({
+    url: `${env.siteUrl}${explainerPath(explainer.template, explainer.slug)}`,
+    lastModified: explainer.updatedAt ? new Date(explainer.updatedAt) : now,
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
+  return [...pages, ...reports, ...explainers];
 }

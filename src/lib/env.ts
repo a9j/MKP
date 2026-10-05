@@ -63,4 +63,11 @@ export const env = {
 
     return "http://localhost:3000";
   },
+  /**
+   * The master switch for scheduled jobs and model calls. Off unless set to
+   * exactly "true", so a typo or an empty value leaves automation off.
+   */
+  get automationEnabled() {
+    return optional("AUTOMATION_ENABLED") === "true";
+  },
 };

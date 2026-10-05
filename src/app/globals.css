@@ -1558,3 +1558,146 @@
   }
 }
 
+
+/* ---------------------------------------------------------------------------
+   Explainers: /ballot, /levy, /contract, /explainers, and their admin.
+   Built from the civic page styles above. Gold stays reserved for the
+   sourced underline, so nothing here adds a gold accent of its own.
+   --------------------------------------------------------------------------- */
+
+.explainer-dateline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: -8px 0 0;
+}
+.explainer-dateline span:first-child:not(:last-child) { font-weight: 700; color: #fff; }
+
+.explainer-photo { margin: 0; border-bottom: 3px solid #0F2A44; }
+.explainer-photo img {
+  display: block;
+  width: 100%;
+  max-height: 440px;
+  object-fit: cover;
+}
+
+.explainer-body > h2 { margin-bottom: 28px; }
+
+/* Ballot: one card per issue, stacked, yes and no side by side. */
+.explainer-issues { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
+.explainer-issue.civic-card { color: #0F2A44; }
+.explainer-issue .tag { margin-bottom: 14px; }
+.explainer-yes-no {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 8px 0 18px;
+}
+.explainer-yes-no > div { border-top: 3px solid #0F2A44; padding-top: 12px; }
+.explainer-yes-no dt { font-size: 14px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.explainer-yes-no dd { font-size: 18px; line-height: 1.55; margin: 0; }
+.explainer-cost { font-size: 17px; line-height: 1.6; margin: 0 0 12px; }
+@media (max-width: 640px) { .explainer-yes-no { grid-template-columns: 1fr; } }
+
+/* Levy: the key numbers as callouts. */
+.explainer-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 0 0 40px;
+}
+.explainer-facts > div {
+  border: 3px solid #0F2A44;
+  background: #fff;
+  color: #0F2A44;
+  padding: 20px 22px;
+}
+.explainer-facts dt { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.explainer-facts dd { font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.15; margin: 0; font-variant-numeric: tabular-nums; }
+
+.explainer-prose { max-width: 44rem; margin-bottom: 40px; }
+.explainer-prose h3 { font-size: 22px; font-weight: 700; color: var(--ink); margin: 24px 0 8px; }
+.explainer-prose p { font-size: 18px; line-height: 1.6; color: var(--ink-2); }
+
+.levy-calc {
+  border: 3px solid #0F2A44;
+  box-shadow: 8px 8px 0 rgba(15, 42, 68, 0.9);
+  background: #fff;
+  color: #0F2A44;
+  padding: 32px;
+  max-width: 40rem;
+}
+.levy-calc h2 { font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 18px; }
+.levy-calc .field label { display: block; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.levy-calc .field input {
+  width: 100%; max-width: 20rem; min-height: 52px; font: inherit; font-size: 22px;
+  font-variant-numeric: tabular-nums; color: #0F2A44; background: #fff;
+  border: 2px solid #0F2A44; border-radius: 10px; padding: 8px 14px;
+}
+.levy-calc .counter { color: #4B5A6B; }
+.levy-calc-result { display: flex; flex-wrap: wrap; gap: 8px 36px; margin: 22px 0 6px; font-size: 18px; }
+.levy-calc-result p { margin: 0; }
+.levy-calc-figure { font-size: clamp(30px, 4vw, 42px); font-weight: 800; font-variant-numeric: tabular-nums; margin-right: 6px; }
+.levy-calc .note { color: #4B5A6B; }
+@media (max-width: 700px) { .levy-calc { padding: 24px 20px; box-shadow: 5px 5px 0 rgba(15, 42, 68, 0.9); } }
+
+/* Contract: a vertical timeline, newest first. */
+.explainer-timeline { list-style: none; margin: 0; padding: 0 0 0 28px; border-left: 3px solid #0F2A44; max-width: 46rem; }
+.explainer-timeline li { position: relative; padding: 0 0 32px; }
+.explainer-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -37px;
+  top: 4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #0F2A44;
+}
+.explainer-timeline li:first-child::before { background: #0F2A44; }
+.explainer-timeline-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; color: var(--ink-3); margin: 0 0 4px; }
+.explainer-timeline-meta span { font-weight: 700; color: var(--teal-ink); }
+.explainer-timeline h3 { font-size: 21px; line-height: 1.3; margin: 0 0 6px; }
+.explainer-timeline p { font-size: 17px; line-height: 1.6; color: var(--ink-2); margin: 0 0 6px; }
+.explainer-timeline-source { font-size: 15px; }
+
+/* Sources band and the closing lines. */
+.explainer-sources li { color: #0F2A44; }
+.explainer-source-date, .explainer-source-note { font-size: 15px; color: rgba(15, 42, 68, 0.8); }
+.explainer-download { margin: 28px 0 0; }
+.explainer-updated { margin: 24px 0 0; font-size: 16px; color: #0F2A44; }
+.civic-band-paper .civic-note { color: #0F2A44; }
+
+/* Cards on the index and the home page. The title link covers the card. */
+.explainer-card-link { color: inherit; text-decoration: none; }
+.explainer-card-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.explainer-card-date { font-size: 15px; opacity: 0.85; margin: 0 0 10px; }
+.explainer-all { margin: 28px 0 0; }
+.explainer-all .more { font-weight: 800; font-size: 18px; color: #0F2A44; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+.preview-banner-link { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Admin */
+.explainer-type-hint { display: block; font-size: 14px; font-weight: 400; color: var(--ink-3); }
+.explainer-badges { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.explainer-actions { display: inline-flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: 15px; }
+.explainer-actions a { display: inline-flex; align-items: center; min-height: 44px; }
+.explainer-status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; align-items: center; margin: 8px 0 4px; }
+.explainer-checklist { margin-top: 16px; }
+.explainer-checklist ul { margin: 8px 0 0 20px; display: grid; gap: 6px; font-size: 15px; }
+.explainer-editor > fieldset { margin-top: 10px; }
+.explainer-subform { margin: 0; }
+.explainer-row { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.explainer-row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 16px; }
+.explainer-row-head h4 { font-size: 16px; font-weight: 600; }
+.explainer-row-tools { display: flex; flex-wrap: wrap; gap: 0 14px; }
+.explainer-publish { border-top: 1px solid var(--line); padding-top: 18px; }
+.explainer-publish .field label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+/* .admin-form label is display: block, which would put a radio or checkbox
+   on its own line above its text. */
+.admin-form label.check-row { display: flex; align-items: flex-start; gap: 12px; color: var(--ink); font-size: 16px; }
+.admin-form label.check-row input { width: 22px; height: 22px; min-height: 0; flex: none; margin-top: 2px; padding: 0; }
+.explainer-editor > fieldset > legend { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }

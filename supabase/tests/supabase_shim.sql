@@ -65,3 +65,8 @@ alter table storage.objects enable row level security;
 grant usage on schema storage to anon, authenticated, service_role;
 grant select on storage.buckets to anon, authenticated, service_role;
 grant all on storage.objects to authenticated, service_role;
+
+-- Supabase lets every API role call auth.jwt() and auth.uid(). Functions that
+-- run as the caller, publish_explainer() among them, need it here too.
+grant usage on schema auth to anon, authenticated, service_role;
+grant execute on all functions in schema auth to anon, authenticated, service_role;
