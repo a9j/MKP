@@ -803,6 +803,11 @@
   .features { margin-top: 36px; border-top: 1px solid var(--line); }
 
   .note { margin-top: 18px; font-size: 14px; color: var(--ink-3); max-width: 44em; }
+  /* The link to the same levy in its other shape. A step to take rather than a
+     footnote, so it reads at body size and in ink, above the quieter
+     navigation note under it. */
+  .note.companion-link { margin-top: 28px; font-size: 16px; color: var(--ink-2); }
+  .note.companion-link a { color: var(--ink); font-weight: 500; }
 
   /* sections. The mockup relies on element vs class specificity here: a
      <section class="wrap"> takes .wrap's "padding: 0 24px" and so has no

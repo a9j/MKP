@@ -11,9 +11,12 @@ import type { Explainer } from "@/lib/explainer-types";
 export function ExplainerView({
   explainer,
   publishedLevySlugs,
+  companionReportSlug = null,
 }: {
   explainer: Explainer;
   publishedLevySlugs: Set<string>;
+  /** The written report for the same levy, when one is published. */
+  companionReportSlug?: string | null;
 }) {
   switch (explainer.template) {
     case "ballot":
@@ -31,7 +34,7 @@ export function ExplainerView({
           explainer={explainer}
           dateLine={explainer.decisionDate ? `On the ballot ${explainerDate(explainer.decisionDate)}` : null}
         >
-          <LevyBody explainer={explainer} />
+          <LevyBody explainer={explainer} companionReportSlug={companionReportSlug} />
         </ExplainerPage>
       );
     case "contract":
