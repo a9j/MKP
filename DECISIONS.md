@@ -1061,7 +1061,7 @@ and was left alone.
 
 ### Reports read on the page; the PDF is a download
 Explainers were only reachable as an embedded PDF. `reports.body` (migration
-0011) holds the full explainer in markdown and renders on `/reports/[slug]`.
+0013) holds the full explainer in markdown and renders on `/reports/[slug]`.
 The summary stays capped at 600 characters as the lede and card text. The PDF
 is offered as a download: the attached file when there is one, otherwise a
 "Download as PDF" button that prints the page with a print stylesheet that
