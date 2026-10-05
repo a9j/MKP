@@ -1116,3 +1116,21 @@ to the ballot report, which this session cannot read for the same egress
 reason. Rather than paraphrase a ballot issue from memory, the three levy cards
 that could be sourced from published copy were written and the rest left out,
 with the page held as a draft.
+
+### The ballot overview reads on the page, and names its own gap
+The 12-measure overview had an empty body, so it reached a reader only as an
+embedded PDF. It now reads on the page, written from material already verified
+and already published: the inventory of the 12 measures comes from this
+report's own summary, and the Issue 8, 9 and 13 figures come from the three
+levy explainers. Nothing on it is a new claim.
+
+What it does not do is paraphrase the nine measures whose verified text exists
+only inside the attached PDF, which this session cannot read. Rather than
+write nine plausible ballot summaries from memory, the page names all twelve so
+a reader knows what they will see, explains the three that are checked, and
+sends them to the Board of Elections for their own ballot. The page says this
+in a line of its own, because a reader is owed the shape of what is missing
+rather than a page that looks complete.
+
+Measured with the repo's own Flesch-Kincaid: the overview is grade 6.3, and the
+three levy explainers are 5.4, 4.8 and 5.4. The editorial cap is 8th grade.
