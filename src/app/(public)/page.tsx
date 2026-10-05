@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { Photo } from "@/components/photo";
@@ -78,6 +78,30 @@ const STEPS = [
   },
 ];
 
+const HERO_ALT = "A person holding up a stack of tax and records forms in front of their face.";
+
+/**
+ * The hero photo is art directed: a 6:5 crop under the text on phones, a 2:3
+ * portrait beside it from 768px. One <picture> so a phone never downloads the
+ * desktop file, and the reverse.
+ */
+const { props: heroMobile } = getImageProps({
+  src: "/photos/hero-records-mobile.webp",
+  alt: HERO_ALT,
+  width: 1200,
+  height: 1000,
+  sizes: "calc(100vw - 48px)",
+  priority: true,
+});
+const { props: heroDesktop } = getImageProps({
+  src: "/photos/hero-records-desktop.webp",
+  alt: HERO_ALT,
+  width: 1200,
+  height: 1800,
+  sizes: "(min-width: 1120px) 480px, 42vw",
+  priority: true,
+});
+
 const TRUST_ITEMS = [
   "Every number links to the document it came from.",
   "No positions. No endorsements. No recommendations.",
@@ -89,39 +113,43 @@ export default async function HomePage() {
 
   return (
     <>
-      <header className="civic-hero civic-hero-photo">
-        <div className="civic-hero-bg" aria-hidden="true">
-          <Image
-            src="/photos/how-we-work.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-          />
-          <div className="civic-hero-scrim" />
-        </div>
-        <div className="wrap civic-hero-inner">
-          <p className="civic-kicker">The Mona K Project &mdash; Toledo, Ohio</p>
-          <h1>
-            The records are public.
-            <br />
-            We make them <span className="hl">readable.</span>
-          </h1>
-          <p className="lede">
-            School budgets. Board votes. Salary schedules. City finances. Ballot
-            issues. We read Toledo&rsquo;s public records, explain them in plain
-            language, and link every number to the document it came from. Then
-            Toledo decides.
-          </p>
-          <div className="actions">
-            <Link className="btn btn-gold btn-large" href="#what-we-do">
-              See what we do
-            </Link>
-            <Link className="btn btn-outline-w btn-large" href="/reports">
-              Read the latest
-            </Link>
+      <header className="home-hero bg-[#F7F5F0] text-[#1B2A3A]">
+        <div className="wrap grid items-center gap-10 pt-28 pb-16 md:min-h-[90svh] md:grid-cols-[minmax(0,55fr)_minmax(0,45fr)] md:gap-12 md:py-16">
+          <div>
+            <h1 className="text-[clamp(2.5rem,9vw,5rem)] leading-[1.05] font-bold tracking-[-0.02em] text-balance text-[#1B2A3A]">
+              The records are public. We make them{" "}
+              <span className="home-hero-hl">readable.</span>
+            </h1>
+            <p className="mt-6 max-w-[34em] text-[18px] leading-[1.6] text-[#1B2A3A]/75">
+              School budgets. Board votes. Salary schedules. City finances. Ballot
+              issues. We read Toledo&rsquo;s public records, explain them in plain
+              language, and link every number to the document it came from. Then
+              Toledo decides.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link
+                className="btn btn-large border-2 border-[#D4A84B] bg-[#D4A84B] font-bold text-[#1B2A3A]"
+                href="#what-we-do"
+              >
+                See what we do
+              </Link>
+              <Link
+                className="btn btn-large border-2 border-[#1B2A3A] bg-transparent font-bold text-[#1B2A3A]"
+                href="/reports"
+              >
+                Read the latest
+              </Link>
+            </div>
+            <p className="mt-6 max-w-[44em] text-[14px] text-[#1B2A3A]/60">{NEUTRALITY_LINE}</p>
           </div>
-          <p className="pledge">{NEUTRALITY_LINE}</p>
+          <picture>
+            <source media="(min-width: 768px)" srcSet={heroDesktop.srcSet} sizes={heroDesktop.sizes} />
+            <img
+              {...heroMobile}
+              alt={HERO_ALT}
+              className="aspect-[6/5] h-auto w-full rounded-2xl object-cover md:aspect-[2/3] md:rounded-3xl"
+            />
+          </picture>
         </div>
       </header>
 

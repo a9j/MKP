@@ -7,6 +7,10 @@
    --------------------------------------------------------------------------- */
 
 :root {
+  /* The civic design uses hardcoded light-mode colors throughout.
+     Force light rendering so phones in dark mode don't get dark
+     backgrounds behind navy text. */
+  color-scheme: light;
   --bg: #FFFFFF;
   --band: #F4F6F8;
   --ink: #0F2A44;
@@ -879,33 +883,14 @@
    (large/bold text only on teal).
    --------------------------------------------------------------------------- */
 
-.civic-hero {
-  background: #0F2A44;
-  color: #FFFFFF;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Giant ghost section mark. Decorative only. */
-.civic-hero::after {
-  content: "\00A7";
-  position: absolute;
-  right: -30px;
-  bottom: -120px;
-  font-family: var(--font-sans);
-  font-size: clamp(280px, 34vw, 520px);
-  line-height: 1;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.045);
-  pointer-events: none;
-  user-select: none;
-}
-
-.civic-hero-inner {
-  padding-top: 104px;
-  padding-bottom: 96px;
-  position: relative;
-  z-index: 1;
+/* Home hero: off-white, navy type #1B2A3A, layout in Tailwind utilities on
+   the element. This is the gold swipe under "readable." */
+.home-hero-hl {
+  background: linear-gradient(to top, #D4A84B 0%, #D4A84B 30%, transparent 30%);
+  padding: 0 0.06em;
+  margin: 0 -0.06em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .civic-kicker {
@@ -924,51 +909,6 @@
   text-transform: uppercase;
   color: var(--teal-ink);
   margin-bottom: 18px;
-}
-
-.civic-hero h1 {
-  font-size: clamp(54px, 8.4vw, 116px);
-  line-height: 0.98;
-  letter-spacing: -0.032em;
-  font-weight: 700;
-  max-width: 11em;
-  margin-bottom: 30px;
-  text-wrap: balance;
-}
-
-/* Highlighter swipe behind the key word. */
-.civic-hero h1 .hl {
-  background: linear-gradient(
-    to top,
-    rgba(217, 164, 65, 0.9) 0%,
-    rgba(217, 164, 65, 0.9) 34%,
-    transparent 34%
-  );
-  padding: 0 0.08em;
-  margin: 0 -0.08em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
-.civic-hero .lede {
-  font-size: 20px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.84);
-  max-width: 34em;
-}
-
-.civic-hero .actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 40px;
-}
-
-.civic-hero .pledge {
-  margin-top: 34px;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.62);
-  max-width: 44em;
 }
 
 /* Chunky buttons. */
@@ -1160,8 +1100,7 @@
 }
 
 @media (max-width: 900px) {
-  .civic-hero-inner { padding-top: 72px; padding-bottom: 72px; }
-  .civic-trust-inner { grid-template-columns: 1fr; gap: 18px; }
+    .civic-trust-inner { grid-template-columns: 1fr; gap: 18px; }
   .civic-programs { grid-template-columns: 1fr; }
   .civic-program { min-height: 0; padding: 44px 28px 48px; }
   .civic-steps li { grid-template-columns: 76px 1fr; gap: 18px; }
@@ -1171,3 +1110,434 @@
 @media (prefers-reduced-motion: reduce) {
   .btn-gold:hover, .btn-outline-w:hover { transform: none; }
 }
+
+/* Empty state for the explorer when pay data is not published yet. */
+.civic-empty {
+  font-size: 18px;
+  color: var(--ink-2);
+  border: 2px dashed var(--line);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+/* ---- Homepage v2: photos back, mission-wide ---- */
+
+/* The base .photo slot (navy block when the file is missing). */
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: #0F2A44;
+}
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.civic-everything {
+  padding: 96px 0 80px;
+}
+
+.civic-everything h2 {
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 18px 0 20px;
+  color: #0F2A44;
+}
+
+.hl-dark {
+  background: linear-gradient(transparent 55%, #D9A441 55%, #D9A441 95%, transparent 95%);
+  padding: 0 6px;
+}
+
+.civic-everything-lede {
+  font-size: 21px;
+  line-height: 1.55;
+  max-width: 46rem;
+  color: var(--ink-2);
+  margin: 0 0 48px;
+}
+
+.civic-programs-photo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.civic-program-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 3px solid #0F2A44;
+  box-shadow: 10px 10px 0 rgba(15, 42, 68, 0.9);
+}
+
+.civic-program-card > * {
+  min-width: 0;
+}
+
+.civic-program-card:nth-child(even) .civic-program-photo {
+  order: 2;
+}
+
+.civic-program-photo.photo {
+  width: 100%;
+  min-height: 320px;
+}
+
+@media (min-width: 901px) {
+  /* In the 2-column card, force the photo to fill the full row height.
+     Without this, aspect-ratio keeps it short when the text runs long,
+     leaving a white gap. !important beats the inline aspect-ratio. */
+  .civic-program-photo.photo {
+    height: 100%;
+    aspect-ratio: auto !important;
+  }
+}
+
+.civic-program-card-body {
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.civic-program-card.tone-navy .civic-program-card-body { background: #0F2A44; color: #fff; }
+.civic-program-card.tone-teal .civic-program-card-body { background: #187585; color: #fff; }
+.civic-program-card.tone-gold .civic-program-card-body { background: #D9A441; color: #0F2A44; }
+
+.civic-program-card .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 6px 12px;
+  margin: 14px 0 18px;
+}
+
+.civic-program-card h3 {
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+}
+
+.civic-program-card p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+  opacity: 0.92;
+}
+
+.civic-program-card .more {
+  font-weight: 800;
+  font-size: 18px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  color: inherit;
+}
+
+.civic-program-card .more:hover { text-decoration-thickness: 4px; }
+
+.civic-steps-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.civic-steps-photo {
+  width: 100%;
+  border: 6px solid #fff;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.35);
+  position: sticky;
+  top: 32px;
+}
+
+.civic-explorer-lede {
+  font-size: 20px;
+  line-height: 1.55;
+  max-width: 44rem;
+  color: var(--ink-2);
+  margin: 0 0 36px;
+}
+
+@media (max-width: 900px) {
+  .civic-steps-grid { grid-template-columns: 1fr; }
+  .civic-steps-photo { position: relative; top: auto; max-width: 420px; }
+  .civic-program-card { grid-template-columns: 1fr; }
+  .civic-program-card:nth-child(even) .civic-program-photo { order: 0; }
+  .civic-program-photo.photo { min-height: 240px; }
+  .civic-program-card-body { padding: 36px 28px; }
+}
+
+@media (max-width: 700px) {
+  .civic-everything { padding: 64px 0 56px; }
+}
+
+/* ---- Shared civic page styles (Reports, Votes, Explorer, Records, About, Get Involved) ---- */
+
+.civic-page-hero {
+  background: #0F2A44;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.civic-page-hero::after {
+  content: "\00A7";
+  position: absolute;
+  right: -30px;
+  bottom: -120px;
+  font-size: clamp(280px, 34vw, 520px);
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+  user-select: none;
+}
+
+.civic-page-hero-inner {
+  padding: 72px 0 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.civic-page-hero h1 {
+  font-size: clamp(42px, 6.5vw, 88px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 24px;
+  max-width: 16em;
+}
+
+.civic-page-hero .lede {
+  font-size: clamp(19px, 2.4vw, 24px);
+  line-height: 1.55;
+  max-width: 44rem;
+  color: #fff;
+  margin: 0 0 32px;
+}
+
+.civic-page-hero .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.civic-section {
+  padding: 60px 0;
+}
+
+.civic-section h2 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #0F2A44;
+  margin: 0 0 20px;
+}
+
+.civic-section .civic-section-lede {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 44rem;
+  margin: 0 0 40px;
+}
+
+.civic-band {
+  padding: 60px 0;
+}
+
+.civic-band-navy { background: #0F2A44; color: #fff; }
+.civic-band-teal { background: #187585; color: #fff; }
+.civic-band-gold { background: #D9A441; color: #0F2A44; }
+.civic-band-paper { background: #F7F4EC; color: #0F2A44; }
+
+.civic-band h2 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0 0 20px;
+}
+
+.civic-band-navy h2, .civic-band-teal h2 { color: #fff; }
+.civic-band-gold h2, .civic-band-paper h2 { color: #0F2A44; }
+
+/* The generic .sub and .unavailable set dark ink; override for colored bands. */
+.civic-band-navy .sub, .civic-band-teal .sub { color: #fff; }
+.civic-band-gold .sub, .civic-band-paper .sub { color: #0F2A44; }
+.civic-band-navy .unavailable, .civic-band-teal .unavailable { color: rgba(255, 255, 255, 0.8); }
+.civic-band-gold .unavailable, .civic-band-paper .unavailable { color: rgba(15, 42, 68, 0.75); }
+
+.civic-band .sub {
+  font-size: 19px;
+  line-height: 1.6;
+  opacity: 0.92;
+  max-width: 44rem;
+  margin: 0 0 24px;
+}
+
+.civic-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.civic-card {
+  border: 3px solid #0F2A44;
+  box-shadow: 8px 8px 0 rgba(15, 42, 68, 0.9);
+  padding: 40px 36px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.civic-card > * { min-width: 0; }
+
+.civic-card.tone-navy { background: #0F2A44; color: #fff; }
+.civic-card.tone-teal { background: #187585; color: #fff; border-color: #0F2A44; }
+.civic-card.tone-gold { background: #D9A441; color: #0F2A44; }
+
+.civic-card .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 6px 12px;
+  margin-bottom: 18px;
+}
+
+.civic-card h3 {
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+
+.civic-card p {
+  font-size: 17px;
+  line-height: 1.6;
+  opacity: 0.92;
+  margin: 0 0 20px;
+}
+
+.civic-card .civic-card-foot {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.civic-card .more {
+  font-weight: 800;
+  font-size: 17px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.civic-card .more:hover { text-decoration-thickness: 4px; }
+
+.civic-card .unavailable {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.civic-numbered {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+
+.civic-numbered li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.civic-numbered .n {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  color: #D9A441;
+  letter-spacing: -0.02em;
+}
+
+.civic-numbered h3 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: #0F2A44;
+}
+
+.civic-numbered p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.civic-note {
+  border-left: 6px solid #D9A441;
+  padding: 4px 0 4px 24px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 46rem;
+  margin: 32px 0 0;
+}
+
+.civic-note a { color: #0F2A44; font-weight: 700; }
+
+@media (max-width: 700px) {
+  .civic-page-hero-inner { padding: 56px 0 48px; }
+  .civic-section, .civic-band { padding: 44px 0; }
+  .civic-card { padding: 32px 26px; }
+  .civic-numbered li { grid-template-columns: 56px 1fr; gap: 14px; }
+  .civic-numbered .n { font-size: 32px; }
+}
+
+.civic-band-navy .civic-numbered p { color: #fff; opacity: 0.94; }
+.civic-band-navy .civic-numbered h3 { color: #fff; }
+.civic-band-navy a { color: #D9A441; }
+.civic-band-navy .officers-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.civic-band-navy .officers-list li { font-size: 18px; }
+.civic-band-navy .officers-list .agency-name { font-weight: 700; }
+.civic-band-navy h3.civic-h3 { margin-top: 48px; margin-bottom: 20px; font-size: 24px; color: #fff; }
+
+.btn-outline-navy {
+  border: 3px solid #0F2A44;
+  color: #0F2A44;
+  background: transparent;
+}
+.btn-outline-navy:hover { background: #0F2A44; color: #fff; }
+
+/* Full-bleed photo band: an editorial break between sections. */
+.civic-photo-band.photo {
+  width: 100%;
+  max-height: 440px;
+  border-top: 3px solid #0F2A44;
+  border-bottom: 3px solid #0F2A44;
+}
+
+@media (max-width: 700px) {
+  /* Inline aspect-ratio is 21/8 (cinematic); on phones that is a sliver,
+     so force a taller frame. !important beats the inline style. */
+  .civic-photo-band.photo {
+    aspect-ratio: 16 / 10 !important;
+    max-height: 320px;
+  }
+}
+
