@@ -491,11 +491,24 @@
       border-top: 1px solid var(--line); border-bottom: 0;
     }
     .admin-rail .admin-brand { display: none; }
-    .admin-rail ul { justify-content: space-between; padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); }
-    .admin-rail li { flex: 1; }
-    .admin-rail li a { justify-content: center; font-size: 13px; padding: 0 4px; min-height: 48px; }
+    /* Eleven screens do not fit across 390px in one row. Laid out in one they
+       were, so the last four sat past the right edge and could only be reached
+       by swiping a 48px strip, with nothing to say they were there. Two rows of
+       six fit every label at a readable size. Fixed in September, lost in the
+       redesign, and measured by a test now so it cannot go quietly again. */
+    .admin-rail ul {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 0; overflow: visible;
+      padding: 2px 4px calc(2px + env(safe-area-inset-bottom));
+    }
+    .admin-rail li a {
+      justify-content: center; font-size: 13px; padding: 0 2px; min-height: 44px;
+      text-align: center;
+    }
     .rail-long { display: none; }
     .rail-short { display: inline; }
+    /* Clear of the two row bar, so the last field of a form is never under it. */
+    .admin-main { padding-bottom: 140px; }
   }
 
   .login { max-width: 420px; margin: 48px auto; padding: 0 20px; }
@@ -697,6 +710,17 @@
     letter-spacing: -.03em; font-weight: 600; max-width: 18em;
   }
   @media (max-width: 900px) { .page-head { padding: 48px 0 8px; } }
+
+  /* The gutter .wrap sets is wiped out by the padding shorthand above, on the
+     same element. Above the container width nothing shows for it, because the
+     block is centred inside a wider viewport. Below it, the headline runs to
+     the edge of the screen while every section under it keeps 24px, which is
+     what a phone shows as text falling off the left side.
+     This was fixed in September and came back with the redesign, which is why
+     tests/e2e/site.spec.ts measures it rather than trusting the rule to stay. */
+  @media (max-width: 1167px) {
+    .page-head { padding-inline: 24px; }
+  }
 
   .explorer-section { padding: 40px 24px 72px; }
   /* Full width so the chart is not squeezed into a hero column. */
@@ -913,9 +937,17 @@
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: #D9A441;
+  /* Gold on the dark sections it was drawn for, and an ink colour everywhere
+     else: on white, gold measures 2.24:1 at this size and misses AA badly.
+     The dark sections are named rather than the light ones, because a new
+     section is light by default and would otherwise inherit a colour it
+     cannot carry. */
+  color: var(--teal-ink);
   margin-bottom: 30px;
 }
+.civic-hero .civic-kicker,
+.civic-steps .civic-kicker,
+.civic-cta .civic-kicker { color: #D9A441; }
 
 .civic-kicker-dark {
   font-size: 13px;
@@ -1149,7 +1181,9 @@
 }
 .civic-cta p {
   font-size: 19px;
-  color: rgba(255, 255, 255, 0.85);
+  /* Solid white, not 85% of it: on this teal the translucent version measures
+     4.34:1 and misses AA for text this size. Solid clears it at 4.6:1. */
+  color: #FFFFFF;
   max-width: 36em;
 }
 .civic-cta .actions {
@@ -1170,4 +1204,105 @@
 
 @media (prefers-reduced-motion: reduce) {
   .btn-gold:hover, .btn-outline-w:hover { transform: none; }
+}
+
+@layer components {
+  /* ---------------------------------------------------------------------
+     Ballot explainers. One strip, one list, one fixed page shape.
+     --------------------------------------------------------------------- */
+
+  /* Shown only while an election is still to come. Navy on gold, which is the
+     one place gold carries a block rather than a rule: it is a notice, not a
+     sourced figure, and it is never next to one. */
+  .ballot-strip { background: var(--gold); }
+  .ballot-strip a {
+    display: flex; align-items: center; min-height: 52px;
+    color: #2A1F00; font-weight: 600; font-size: 16px;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+
+  .ballot-list { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .ballot-list li { border-bottom: 1px solid var(--line); }
+  /* A grid, not wrapping flex: with flex the issue number sat beside a short
+     title and above a long one, so no two rows lined up. */
+  .ballot-list a {
+    display: grid; grid-template-columns: 92px 1fr; align-items: baseline;
+    gap: 4px 12px; padding: 18px 0; color: var(--ink);
+  }
+  @media (max-width: 420px) {
+    .ballot-list a { grid-template-columns: 1fr; }
+  }
+  .ballot-issue {
+    font-size: 14px; font-weight: 600; color: var(--teal-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .ballot-title { font-size: 19px; font-weight: 500; letter-spacing: -.01em; }
+  .ballot-list a:hover .ballot-title { text-decoration: underline; text-underline-offset: 3px; }
+
+  .explainer { margin-top: 36px; border-top: 1px solid var(--line); }
+  .explainer-ballot {
+    margin-top: 20px; font-size: 14px; color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .explainer-section { padding: 28px 0 0; }
+  .explainer-section h2 {
+    font-size: 22px; letter-spacing: -.02em; font-weight: 600; max-width: none;
+    margin-bottom: 10px;
+  }
+  .explainer-section p { color: var(--ink-2); font-size: 17px; max-width: 42em; }
+  .explainer-section p + p { margin-top: 12px; }
+  .explainer-section ul, .explainer-section ol { margin: 12px 0 0 22px; display: grid; gap: 8px; }
+  .explainer-section li { color: var(--ink-2); font-size: 17px; max-width: 42em; }
+  .explainer .note { margin-top: 28px; }
+}
+
+@layer components {
+  /* One heading per election, so a date never labels an issue from another. */
+  .ballot-group { margin-top: 28px; }
+  .ballot-group + .ballot-group { margin-top: 44px; }
+  .ballot-group h2 { font-size: 26px; letter-spacing: -.02em; }
+}
+
+/* ---------------------------------------------------------------------------
+   next/image with `fill` positions itself against the nearest positioned
+   ancestor. The Photo component gave it none, so every photograph on the site
+   was absolutely positioned against the viewport instead of its own slot: four
+   full screen images stacked over the top of the home page, painting over
+   whatever was there. The slot has to be positioned for the image to stay in
+   it.
+   --------------------------------------------------------------------------- */
+.photo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: var(--band);
+}
+.photo img { object-fit: cover; }
+
+/* The hero renders a background photo, a scrim over it and the words on top,
+   but only the first of those three had any CSS. Without the scrim the white
+   headline sat straight on a pale photograph. The markup already names the
+   layers; these are the rules that make them layers. */
+.civic-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.civic-hero-bg img { object-fit: cover; }
+.civic-hero-scrim {
+  position: absolute;
+  inset: 0;
+  /* Darkest where the headline sits, so the photograph still reads at the
+     edges. Navy rather than black, which is the colour the hero falls back to
+     when there is no photograph at all. */
+  background: linear-gradient(
+    100deg,
+    rgba(15, 42, 68, 0.94) 0%,
+    rgba(15, 42, 68, 0.88) 45%,
+    rgba(15, 42, 68, 0.72) 100%
+  );
+}
+.civic-hero-inner {
+  position: relative;
+  z-index: 1;
 }

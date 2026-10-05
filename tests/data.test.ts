@@ -47,6 +47,21 @@ test("latest feed covers all four sources", async () => {
   }
 });
 
+test("a vote in the feed is labelled with the body that took it", async () => {
+  // The home page shows only the six newest items, so which rows are votes
+  // depends on what else has been published. Here the whole feed is read, so
+  // the seeded votes are always in it and the label can be pinned down.
+  const votes = (await getLatestFeed(50)).filter((entry) => entry.kind === "vote");
+  assert.ok(votes.length > 0, "the seed should provide published votes");
+  for (const vote of votes) {
+    assert.match(
+      vote.kindLabel,
+      /^(TPS Board|City Council|County) vote$/,
+      `a vote row read "${vote.kindLabel}"`,
+    );
+  }
+});
+
 test("every feed row is renderable", async () => {
   for (const entry of await getLatestFeed(50)) {
     assert.ok(entry.title.length > 0, "empty title");

@@ -119,8 +119,8 @@ test.describe("city budget", () => {
 
   test("the home page lists four tools, the budget among them", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".tool")).toHaveCount(4);
-    const budget = page.locator(".tool").filter({ hasText: "City Budget Explorer" });
+    await expect(page.locator(".civic-program-card")).toHaveCount(4);
+    const budget = page.locator(".civic-program-card").filter({ hasText: "City Budget Explorer" });
     // The seed loads a budget, so the card links through rather than waiting.
     await expect(budget).not.toContainText("Loading soon.");
     await budget.locator("a.more").click();

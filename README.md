@@ -71,8 +71,7 @@ pnpm dev
 
 ## Signing in
 
-Magic link only. Ask for a link at `/admin/login`, follow it, and you are in.
-The link works once. Middleware sends a signed out visitor to sign in, but that
+Email and password at `/admin/login`. Middleware sends a signed out visitor to sign in, but that
 is a convenience: every admin page and every server action checks for an
 administrator itself, and RLS refuses the write regardless.
 
@@ -95,18 +94,20 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 | Command | What it covers |
 | --- | --- |
 | `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 67 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, and the RLS rules for anonymous, non-admin, admin and service role callers |
-| `pnpm test:data` | 55 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
+| `pnpm test:data` | 56 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL and the mail fallback, neither of which needs the database |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
 | `pnpm test:lighthouse` | Lighthouse over all 12 public routes in mobile emulation. Fails if any category on any route drops below 95 |
-| `pnpm test:e2e` | Playwright, 58 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, the city budget loads from a CSV and drives every panel on `/budget`, a draft report stays off the public site while its preview link opens without a login, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
+| `pnpm test:e2e` | Playwright, 66 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, the city budget loads from a CSV and drives every panel on `/budget`, a draft report stays off the public site while its preview link opens without a login, a ballot explainer will not save without its three answers and reaches the ballot grouping, the home page strip and its own three part page, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
 
 `pnpm test:data`, `pnpm test:visual` and `pnpm test:e2e` need the local stack
 and a running app.
 
 The local stack includes a small stand in for the Supabase auth server, so the
-end to end tests sign in through the real magic link flow rather than forging a
-session. Links are written to `.local-storage/magic-links.json` instead of being
-emailed; `scripts/local-supabase.sh` prints them too.
+end to end tests sign in through the real sign in screen rather than forging a
+session. It accepts one development password, `local-development-password`, for
+any address; override it with `DEV_PASSWORD`. It is not a credential: it only
+works against the stub on your own machine. Production passwords live in
+Supabase Auth.
 
 The mockup loads Instrument Sans from the Google Fonts CDN. Where that is
 unreachable it silently falls back to a system font and every measurement

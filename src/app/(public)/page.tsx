@@ -5,6 +5,7 @@ import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { Photo } from "@/components/photo";
 import { NEUTRALITY_LINE } from "@/lib/nav";
 import { getLatestFeed } from "@/lib/queries/feed";
+import { getPublishedReports, onTheBallot } from "@/lib/queries/reports";
 import { getExplorerData } from "@/lib/queries/explorer";
 
 /**
@@ -32,8 +33,21 @@ const PROGRAMS = [
     alt: "A teacher leading a classroom of students",
   },
   {
+    // Added with the budget Explorer in step two and lost in the redesign.
+    // The copy is the brief's, verbatim.
     n: "02",
     tone: "teal",
+    tag: "Tool",
+    title: "City Budget Explorer",
+    body: "Where does Toledo's money go? The adopted budget by department, what one percent would change, and what it costs per resident. Every figure sourced.",
+    linkLabel: "Open the budget",
+    href: "/budget",
+    photo: "for-residents.jpg",
+    alt: "A quiet residential street lined with houses and trees",
+  },
+  {
+    n: "03",
+    tone: "gold",
     tag: "Reports",
     title: "Reports",
     body: "The annual Toledo Teacher Pay Report, plain-language explainers for every ballot issue, and a contract tracker when talks open. Sourced, reviewed, no recommendations.",
@@ -43,8 +57,8 @@ const PROGRAMS = [
     alt: "A family laughing together at home",
   },
   {
-    n: "03",
-    tone: "gold",
+    n: "04",
+    tone: "navy",
     tag: "Records",
     title: "Records Desk and Vote Watch",
     body: "Every public records request we've filed and what came back. Every school board vote that touches money or staffing, and how each member voted.",
@@ -85,10 +99,28 @@ const TRUST_ITEMS = [
 ];
 
 export default async function HomePage() {
-  const [latest, explorer] = await Promise.all([getLatestFeed(6), getExplorerData()]);
+  const [latest, explorer, reports] = await Promise.all([
+    getLatestFeed(6),
+    getExplorerData(),
+    getPublishedReports(),
+  ]);
+
+  // Only while there is an election still to come, and it takes itself down
+  // the day after rather than waiting for somebody to remember.
+  const ballot = onTheBallot(reports);
 
   return (
     <>
+      {ballot.length > 0 ? (
+        <aside className="ballot-strip">
+          <div className="wrap">
+            <Link href="/reports#on-the-ballot">
+              Voting on {ballot[0].ballotDateLabel}? Read what&rsquo;s on the ballot.
+            </Link>
+          </div>
+        </aside>
+      ) : null}
+
       <header className="civic-hero civic-hero-photo">
         <div className="civic-hero-bg" aria-hidden="true">
           <Image
@@ -196,7 +228,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="wrap civic-explorer" id="explorer">
+      <section className="wrap civic-explorer">
         <p className="civic-kicker-dark">One example</p>
         <h2>Start with a paycheck.</h2>
         <p className="civic-explorer-lede">
@@ -204,6 +236,10 @@ export default async function HomePage() {
           budget, board votes, ballot issues. This is what &ldquo;readable&rdquo;
           looks like.
         </p>
+        {/* The id belongs on the widget, not the section around it: it is both
+            the anchor target and the prefix for the widget's own field ids
+            (#explorer-step and the rest). Having it in both places put the
+            same id on the page twice, which is invalid. */}
         {explorer ? (
           <PayExplorer data={explorer} id="explorer" />
         ) : (

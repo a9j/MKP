@@ -129,10 +129,13 @@ test.describe("vote watch covers more than one body", () => {
     await page.goto("/");
     // Which votes are in the six newest rows depends on what the rest of the
     // suite published, so every vote row is checked rather than one of them.
+    // The feed shows the six newest items of every kind, so whether a vote is
+    // among them depends on what else the suite has published by now. What has
+    // to hold is the label on the vote rows that are there; that the labelling
+    // happens at all is pinned down in tests/data.test.ts, against the seed.
     const kinds = await page
       .locator('.latest .item[href="/votes"] .kind')
       .allTextContents();
-    expect(kinds.length).toBeGreaterThan(0);
     for (const kind of kinds) {
       expect(kind).toMatch(/^(TPS Board|City Council|County) vote$/);
     }
@@ -156,15 +159,13 @@ test.describe("vote watch covers more than one body", () => {
 test.describe("home page", () => {
   test("hero, four tools, and the Explorer below Latest", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".home-hero h1")).toHaveText(
-      "The records are public. We make them readable.",
-    );
-    const tools = page.locator("#tools .tool h3");
+    await expect(page.locator(".civic-hero h1")).toContainText("The records are public");
+    const tools = page.locator("#what-we-do .civic-program-card h3");
     await expect(tools).toHaveText([
-      "Vote Watch",
       "Teacher Pay Explorer",
       "City Budget Explorer",
-      "Records Desk",
+      "Reports",
+      "Records Desk and Vote Watch",
     ]);
     await expect(page.locator("#explorer")).toBeVisible();
 
@@ -183,7 +184,10 @@ test.describe("home page", () => {
 
   test("every image has alt text", async ({ page }) => {
     await page.goto("/");
-    for (const img of await page.locator("img").all()) {
+    // An image inside an aria-hidden container is decorative, and an empty alt
+    // is the correct markup for one: it keeps it out of the accessibility tree
+    // rather than reading a description nobody needs.
+    for (const img of await page.locator("img:not([aria-hidden] img)").all()) {
       const alt = (await img.getAttribute("alt")) ?? "";
       expect(alt.trim(), await img.getAttribute("src") ?? "img").not.toBe("");
     }
@@ -240,26 +244,36 @@ test.describe("admin access", () => {
     await expect(page).toHaveURL(/next=%2Fadmin%2Fvotes/);
   });
 
-  test("there is no password field anywhere in sign in", async ({ page }) => {
+  // Sign in was magic link only until October, and this test asserted that no
+  // password field existed anywhere. It does now, deliberately, so what is
+  // worth pinning down instead is that a wrong one is refused.
+  test("a wrong password is refused", async ({ page }) => {
     await page.goto("/admin/login");
-    expect(await page.locator('input[type="password"]').count()).toBe(0);
-  });
-
-  test("a signed in address that is not an administrator is refused", async ({ page }) => {
-    await signIn(page, "stranger@example.com");
+    await page.fill("#login-email", "hello@monakproject.org");
+    await page.fill("#login-password", "not the password");
+    await page.click(".login-form button[type=submit]");
+    await expect(page.locator(".login-error")).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/login/);
-    await expect(page.locator(".login-error")).toContainText("not on the administrator list");
   });
 
-  test("a sign in link only works once", async ({ page, context }) => {
+  /**
+   * Being signed in is not the same as being allowed in. Under magic links the
+   * confirm route turned a non-administrator away with a message. Password sign
+   * in has no such route, so what holds the line now is the check on every
+   * admin page, and that is what this pins down: a valid session that is not on
+   * the administrator list sees no admin content.
+   */
+  test("a signed in address that is not an administrator sees nothing", async ({ page }) => {
+    await signIn(page, "stranger@example.com");
+    await page.goto("/admin/votes");
+    await expect(page.locator(".admin-form")).toHaveCount(0);
+    await expect(page.locator("body")).toContainText("not signed in as an administrator");
+  });
+
+  test("a signed in administrator reaches the workspace", async ({ page }) => {
     await signIn(page);
     await expect(page).toHaveURL(/\/admin/);
-
-    const usedLink = page.url();
-    const second = await context.newPage();
-    await second.goto(usedLink);
-    // Re-following the consumed link lands back on sign in, not in the panel.
-    await expect(second).toHaveURL(/\/admin/);
+    await expect(page.locator(".admin-rail")).toBeVisible();
   });
 });
 

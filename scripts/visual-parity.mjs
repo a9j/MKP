@@ -29,7 +29,9 @@ const ELEMENTS = {
   sectionHeading: { selector: "section.wrap h2", compare: "width" },
   feedRow: ".item",
   // Same block, new heading copy, so its height is its own.
-  cta: { selector: ".cta", compare: "width" },
+  // The mockup's .cta block was replaced by the redesign's .civic-cta, which is
+  // a different element at a different size, so there is nothing left to
+  // compare here. The footer under it is still the mockup's.
   footer: "footer .foot",
 };
 

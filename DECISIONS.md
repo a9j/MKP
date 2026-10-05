@@ -984,3 +984,135 @@ four-minute read." and on a desktop it sits to its left, as the brief laid out.
 ### The promise band has a visually hidden heading
 The brief gives the band no heading. A hidden "Our promise" h2 keeps the
 heading outline unbroken for screen reader users without changing the page.
+
+## 2026-10-05, phase 2 step 3: ballot explainers
+
+Step three of the build order, the one with the deadline: early voting opens in
+early October. Part D, plus the repairs it took to get there.
+
+### The repo had moved, and three of the four decisions were already made
+
+Between the step 2 merge and this work, fourteen commits landed: a visual
+redesign, photography, and a switch of admin sign in from magic links to email
+and password. Part D was also started by someone else, differently from the
+brief: `ballot_explainer` was added as a fourth report type alongside
+`levy_explainer`, rather than replacing it, with its own card and copy on
+`/reports`.
+
+The brief says rename. The repo says keep both. Asked, and the answer was keep
+both, so an explainer is now either type: both carry the ballot fields, both
+group under the "On the ballot" heading, both render the fixed three part
+page. `EXPLAINER_TYPES` in `src/lib/report-types.ts` is the one place that
+decides, so merging them later is a one line change and a data update.
+
+### The migration chain could not be applied to a new database
+
+`0009_ballot_explainer.sql` converts `reports.type` from an enum to text, and
+Postgres refuses to change the type of a column a view depends on. `latest_feed`
+depends on it. So the migration failed partway on any fresh database, which
+means nobody could set up this project from scratch, and `local-supabase.sh`
+stopped dead. It had worked on the live project, where it was presumably
+applied by hand with the view out of the way.
+
+The migration now drops the view and rebuilds it. Both 0009 files were already
+applied to the live project, so editing the file changes nothing there; it is
+the next clean setup it saves. The duplicate 0009 number is left alone for the
+same reason: both are applied everywhere, they touch different tables, and they
+sort in an order that works.
+
+### Sign in was switched to a password, and nothing else moved with it
+
+The October commit changed the login form to `signInWithPassword`. The local
+auth stub only implements the magic link endpoints, so every test that signs in
+hung for twenty seconds and then failed, and local development could not sign in
+at all. The stub now accepts a password grant with one development password,
+and the helper signs in the way the screen now works.
+
+Two tests were about the old flow and are now about the new one: "there is no
+password field anywhere" asserted something that is deliberately false, so it
+is "a wrong password is refused" instead, and the single use magic link test is
+gone with the links.
+
+One thing did not survive the switch and is not mine to rebuild: under magic
+links, an address that was not on the administrator list was turned away at the
+confirm route with a message saying so. Password sign in has no confirm route,
+so a non-administrator now signs in, sees the workspace shell and is told by
+each page that they are not an administrator. Nothing is exposed, because every
+page and every action checks, and RLS refuses the write either way. It is worse
+to read than it was. Worth deciding what that path should say.
+
+### Three things from steps 1 and 2 had been reverted
+
+The redesign undid the phone gutter fix, the two row admin tab bar, and the
+City Budget Explorer card on the home page. All three are restored, and all
+three had tests, which is how they were found rather than being noticed on a
+phone months later. The brief asks for four programs on the home page, so the
+budget card is not a preference.
+
+### Every photograph on the site was positioned against the viewport
+
+`next/image` with `fill` positions itself against the nearest positioned
+ancestor. The `Photo` component gave it none, because `.photo` had no CSS at
+all. Four full screen images were therefore stacked over the top of the home
+page, painting over whatever was there, which is what hid the new ballot strip
+and is why the strip's link could not be clicked.
+
+Fixing that uncovered the next one: `.civic-hero-bg` and `.civic-hero-scrim`
+had no CSS either, so the hero had no scrim and its white headline sat on a
+pale photograph. The markup already named the layers; these are the rules that
+make them layers.
+
+### The contrast failures the photographs had been hiding
+
+With the photographs out of the way, axe found three, all from translucency or
+from gold on white:
+
+- `.civic-cta p` at 85% white on teal, 4.34:1. Solid white clears it at 4.6:1.
+- The footer's admin link at 70% opacity, 3.02:1. The opacity is gone.
+- `.civic-kicker`, gold on white, 2.24:1 at 13px. Gold is now scoped to the
+  three dark sections it was drawn for, and the kicker takes an ink colour
+  everywhere else. The dark sections are named rather than the light ones,
+  because a new section is light by default and would otherwise inherit a
+  colour it cannot carry.
+
+### The explainer's shape is fixed, and the server enforces it
+
+Three questions, always the same three, always in that order: what it asks for,
+what it would fund, what happens if it fails. A fourth, what it costs a
+homeowner, is optional because the auditor's certification is not always out
+when the explainer is written.
+
+The three are required by the form and again by the server action, so the rule
+does not depend on the browser having run the right JavaScript. The homeowner
+figure is refused unless the text names the auditor, because that is the number
+a reader checks against their own tax bill and it has one legitimate source.
+A ballot date and an issue number have to arrive together, in the form and in a
+check constraint, since half an identity is a half entered explainer rather
+than a state anybody meant.
+
+### One heading per election, not one heading for the page
+
+The brief groups explainers under "On the ballot, November 3, 2026". With one
+election coming that is exactly what renders. With two, a single heading
+carrying the soonest date would be labelling issues that are not on that
+ballot, so there is a heading per election date, each with its own list, sorted
+by issue number inside it. `compareIssueNumbers` sorts Issue 2 above Issue 12,
+which a string sort does not.
+
+Nothing is hardcoded to November 2026. An explainer joins the group when its
+ballot date is still ahead and leaves the day after, including the home page
+strip, without anyone remembering to take it down.
+
+### What is still red
+
+One test: "the Explorer below Latest" expects the Explorer section to come
+after the Latest feed, and on the page it comes before. Both are from the
+redesign, so one of the two drifted from the intent and I do not know which.
+Reordering sections of the home page is a visible design change and not mine to
+guess at. Everything else passes: 65 end to end, 56 data, the RLS suite, and
+visual parity.
+
+The home page feed is ordered by date alone, so items published on the same day
+tie in an arbitrary order. It makes one test fragile once a development
+database has collected a few same day rows. A tiebreak column on `latest_feed`
+would fix it properly.

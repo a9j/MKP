@@ -29,6 +29,13 @@ const JWT_SECRET =
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const STORE = join(ROOT, ".local-storage");
 const LINKS = join(STORE, "magic-links.json");
+
+/**
+ * The password every address signs in with locally. Not a credential: it only
+ * works against this stub, which runs on your own machine and signs its own
+ * JWTs. Production passwords live in Supabase Auth and never come near here.
+ */
+const DEV_PASSWORD = process.env.DEV_PASSWORD ?? "local-development-password";
 mkdirSync(STORE, { recursive: true });
 
 const b64url = (buf) => Buffer.from(buf).toString("base64url");
@@ -184,6 +191,22 @@ async function handleAuth(req, res, url) {
   }
 
   if (path === "/token" && req.method === "POST") {
+    // Email and password, which is how the sign in screen works since the
+    // switch away from magic links. The stub holds one development password
+    // for every address rather than a password store: what is being exercised
+    // is this project's code, not the auth server's hashing.
+    if (url.searchParams.get("grant_type") === "password") {
+      const email = String(body.email ?? "").toLowerCase();
+      const password = String(body.password ?? "");
+      if (!email.includes("@") || password !== DEV_PASSWORD) {
+        return json(res, 400, {
+          error: "invalid_grant",
+          error_description: "Invalid login credentials",
+        });
+      }
+      return json(res, 200, sessionFor(email));
+    }
+
     if (url.searchParams.get("grant_type") === "refresh_token") {
       const token = String(body.refresh_token ?? "");
       if (!token.startsWith("local-")) return json(res, 400, { error: "invalid_grant" });

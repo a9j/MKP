@@ -49,9 +49,10 @@ export function SiteFooter({ ein, mailingAddress }: SiteFooterProps) {
           </span>
           <span>{NEUTRALITY_LINE}</span>
           <span>
-            <Link href="/admin" style={{ opacity: 0.7 }}>
-              Admin sign in
-            </Link>
+            {/* No opacity: at this size, 70% of the link colour measures
+                3.02:1 and misses AA. It is a quiet link because of where it
+                sits, not because it is faded. */}
+            <Link href="/admin">Admin sign in</Link>
           </span>
         </div>
       </div>

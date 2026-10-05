@@ -28,6 +28,10 @@ test.describe("reports", () => {
     await page.fill("#report-title", title);
     await page.fill("#report-summary", "A **draft** the council has not read yet.");
     await page.selectOption("#report-type", "levy_explainer");
+    // An explainer answers its three questions before it saves, draft or not.
+    await page.fill("#report-asksFor", "A 4.9 mill operating levy for five years.");
+    await page.fill("#report-funds", "Day to day operations.");
+    await page.fill("#report-ifFails", "The forecast shows a deficit in year two.");
     await page.fill("#source-label-0", "County levy filing");
     await page.fill("#source-url-0", "https://example.com/levy.pdf");
     await page.setInputFiles("#report-pdf", PDF);
@@ -151,5 +155,164 @@ test.describe("reports", () => {
     // And it reaches the home page feed.
     await pub.goto("/");
     await expect(pub.locator(".item .t").filter({ hasText: title })).toBeVisible();
+  });
+});
+
+test.describe("ballot explainers", () => {
+  const future = "2027-11-02";
+
+  test("an explainer will not save without its three answers", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/admin/reports");
+
+    // The fields appear only for an explainer, so a pay report never sees them.
+    await expect(page.locator("#report-asksFor")).toHaveCount(0);
+    await page.selectOption("#report-type", "ballot_explainer");
+    await expect(page.locator("#report-asksFor")).toBeVisible();
+    await expect(page.locator("#report-funds")).toBeVisible();
+    await expect(page.locator("#report-ifFails")).toBeVisible();
+
+    await page.fill("#report-title", `Issue 3 ${Date.now()}`);
+    await page.fill("#report-summary", "A ballot issue the test suite wrote.");
+    await page.fill("#source-label-0", "County board of elections");
+    await page.fill("#source-url-0", "https://example.com/ballot.pdf");
+    // Two of the three, so the third has to be what stops it.
+    await page.fill("#report-asksFor", "A 1 mill levy for five years.");
+    await page.fill("#report-funds", "Branch hours and materials.");
+    await page.click(".admin-form button[type=submit]");
+
+    await expect(page.locator(".toast")).toContainText("Nothing was saved");
+    await expect(page.locator(".field-error")).toContainText("what happens if it fails");
+  });
+
+  test("a homeowner figure has to name the auditor", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/admin/reports");
+    await page.selectOption("#report-type", "ballot_explainer");
+
+    await page.fill("#report-title", `Issue 4 ${Date.now()}`);
+    await page.fill("#report-summary", "A ballot issue the test suite wrote.");
+    await page.fill("#source-label-0", "County board of elections");
+    await page.fill("#source-url-0", "https://example.com/ballot.pdf");
+    await page.fill("#report-asksFor", "A 1 mill levy for five years.");
+    await page.fill("#report-funds", "Branch hours and materials.");
+    await page.fill("#report-ifFails", "The levy expires.");
+    await page.fill("#report-homeownerCost", "About fifty dollars a year.");
+    await page.click(".admin-form button[type=submit]");
+
+    await expect(page.locator(".field-error")).toContainText("auditor");
+  });
+
+  test("an election date and an issue number travel together", async ({ page }) => {
+    await signIn(page);
+    await page.goto("/admin/reports");
+    await page.selectOption("#report-type", "ballot_explainer");
+
+    await page.fill("#report-title", `Issue 5 ${Date.now()}`);
+    await page.fill("#report-summary", "A ballot issue the test suite wrote.");
+    await page.fill("#source-label-0", "County board of elections");
+    await page.fill("#source-url-0", "https://example.com/ballot.pdf");
+    await page.fill("#report-asksFor", "A 1 mill levy.");
+    await page.fill("#report-funds", "Branch hours.");
+    await page.fill("#report-ifFails", "The levy expires.");
+    await page.fill("#report-ballot-date", future);
+    // Deliberately no issue number.
+    await page.click(".admin-form button[type=submit]");
+
+    await expect(page.locator(".field-error")).toContainText("issue number");
+  });
+
+  test("a published explainer reaches the ballot group, the strip and its page", async ({
+    page,
+    context,
+  }) => {
+    await signIn(page);
+    await page.goto("/admin/reports");
+    await page.selectOption("#report-type", "ballot_explainer");
+
+    const stamp = Date.now();
+    const title = `Issue 7 test explainer ${stamp}`;
+    await page.fill("#report-title", title);
+    await page.fill("#report-summary", "A ballot issue the test suite published.");
+    await page.fill("#source-label-0", "County board of elections");
+    await page.fill("#source-url-0", "https://example.com/ballot.pdf");
+    await page.fill("#report-asksFor", "A 1 mill levy for five years.");
+    await page.fill("#report-funds", "Branch hours and materials.");
+    await page.fill("#report-ifFails", "The levy expires at the end of next year.");
+    await page.fill(
+      "#report-homeownerCost",
+      "The county auditor's certification states $35 a year on a $100,000 home.",
+    );
+    await page.fill("#report-ballot-date", future);
+    await page.fill("#report-issue-number", "Issue 7");
+    await page.selectOption("#report-status", "published");
+    await page.click(".admin-form button[type=submit]");
+    await expect(page.locator(".toast")).toContainText("Report published");
+
+    const pub = await context.newPage();
+
+    // The grouping, under a heading carrying the election date.
+    await pub.goto("/reports");
+    const section = pub.locator("#on-the-ballot");
+    await expect(section.locator("h2").first()).toContainText("On the ballot,");
+
+    // Each election gets its own heading and its own list, and within one list
+    // the issues are in numeric order: 7 above 12, which a string sort misses.
+    const group = section.locator(`.ballot-group[data-ballot-date="${future}"]`);
+    await expect(group.locator("li").filter({ hasText: title })).toHaveCount(1);
+    const issues = await group.locator(".ballot-issue").allTextContents();
+    const numbers = issues.map((text) => Number(text.replace(/\D/g, "")));
+    expect(numbers).toEqual([...numbers].sort((a, b) => a - b));
+
+    // The home page strip, which only exists while an election is coming.
+    await pub.goto("/");
+    const strip = pub.locator(".ballot-strip");
+    // The site sets a typographic apostrophe, as it does in every other string.
+    await expect(strip).toContainText("Read what’s on the ballot.");
+    await strip.locator("a").click();
+    await expect(pub).toHaveURL(/\/reports#on-the-ballot$/);
+
+    // The page itself: the same headings in the same order, every time.
+    await pub.goto("/reports");
+    await pub.locator(".ballot-list a").filter({ hasText: title }).click();
+    // allTextContents does not wait for the navigation the click started, so
+    // settle on the new page before reading it.
+    await expect(pub.locator(".explainer-section h2").first()).toBeVisible();
+    const headings = await pub.locator(".explainer-section h2").allTextContents();
+    expect(headings).toEqual([
+      "What it asks for",
+      "What it would fund",
+      "What happens if it fails",
+      "What it costs a homeowner",
+    ]);
+    await expect(pub.locator(".explainer")).toContainText("Issue 7");
+    await expect(pub.locator(".explainer")).toContainText("auditor");
+  });
+
+  test("an explainer whose election has passed leaves the group and the strip", async ({
+    page,
+  }) => {
+    await signIn(page);
+    await page.goto("/admin/reports");
+    await page.selectOption("#report-type", "ballot_explainer");
+
+    const title = `Issue 99 last year ${Date.now()}`;
+    await page.fill("#report-title", title);
+    await page.fill("#report-summary", "An election that has already happened.");
+    await page.fill("#source-label-0", "County board of elections");
+    await page.fill("#source-url-0", "https://example.com/ballot.pdf");
+    await page.fill("#report-asksFor", "A 1 mill levy.");
+    await page.fill("#report-funds", "Branch hours.");
+    await page.fill("#report-ifFails", "The levy expires.");
+    await page.fill("#report-ballot-date", "2020-11-03");
+    await page.fill("#report-issue-number", "Issue 99");
+    await page.selectOption("#report-status", "published");
+    await page.click(".admin-form button[type=submit]");
+    await expect(page.locator(".toast")).toContainText("Report published");
+
+    await page.goto("/reports");
+    // Still a report, just not on the ballot any more.
+    await expect(page.locator(".ballot-list").filter({ hasText: title })).toHaveCount(0);
+    await expect(page.locator(".report-row").filter({ hasText: title })).toHaveCount(1);
   });
 });
