@@ -643,6 +643,163 @@ export type Database = {
         }
         Relationships: []
       }
+      ballot_issues: {
+        Row: {
+          cost_note: string | null
+          cost_source_id: string | null
+          created_at: string
+          explainer_id: string
+          id: string
+          issue_number: string | null
+          jurisdiction: string | null
+          linked_levy_explainer_id: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          what_no_means: string
+          what_yes_means: string
+        }
+        Insert: {
+          cost_note?: string | null
+          cost_source_id?: string | null
+          created_at?: string
+          explainer_id: string
+          id?: string
+          issue_number?: string | null
+          jurisdiction?: string | null
+          linked_levy_explainer_id?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          what_no_means?: string
+          what_yes_means?: string
+        }
+        Update: {
+          cost_note?: string | null
+          cost_source_id?: string | null
+          created_at?: string
+          explainer_id?: string
+          id?: string
+          issue_number?: string | null
+          jurisdiction?: string | null
+          linked_levy_explainer_id?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          what_no_means?: string
+          what_yes_means?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ballot_issues_explainer_id_fkey"
+            columns: ["explainer_id"]
+            isOneToOne: false
+            referencedRelation: "explainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ballot_issues_linked_levy_explainer_id_fkey"
+            columns: ["linked_levy_explainer_id"]
+            isOneToOne: false
+            referencedRelation: "explainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_events: {
+        Row: {
+          ai_generated: boolean
+          created_at: string
+          description: string | null
+          event_date: string
+          event_type: string
+          explainer_id: string
+          headline: string
+          id: string
+          sort_order: number
+          source_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_generated?: boolean
+          created_at?: string
+          description?: string | null
+          event_date: string
+          event_type: string
+          explainer_id: string
+          headline: string
+          id?: string
+          sort_order?: number
+          source_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_generated?: boolean
+          created_at?: string
+          description?: string | null
+          event_date?: string
+          event_type?: string
+          explainer_id?: string
+          headline?: string
+          id?: string
+          sort_order?: number
+          source_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_events_explainer_id_fkey"
+            columns: ["explainer_id"]
+            isOneToOne: false
+            referencedRelation: "explainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      explainer_sources: {
+        Row: {
+          created_at: string
+          document_date: string | null
+          explainer_id: string
+          id: string
+          label: string
+          note: string | null
+          sort_order: number
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          document_date?: string | null
+          explainer_id: string
+          id?: string
+          label: string
+          note?: string | null
+          sort_order?: number
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          document_date?: string | null
+          explainer_id?: string
+          id?: string
+          label?: string
+          note?: string | null
+          sort_order?: number
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "explainer_sources_explainer_id_fkey"
+            columns: ["explainer_id"]
+            isOneToOne: false
+            referencedRelation: "explainers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       explainer_versions: {
         Row: {
           change_note: string | null
@@ -726,6 +883,12 @@ export type Database = {
           updated_at: string
           version: number
           vote_id: string | null
+          current_status: string | null
+          hero_image_alt: string | null
+          hero_image_path: string | null
+          is_sample: boolean
+          pdf_path: string | null
+          template: string | null
         }
         Insert: {
           ai_draft?: boolean
@@ -754,6 +917,12 @@ export type Database = {
           updated_at?: string
           version?: number
           vote_id?: string | null
+          current_status?: string | null
+          hero_image_alt?: string | null
+          hero_image_path?: string | null
+          is_sample?: boolean
+          pdf_path?: string | null
+          template?: string | null
         }
         Update: {
           ai_draft?: boolean
@@ -782,6 +951,12 @@ export type Database = {
           updated_at?: string
           version?: number
           vote_id?: string | null
+          current_status?: string | null
+          hero_image_alt?: string | null
+          hero_image_path?: string | null
+          is_sample?: boolean
+          pdf_path?: string | null
+          template?: string | null
         }
         Relationships: [
           {
@@ -1000,6 +1175,59 @@ export type Database = {
           status?: Database["public"]["Enums"]["job_status"]
         }
         Relationships: []
+      }
+      levy_details: {
+        Row: {
+          cost_per_100k: number | null
+          cost_source_id: string | null
+          district_or_body: string
+          estimated_annual_revenue: number | null
+          explainer_id: string
+          levy_kind: string
+          mills: number | null
+          mills_source_id: string | null
+          purpose: string | null
+          revenue_source_id: string | null
+          updated_at: string
+          years: number | null
+        }
+        Insert: {
+          cost_per_100k?: number | null
+          cost_source_id?: string | null
+          district_or_body?: string
+          estimated_annual_revenue?: number | null
+          explainer_id: string
+          levy_kind?: string
+          mills?: number | null
+          mills_source_id?: string | null
+          purpose?: string | null
+          revenue_source_id?: string | null
+          updated_at?: string
+          years?: number | null
+        }
+        Update: {
+          cost_per_100k?: number | null
+          cost_source_id?: string | null
+          district_or_body?: string
+          estimated_annual_revenue?: number | null
+          explainer_id?: string
+          levy_kind?: string
+          mills?: number | null
+          mills_source_id?: string | null
+          purpose?: string | null
+          revenue_source_id?: string | null
+          updated_at?: string
+          years?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levy_details_explainer_id_fkey"
+            columns: ["explainer_id"]
+            isOneToOne: false
+            referencedRelation: "explainers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       listening_points: {
         Row: {
@@ -1543,6 +1771,7 @@ export type Database = {
           slug: string | null
           snapshot: Json | null
           summary_30s: string | null
+          template: string | null
           title: string | null
           updated_at: string | null
           version: number | null

@@ -69,6 +69,11 @@ pnpm install
 pnpm dev
 ```
 
+The local auth stand in accepts any address with the password
+`local-password` (set `LOCAL_ADMIN_PASSWORD` to change it). Whether that
+address is an admin is still decided by the `admins` table, and the seed adds
+`hello@monakproject.org`.
+
 ## Signing in
 
 Magic link only. Ask for a link at `/admin/login`, follow it, and you are in.
@@ -240,6 +245,65 @@ and Vote Watch name them.
 Switch the status to Published and it appears on `/reports`, at its own address,
 and in the Latest feed. Editing a published report does not move its publication
 date.
+
+## Publishing an explainer
+
+Ballot, levy and contract explainers live at `/ballot/[slug]`, `/levy/[slug]`
+and `/contract/[slug]`, with an index at `/explainers` and the newest three on
+the home page. They are built in `/admin/explainers` and never need a code
+change or a redeploy: publishing refreshes the pages it touches.
+
+Under the hood they are the explainers from the Phase One spec, with a
+`template` column. So they publish only through `publish_explainer()`: the
+public page is a frozen snapshot of what was approved, an edit to a live page
+stays private until you publish again, and from the second version on you say
+what changed. The checklist at the top of the editor is `explainer_problems()`,
+the same list publishing checks, and the button refuses until it is empty.
+
+Every type needs a title, a two or three sentence summary, at least one source,
+and a reading grade at or under `explainer_max_reading_grade` (9 to start). The
+grade is worked out on every save from the plain-language text. Every figure
+picks its source from a dropdown of the explainer's own sources, and a figure
+with no source blocks publishing. So does an em dash, and so does "vote yes" or
+"vote no" anywhere a reader will see it.
+
+**Ballot.** New explainer, Ballot Explainer, give it a title like "November
+2026 ballot". Set the election date, add the sources, then one issue card per
+issue: number, who it covers, title, what a yes vote does, what a no vote does,
+and an optional cost note. A cost note with a number in it needs a source.
+Cards can be moved up and down. An issue can link to a levy explainer, and the
+card shows "Read the full levy explainer" once that levy page is live.
+
+**Levy.** Who is asking, the kind of levy, mills, years (blank for a continuing
+levy), what it pays for, and optionally the estimated yearly revenue and the
+county auditor's certified cost per $100,000. Mills always needs a source, and
+the other two need one when they are filled in. The calculator uses the
+auditor's figure when it is there and Ohio's formula (market value x 35% x
+mills / 1000) when it is not, and says which under the result.
+
+**Contract tracker.** A current status line ("Talks ongoing") and the timeline.
+The quickest way to add an event is **Add an update** at the top of the
+editor: date, type, headline, an optional line on what happened, and a source.
+Pick an existing source or paste a new document's name and link in place. Tick
+"Publish the page with this update" to put it live in the same step; the
+change note is written for you. Every event needs a source before the page can
+be published.
+
+**Preview** opens the page exactly as it would publish, in the real site
+layout, for a signed in admin only. **Save draft** saves without touching the
+public site. **Save and publish** saves, runs the checklist and publishes. A
+PDF and a photo at the top are optional; the photo needs a description for
+screen readers. An explainer that was never published can be deleted from the
+list. One that was published cannot: correct it and publish again.
+
+The three samples (`is_sample`) are drafts with placeholder text so you can
+see the forms and pages. They can be previewed and never published. Delete
+them from the list when you are done with them.
+
+When automation is switched on, `src/lib/automation/explainers.ts` is where
+drafting code writes. It creates drafts flagged as AI drafts and timeline
+events flagged as generated. Nothing it writes is public until a person
+publishes, and the database refuses if it tries.
 
 ## Subscribers and mail
 

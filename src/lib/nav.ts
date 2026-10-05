@@ -2,6 +2,7 @@
 export const NAV_LINKS = [
   { href: "/explorer", label: "Explorer" },
   { href: "/reports", label: "Reports" },
+  { href: "/explainers", label: "Explainers" },
   { href: "/records", label: "Records" },
   { href: "/votes", label: "Votes" },
   { href: "/about", label: "About" },

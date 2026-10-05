@@ -984,3 +984,76 @@ four-minute read." and on a desktop it sits to its left, as the brief laid out.
 ### The promise band has a visually hidden heading
 The brief gives the band no heading. A hidden "Our promise" h2 keeps the
 heading outline unbroken for screen reader users without changing the page.
+
+## 2026-10-05, ballot, levy and contract explainers
+
+### They are the Phase One explainers, with a template
+The brief described a new `explainers` table with its own draft and publish
+switch. One already existed, from 0008: claim-level sourcing, a publish gate in
+the database, frozen versions, and an audit trail, with no screens yet. A
+second table of the same name could not exist, and a second way to publish
+beside the first is the thing "Publishing goes through one path" rules out.
+So 0011 adds a `template` column (ballot, levy, contract) to the existing
+table, puts the issue cards, levy figures and timeline in their own tables,
+and gives `explainer_problems()` a checklist for templated explainers in place
+of the claim checks. A claim-based explainer, `template` null, behaves exactly
+as before. This was put to the director and agreed before building.
+
+What that costs: an edit to a live page stays private until it is published
+again, and from version 2 a change note is required. The contract tracker's
+quick update writes that note itself.
+
+### The public reads the snapshot, not the new tables
+The brief asked for public read on the new tables where the parent is
+published. They are admin only instead, and the public page is built from the
+snapshot `publish_explainer()` freezes, which now carries the issues, figures,
+events and sources. Public read on the live tables would show an unpublished
+edit the moment it was saved.
+
+### A ballot page uses the ballot_issue kind
+A ballot page covers a whole election. It is stored as kind `ballot_issue`
+rather than a new enum value, because Postgres does not let a migration add an
+enum value and use it in the same transaction. A check constraint ties each
+template to its kind, and the home page's "what's on the ballot" test, which
+filters on kind, picks ballot pages up unchanged. The election date is the
+explainer's `decision_date`, not a column on each issue.
+
+### A figure's source must belong to the same explainer
+The source columns are composite foreign keys on (explainer_id, id), so an
+issue cannot cite another explainer's document. Removing a source clears the
+figures that cited it (`on delete set null (column)`), which puts them back on
+the checklist.
+
+### The checklist reads like the house rules
+Besides sources, a templated explainer cannot publish with an em dash in reader
+facing text or with "vote yes" or "vote no" in it. Samples can never publish,
+and `explainers_public` and the public read policies exclude them as well.
+
+### The reading grade is computed on save
+`reading_grade` was "computed by the app on save" in 0008, but nothing computed
+it. `src/lib/reading-grade.ts` is a plain Flesch-Kincaid over the summary and
+the plain-language fields, not the titles, which are names.
+
+### Old files are never deleted
+A new PDF or photo is a new object. The previous one stays, because the
+published version still points at it until the next publish.
+
+### Missing tables are a state the site survives
+Until 0011 is applied, every explainer read logs the reason and returns
+nothing, so the build and the home page carry on. This is the same rule as
+"An empty table used to take the whole site down".
+
+### Two local fixes the tests needed
+`0009_ballot_explainer.sql` could not run on a fresh database, because the
+`latest_feed` view depends on `reports.type`. Production had it applied by
+hand and never recorded it. It is now guarded: it runs only while the column
+is still the enum, and saves and restores the view and its grant. The local
+shim now grants the `auth` schema the way Supabase does, which
+`publish_explainer()` needs as the caller. The local auth stand in also
+accepts a password, since the admin login no longer sends magic links.
+
+### Still open
+The `/explainers` index lists only templated explainers. The Phase One spec's
+`/explainers/[slug]` page for claim-based explainers is still not built. The
+Reports page still describes ballot, levy and contract work in its own cards
+and was left alone.

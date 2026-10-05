@@ -57,5 +57,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  // The explainer preview sits in the public layout but is read with the
+  // admin's session, so it needs that session kept fresh too. It is not
+  // redirected: a signed out visitor gets the page's own 404.
+  matcher: ["/admin/:path*", "/explainers/preview/:path*"],
 };
