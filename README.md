@@ -71,6 +71,11 @@ pnpm install
 pnpm dev
 ```
 
+The local auth stand in accepts any address with the password
+`local-password` (set `LOCAL_ADMIN_PASSWORD` to change it). Whether that
+address is an admin is still decided by the `admins` table, and the seed adds
+`hello@monakproject.org`.
+
 ## Signing in
 
 Email and password at `/admin/login`. Middleware sends a signed out visitor to sign in, but that
@@ -95,8 +100,8 @@ Case does not matter: `is_admin()` compares lowercased addresses.
 
 | Command | What it covers |
 | --- | --- |
-| `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 67 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, and the RLS rules for anonymous, non-admin, admin and service role callers |
-| `pnpm test:data` | 61 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL, the mail fallback, the digest's grouping and ordering, the house mail template, and the guards on the scheduled routes, none of which needs the database |
+| `pnpm test:db` | Applies the migrations to a throwaway Postgres and runs 102 assertions on `business_days_between`, the `latest_feed` view, the source and length constraints, the rule that only a person may publish, the RLS rules for anonymous, non-admin, admin and service role callers, and the templated explainers' own publish gate, snapshots and version history |
+| `pnpm test:data` | 70 tests. Runs the query layer against real PostgREST: feed ordering, draft exclusion, settings filtering, the Explorer and city budget rules, CSV parsing and validation, and the RLS boundaries as `supabase-js` sees them. Also the site URL, the mail fallback, the digest's grouping and ordering, the house mail template, and the guards on the scheduled routes, none of which needs the database |
 | `pnpm test:visual` | Compares the rendered home page against `mona-k-homepage-mockup.html` element by element |
 | `pnpm test:lighthouse` | Lighthouse over all 12 public routes in mobile emulation. Fails if any category on any route drops below 95 |
 | `pnpm test:e2e` | Playwright, 69 tests. Public pages render, the Explorer updates on input change, admin routes redirect to sign in, a vote posted through the admin UI appears on `/votes` and in the Latest feed, a salary CSV with a missing `source_url` is refused, the city budget loads from a CSV and drives every panel on `/budget`, a draft report stays off the public site while its preview link opens without a login, a ballot explainer will not save without its three answers and reaches the ballot grouping, the home page strip and its own three part page, "Send to council" reaches every advisory member, a subscriber is never written to before confirming, a publish notice reaches confirmed addresses only, a machine written draft appears on no public page, and the Publish button on such a draft stays disabled until the reviewer confirms they checked it against the document, the daily digest refuses a caller without the shared secret and otherwise writes a mail that links into each waiting form, and the dashboard says when each scheduled job last ran. It also runs axe over every public and admin screen in light mode, dark mode and at 390px, and fails on any WCAG 2.1 A or AA violation |
@@ -297,6 +302,65 @@ and Vote Watch name them.
 Switch the status to Published and it appears on `/reports`, at its own address,
 and in the Latest feed. Editing a published report does not move its publication
 date.
+
+## Publishing an explainer
+
+Ballot, levy and contract explainers live at `/ballot/[slug]`, `/levy/[slug]`
+and `/contract/[slug]`, with an index at `/explainers` and the newest three on
+the home page. They are built in `/admin/explainers` and never need a code
+change or a redeploy: publishing refreshes the pages it touches.
+
+Under the hood they are the explainers from the Phase One spec, with a
+`template` column. So they publish only through `publish_explainer()`: the
+public page is a frozen snapshot of what was approved, an edit to a live page
+stays private until you publish again, and from the second version on you say
+what changed. The checklist at the top of the editor is `explainer_problems()`,
+the same list publishing checks, and the button refuses until it is empty.
+
+Every type needs a title, a two or three sentence summary, at least one source,
+and a reading grade at or under `explainer_max_reading_grade` (9 to start). The
+grade is worked out on every save from the plain-language text. Every figure
+picks its source from a dropdown of the explainer's own sources, and a figure
+with no source blocks publishing. So does an em dash, and so does "vote yes" or
+"vote no" anywhere a reader will see it.
+
+**Ballot.** New explainer, Ballot Explainer, give it a title like "November
+2026 ballot". Set the election date, add the sources, then one issue card per
+issue: number, who it covers, title, what a yes vote does, what a no vote does,
+and an optional cost note. A cost note with a number in it needs a source.
+Cards can be moved up and down. An issue can link to a levy explainer, and the
+card shows "Read the full levy explainer" once that levy page is live.
+
+**Levy.** Who is asking, the kind of levy, mills, years (blank for a continuing
+levy), what it pays for, and optionally the estimated yearly revenue and the
+county auditor's certified cost per $100,000. Mills always needs a source, and
+the other two need one when they are filled in. The calculator uses the
+auditor's figure when it is there and Ohio's formula (market value x 35% x
+mills / 1000) when it is not, and says which under the result.
+
+**Contract tracker.** A current status line ("Talks ongoing") and the timeline.
+The quickest way to add an event is **Add an update** at the top of the
+editor: date, type, headline, an optional line on what happened, and a source.
+Pick an existing source or paste a new document's name and link in place. Tick
+"Publish the page with this update" to put it live in the same step; the
+change note is written for you. Every event needs a source before the page can
+be published.
+
+**Preview** opens the page exactly as it would publish, in the real site
+layout, for a signed in admin only. **Save draft** saves without touching the
+public site. **Save and publish** saves, runs the checklist and publishes. A
+PDF and a photo at the top are optional; the photo needs a description for
+screen readers. An explainer that was never published can be deleted from the
+list. One that was published cannot: correct it and publish again.
+
+The three samples (`is_sample`) are drafts with placeholder text so you can
+see the forms and pages. They can be previewed and never published. Delete
+them from the list when you are done with them.
+
+When automation is switched on, `src/lib/automation/explainers.ts` is where
+drafting code writes. It creates drafts flagged as AI drafts and timeline
+events flagged as generated. Nothing it writes is public until a person
+publishes, and the database refuses if it tries.
 
 ## Subscribers and mail
 

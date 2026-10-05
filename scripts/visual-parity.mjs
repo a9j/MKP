@@ -26,7 +26,12 @@ const CHROME = process.env.CHROMIUM_PATH ?? "/opt/pw-browsers/chromium";
 // longer tracked. What the new page still takes from the mockup is the column,
 // the type scale, the Latest feed, the call to action and the footer.
 const ELEMENTS = {
-  sectionHeading: { selector: "section.wrap h2", compare: "width" },
+  // The Latest feed's own heading, not whichever section heading comes first.
+  // The October redesign put two new display headings above it, so "the first
+  // section.wrap h2" stopped meaning the same element in the two documents and
+  // the comparison was measuring a deliberate design change as a drift. This
+  // picks the heading over the feed, which both pages still share.
+  sectionHeading: { selector: "section.wrap:has(.latest) h2", compare: "width" },
   feedRow: ".item",
   // Same block, new heading copy, so its height is its own.
   // The mockup's .cta block was replaced by the redesign's .civic-cta, which is

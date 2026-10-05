@@ -213,6 +213,17 @@ async function handleAuth(req, res, url) {
       const email = Buffer.from(token.slice("local-".length), "base64url").toString();
       return json(res, 200, sessionFor(email));
     }
+    // Email and password, which the admin login uses since it stopped sending
+    // magic links. Any address with the one local password gets a session;
+    // whether it is an admin is still decided by the admins table and RLS.
+    if (url.searchParams.get("grant_type") === "password") {
+      const email = String(body.email ?? "").toLowerCase();
+      const expected = process.env.LOCAL_ADMIN_PASSWORD ?? "local-password";
+      if (!email.includes("@") || String(body.password ?? "") !== expected) {
+        return json(res, 400, { error: "invalid_grant", error_description: "Invalid login credentials" });
+      }
+      return json(res, 200, sessionFor(email));
+    }
     return json(res, 400, { error: "unsupported_grant_type" });
   }
 

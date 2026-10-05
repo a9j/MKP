@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
 import { Photo } from "@/components/photo";
 import { NEUTRALITY_LINE } from "@/lib/nav";
 import { getLatestFeed } from "@/lib/queries/feed";
-import { getPublishedReports, onTheBallot } from "@/lib/queries/reports";
 import { getExplorerData } from "@/lib/queries/explorer";
+import { getPublishedReports, onTheBallot } from "@/lib/queries/reports";
+import { getLatestExplainers } from "@/lib/queries/explainers";
+import { ExplainerCards } from "@/components/explainers/explainer-cards";
 
 /**
  * Rebuilt on demand. Every admin save calls revalidatePath for the routes it
@@ -33,8 +35,8 @@ const PROGRAMS = [
     alt: "A teacher leading a classroom of students",
   },
   {
-    // Added with the budget Explorer in step two and lost in the redesign.
-    // The copy is the brief's, verbatim.
+    // Added with the budget Explorer in step two and lost in each redesign
+    // since. The copy is the brief's, verbatim.
     n: "02",
     tone: "teal",
     tag: "Tool",
@@ -92,6 +94,30 @@ const STEPS = [
   },
 ];
 
+const HERO_ALT = "A person holding up a stack of tax and records forms in front of their face.";
+
+/**
+ * The hero photo sits behind the words, art directed: the portrait on phones,
+ * a widened 16:9 version from 768px with the person on the right and open wall
+ * on the left under the text. One <picture> so each width downloads one file.
+ */
+const { props: heroMobile } = getImageProps({
+  src: "/photos/hero-records-desktop.webp",
+  alt: HERO_ALT,
+  width: 1200,
+  height: 1800,
+  sizes: "100vw",
+  priority: true,
+});
+const { props: heroWide } = getImageProps({
+  src: "/photos/hero-records-wide.webp",
+  alt: HERO_ALT,
+  width: 2400,
+  height: 1350,
+  sizes: "100vw",
+  priority: true,
+});
+
 const TRUST_ITEMS = [
   "Every number links to the document it came from.",
   "No positions. No endorsements. No recommendations.",
@@ -99,9 +125,10 @@ const TRUST_ITEMS = [
 ];
 
 export default async function HomePage() {
-  const [latest, explorer, reports] = await Promise.all([
+  const [latest, explorer, explainers, reports] = await Promise.all([
     getLatestFeed(6),
     getExplorerData(),
+    getLatestExplainers(3),
     getPublishedReports(),
   ]);
 
@@ -121,39 +148,44 @@ export default async function HomePage() {
         </aside>
       ) : null}
 
-      <header className="civic-hero civic-hero-photo">
-        <div className="civic-hero-bg" aria-hidden="true">
-          <Image
-            src="/photos/how-we-work.jpg"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
+      <header className="home-hero relative isolate overflow-hidden bg-[#F7F5F0] text-[#1B2A3A]">
+        <picture>
+          <source media="(min-width: 768px)" srcSet={heroWide.srcSet} sizes={heroWide.sizes} />
+          <img
+            {...heroMobile}
+            alt={HERO_ALT}
+            className="absolute inset-0 -z-20 h-full w-full object-cover object-[center_70%] md:object-[72%_center]"
           />
-          <div className="civic-hero-scrim" />
-        </div>
-        <div className="wrap civic-hero-inner">
-          <p className="civic-kicker">The Mona K Project &mdash; Toledo, Ohio</p>
-          <h1>
-            The records are public.
-            <br />
-            We make them <span className="hl">readable.</span>
-          </h1>
-          <p className="lede">
-            School budgets. Board votes. Salary schedules. City finances. Ballot
-            issues. We read Toledo&rsquo;s public records, explain them in plain
-            language, and link every number to the document it came from. Then
-            Toledo decides.
-          </p>
-          <div className="actions">
-            <Link className="btn btn-gold btn-large" href="#what-we-do">
-              See what we do
-            </Link>
-            <Link className="btn btn-outline-w btn-large" href="/reports">
-              Read the latest
-            </Link>
+        </picture>
+        <div className="home-hero-wash absolute inset-0 -z-10" aria-hidden="true" />
+        <div className="wrap flex items-center pt-28 pb-16 md:min-h-[90svh] md:py-16">
+          <div className="md:w-[55%]">
+            <h1 className="text-[clamp(2.5rem,9vw,5rem)] leading-[1.05] font-bold tracking-[-0.02em] text-balance text-[#1B2A3A]">
+              The records are public. We make them{" "}
+              <span className="home-hero-hl">readable.</span>
+            </h1>
+            <p className="mt-6 max-w-[34em] text-[18px] leading-[1.6] text-[#1B2A3A]/75">
+              School budgets. Board votes. Salary schedules. City finances. Ballot
+              issues. We read Toledo&rsquo;s public records, explain them in plain
+              language, and link every number to the document it came from. Then
+              Toledo decides.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <Link
+                className="btn btn-large border-2 border-[#D4A84B] bg-[#D4A84B] font-bold text-[#1B2A3A]"
+                href="#what-we-do"
+              >
+                See what we do
+              </Link>
+              <Link
+                className="btn btn-large border-2 border-[#1B2A3A] bg-transparent font-bold text-[#1B2A3A]"
+                href="/reports"
+              >
+                Read the latest
+              </Link>
+            </div>
+            <p className="mt-6 max-w-[44em] text-[14px] text-[#1B2A3A]/60">{NEUTRALITY_LINE}</p>
           </div>
-          <p className="pledge">{NEUTRALITY_LINE}</p>
         </div>
       </header>
 
@@ -201,6 +233,23 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Fills itself from the newest published explainers, and is absent
+          until there is one, so publishing never needs a home page edit. */}
+      {explainers.length > 0 ? (
+        <section className="civic-band civic-band-paper" aria-labelledby="home-explainers">
+          <div className="wrap">
+            <p className="civic-kicker-dark">Explainers</p>
+            <h2 id="home-explainers">On the ballot and at the table</h2>
+            <ExplainerCards explainers={explainers} />
+            <p className="explainer-all">
+              <Link className="more" href="/explainers">
+                All explainers <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </p>
+          </div>
+        </section>
+      ) : null}
+
       <section className="civic-steps">
         <div className="wrap civic-steps-grid">
           <div>
@@ -228,9 +277,9 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="wrap civic-explorer">
+      <section className="wrap civic-explorer" aria-labelledby="explorer-heading">
         <p className="civic-kicker-dark">One example</p>
-        <h2>Start with a paycheck.</h2>
+        <h2 id="explorer-heading">Start with a paycheck.</h2>
         <p className="civic-explorer-lede">
           The Teacher Pay Explorer is the first tool. More are coming: the city
           budget, board votes, ballot issues. This is what &ldquo;readable&rdquo;
@@ -239,7 +288,8 @@ export default async function HomePage() {
         {/* The id belongs on the widget, not the section around it: it is both
             the anchor target and the prefix for the widget's own field ids
             (#explorer-step and the rest). Having it in both places put the
-            same id on the page twice, which is invalid. */}
+            same id on the page twice, which is invalid. Fixed in step three
+            and back with this redesign. */}
         {explorer ? (
           <PayExplorer data={explorer} id="explorer" />
         ) : (

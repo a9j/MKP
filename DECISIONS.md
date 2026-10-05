@@ -985,6 +985,79 @@ four-minute read." and on a desktop it sits to its left, as the brief laid out.
 The brief gives the band no heading. A hidden "Our promise" h2 keeps the
 heading outline unbroken for screen reader users without changing the page.
 
+## 2026-10-05, ballot, levy and contract explainers
+
+### They are the Phase One explainers, with a template
+The brief described a new `explainers` table with its own draft and publish
+switch. One already existed, from 0008: claim-level sourcing, a publish gate in
+the database, frozen versions, and an audit trail, with no screens yet. A
+second table of the same name could not exist, and a second way to publish
+beside the first is the thing "Publishing goes through one path" rules out.
+So 0011 adds a `template` column (ballot, levy, contract) to the existing
+table, puts the issue cards, levy figures and timeline in their own tables,
+and gives `explainer_problems()` a checklist for templated explainers in place
+of the claim checks. A claim-based explainer, `template` null, behaves exactly
+as before. This was put to the director and agreed before building.
+
+What that costs: an edit to a live page stays private until it is published
+again, and from version 2 a change note is required. The contract tracker's
+quick update writes that note itself.
+
+### The public reads the snapshot, not the new tables
+The brief asked for public read on the new tables where the parent is
+published. They are admin only instead, and the public page is built from the
+snapshot `publish_explainer()` freezes, which now carries the issues, figures,
+events and sources. Public read on the live tables would show an unpublished
+edit the moment it was saved.
+
+### A ballot page uses the ballot_issue kind
+A ballot page covers a whole election. It is stored as kind `ballot_issue`
+rather than a new enum value, because Postgres does not let a migration add an
+enum value and use it in the same transaction. A check constraint ties each
+template to its kind, and the home page's "what's on the ballot" test, which
+filters on kind, picks ballot pages up unchanged. The election date is the
+explainer's `decision_date`, not a column on each issue.
+
+### A figure's source must belong to the same explainer
+The source columns are composite foreign keys on (explainer_id, id), so an
+issue cannot cite another explainer's document. Removing a source clears the
+figures that cited it (`on delete set null (column)`), which puts them back on
+the checklist.
+
+### The checklist reads like the house rules
+Besides sources, a templated explainer cannot publish with an em dash in reader
+facing text or with "vote yes" or "vote no" in it. Samples can never publish,
+and `explainers_public` and the public read policies exclude them as well.
+
+### The reading grade is computed on save
+`reading_grade` was "computed by the app on save" in 0008, but nothing computed
+it. `src/lib/reading-grade.ts` is a plain Flesch-Kincaid over the summary and
+the plain-language fields, not the titles, which are names.
+
+### Old files are never deleted
+A new PDF or photo is a new object. The previous one stays, because the
+published version still points at it until the next publish.
+
+### Missing tables are a state the site survives
+Until 0011 is applied, every explainer read logs the reason and returns
+nothing, so the build and the home page carry on. This is the same rule as
+"An empty table used to take the whole site down".
+
+### Two local fixes the tests needed
+`0009_ballot_explainer.sql` could not run on a fresh database, because the
+`latest_feed` view depends on `reports.type`. Production had it applied by
+hand and never recorded it. It is now guarded: it runs only while the column
+is still the enum, and saves and restores the view and its grant. The local
+shim now grants the `auth` schema the way Supabase does, which
+`publish_explainer()` needs as the caller. The local auth stand in also
+accepts a password, since the admin login no longer sends magic links.
+
+### Still open
+The `/explainers` index lists only templated explainers. The Phase One spec's
+`/explainers/[slug]` page for claim-based explainers is still not built. The
+Reports page still describes ballot, levy and contract work in its own cards
+and was left alone.
+
 ## 2026-10-05, phase 2 step 3: ballot explainers
 
 Step three of the build order, the one with the deadline: early voting opens in
@@ -1243,3 +1316,69 @@ real votes and leave them behind, the home page feed shows a fixed number of
 items, and after enough runs a new vote no longer fits on it. The fix is a note
 in README rather than a change to the tests, because the thing the test is
 checking, that a saved vote reaches the feed, is the right thing to check.
+
+## 2026-10-05, merging the templated explainers into the phase 2 branch
+
+`main` moved while steps 5 and 6 were being built: PR 17 landed a complete
+templated explainer system, about 5,400 lines of it, plus a new home page
+design. Merging it raised five conflicts and a handful of things that only
+showed up once both halves were in one tree.
+
+### Where the two sides disagreed, main won on design
+
+`main`'s home page, its `globals.css` and its version of
+`0009_ballot_explainer.sql` were taken whole. Its 0009 is strictly better than
+the fix this branch had made for the same problem: both drop and rebuild
+`latest_feed` so the column type can change, but main's saves the view's own
+definition with `pg_get_viewdef` and is guarded so it can run twice, which the
+live project needed and a hand written copy of the 0006 view did not give.
+
+### Two ways to publish a ballot explainer now exist, and that is not resolved
+
+This branch added six columns to `reports`, so an explainer is a report that
+answers three fixed questions. `main` added a dedicated system: its own
+tables, templates, snapshots, a levy calculator, a reading grade check, admin
+screens, and `/explainers`, `/ballot/[slug]`, `/levy/[slug]`,
+`/contract/[slug]`. Both are in this branch and both work. Nothing was deleted,
+because deleting either is an editorial decision about where a reader goes to
+read about a ballot issue, not a merge conflict. It is written up on the pull
+request for a decision.
+
+### This branch's migrations moved to 0013 and 0014
+
+`main` took 0011 and 0012 for the explainer templates and samples. Renumbering
+was the honest fix, since two files sharing a number stops the sequence meaning
+anything. Both had already been applied to the live project by hand, so both
+are now guarded with `if not exists` and a constraint check, the same way
+main's 0009 is, and both are no-ops where they have already run.
+
+### The redesign reverted the same four repairs again
+
+The phone gutter, the two row admin tab bar, the City Budget Explorer card and
+the duplicate `id="explorer"` were all fixed in September or in step three, all
+reverted by this redesign, and all restored here. The gutter one is now fixed
+at the cause rather than overridden: `.civic-everything`,
+`.civic-page-hero-inner` and `.civic-section` sit on the same element as
+`.wrap` and were setting the `padding` shorthand, which wipes the gutter
+`.wrap` gives. They set `padding-block` now, so the inline gutter survives.
+Each of the four has a test, which is how all four were found.
+
+### Six accessibility failures came with the redesign, five of them new
+
+Axe found, and this fixes: the program card number at 3.23:1 on teal, the call
+to action paragraph at 4.34:1, the numbered list marker at 2.24:1 on white and
+2:1 on navy, the "nothing here yet" line at 1.81:1 on gold and 2.22:1 on navy,
+the gold kicker at 2.38:1 on teal, and seven form labels at 2.92:1 and 1.07:1
+on the two coloured bands of `/get-involved`. The rule that came out of it:
+gold reads on navy at 6.5:1 and on teal at 2.38:1, so gold belongs on navy,
+white goes on teal, and teal ink goes on paper. Three of these had been fixed
+in step three and came back.
+
+### The visual parity check was comparing two different headings
+
+`sectionHeading` selected the first `section.wrap h2`, and the redesign put two
+new display headings above the Latest feed, so the mockup's heading and the
+built page's were no longer the same element and a deliberate design change
+read as a drift. It now selects the heading over the feed, which both documents
+still share, and matches at 800px again. Narrowing a selector to compare the
+same thing is not the same as loosening a check to make it pass.

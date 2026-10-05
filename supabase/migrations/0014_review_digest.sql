@@ -7,7 +7,9 @@
 
 -- Where the digest goes for an administrator who reads mail somewhere other
 -- than the address they sign in with. Null means use the sign in address.
-alter table public.admins add column digest_email text;
+-- Guarded for the same reason 0013 is: applied to the live project by hand
+-- before the file was renumbered.
+alter table public.admins add column if not exists digest_email text;
 
 comment on column public.admins.digest_email is
   'Where the daily review digest goes for this administrator. Null means send it to the address they sign in with.';

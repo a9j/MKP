@@ -10,6 +10,7 @@ const LINKS = [
   { href: "/admin/meetings", label: "Meetings", short: "Meets" },
   { href: "/admin/records", label: "Records", short: "Records" },
   { href: "/admin/reports", label: "Reports", short: "Reports" },
+  { href: "/admin/explainers", label: "Explainers", short: "Explain" },
   { href: "/admin/listening", label: "Listening", short: "Listen" },
   { href: "/admin/explorer", label: "Explorer data", short: "Data" },
   { href: "/admin/people", label: "People", short: "People" },

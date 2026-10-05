@@ -159,7 +159,7 @@ test.describe("vote watch covers more than one body", () => {
 test.describe("home page", () => {
   test("hero, four tools, and the Explorer above Latest", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(".civic-hero h1")).toContainText("The records are public");
+    await expect(page.locator(".home-hero h1")).toContainText("The records are public");
     const tools = page.locator("#what-we-do .civic-program-card h3");
     await expect(tools).toHaveText([
       "Teacher Pay Explorer",

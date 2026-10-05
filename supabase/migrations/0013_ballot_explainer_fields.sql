@@ -10,14 +10,18 @@
 -- The columns are nullable at the database level because every other report
 -- type leaves them empty. The requirement belongs to the form, which knows
 -- which type is being saved.
+--
+-- Guarded so it can run twice: these were applied to the live project by hand
+-- before the file was renumbered to sit after the templated explainer
+-- migrations, the same situation 0009 documents.
 
 alter table public.reports
-  add column ballot_date    date,
-  add column issue_number   text,
-  add column asks_for       text,
-  add column funds          text,
-  add column if_fails       text,
-  add column homeowner_cost text;
+  add column if not exists ballot_date    date,
+  add column if not exists issue_number   text,
+  add column if not exists asks_for       text,
+  add column if not exists funds          text,
+  add column if not exists if_fails       text,
+  add column if not exists homeowner_cost text;
 
 comment on column public.reports.ballot_date is
   'The date of the election this explainer is for. A date in the future is what puts it under the "On the ballot" heading on /reports.';
@@ -34,9 +38,19 @@ comment on column public.reports.homeowner_cost is
 
 -- A ballot date without an issue number, or the other way round, is a half
 -- entered explainer rather than a deliberate state. Either both or neither.
-alter table public.reports
-  add constraint reports_ballot_identity_complete
-  check (
-    (ballot_date is null and issue_number is null)
-    or (ballot_date is not null and length(btrim(issue_number)) > 0)
-  );
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+     where conname = 'reports_ballot_identity_complete'
+       and conrelid = 'public.reports'::regclass
+  ) then
+    alter table public.reports
+      add constraint reports_ballot_identity_complete
+      check (
+        (ballot_date is null and issue_number is null)
+        or (ballot_date is not null and length(btrim(issue_number)) > 0)
+      );
+  end if;
+end;
+$$;

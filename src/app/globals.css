@@ -7,6 +7,10 @@
    --------------------------------------------------------------------------- */
 
 :root {
+  /* The civic design uses hardcoded light-mode colors throughout.
+     Force light rendering so phones in dark mode don't get dark
+     backgrounds behind navy text. */
+  color-scheme: light;
   --bg: #FFFFFF;
   --band: #F4F6F8;
   --ink: #0F2A44;
@@ -491,11 +495,12 @@
       border-top: 1px solid var(--line); border-bottom: 0;
     }
     .admin-rail .admin-brand { display: none; }
-    /* Eleven screens do not fit across 390px in one row. Laid out in one they
-       were, so the last four sat past the right edge and could only be reached
+    /* Twelve screens do not fit across 390px in one row. Laid out in one they
+       were, so the last few sat past the right edge and could only be reached
        by swiping a 48px strip, with nothing to say they were there. Two rows of
-       six fit every label at a readable size. Fixed in September, lost in the
-       redesign, and measured by a test now so it cannot go quietly again. */
+       six fit every label at a readable size. Fixed in September, lost in each
+       redesign since, and measured by a test now so it cannot go quietly
+       again. */
     .admin-rail ul {
       display: grid; grid-template-columns: repeat(6, 1fr);
       gap: 0; overflow: visible;
@@ -716,8 +721,9 @@
      block is centred inside a wider viewport. Below it, the headline runs to
      the edge of the screen while every section under it keeps 24px, which is
      what a phone shows as text falling off the left side.
-     This was fixed in September and came back with the redesign, which is why
-     tests/e2e/site.spec.ts measures it rather than trusting the rule to stay. */
+     This was fixed in September and has come back with each redesign since,
+     which is why tests/e2e/site.spec.ts measures it rather than trusting the
+     rule to stay. */
   @media (max-width: 1167px) {
     .page-head { padding-inline: 24px; }
   }
@@ -903,33 +909,31 @@
    (large/bold text only on teal).
    --------------------------------------------------------------------------- */
 
-.civic-hero {
-  background: #0F2A44;
-  color: #FFFFFF;
-  position: relative;
-  overflow: hidden;
+/* Home hero: off-white, navy type #1B2A3A, layout in Tailwind utilities on
+   the element. This is the gold swipe under "readable." */
+/* Light off-white wash over the hero photo, never a dark one: the navy text
+   sits on top. Phones put the text over the whole photo, so the wash is even;
+   from 768px it fades out toward the person on the right. */
+.home-hero-wash {
+  background: rgba(247, 245, 240, 0.78);
+}
+@media (min-width: 768px) {
+  .home-hero-wash {
+    background: linear-gradient(
+      90deg,
+      rgba(247, 245, 240, 0.85) 0%,
+      rgba(247, 245, 240, 0.6) 45%,
+      rgba(247, 245, 240, 0) 65%
+    );
+  }
 }
 
-/* Giant ghost section mark. Decorative only. */
-.civic-hero::after {
-  content: "\00A7";
-  position: absolute;
-  right: -30px;
-  bottom: -120px;
-  font-family: var(--font-sans);
-  font-size: clamp(280px, 34vw, 520px);
-  line-height: 1;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.045);
-  pointer-events: none;
-  user-select: none;
-}
-
-.civic-hero-inner {
-  padding-top: 104px;
-  padding-bottom: 96px;
-  position: relative;
-  z-index: 1;
+.home-hero-hl {
+  background: linear-gradient(to top, #D4A84B 0%, #D4A84B 30%, transparent 30%);
+  padding: 0 0.06em;
+  margin: 0 -0.06em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .civic-kicker {
@@ -937,17 +941,16 @@
   font-weight: 700;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  /* Gold on the dark sections it was drawn for, and an ink colour everywhere
-     else: on white, gold measures 2.24:1 at this size and misses AA badly.
-     The dark sections are named rather than the light ones, because a new
-     section is light by default and would otherwise inherit a colour it
-     cannot carry. */
-  color: var(--teal-ink);
+  color: #D9A441;
   margin-bottom: 30px;
 }
-.civic-hero .civic-kicker,
-.civic-steps .civic-kicker,
-.civic-cta .civic-kicker { color: #D9A441; }
+
+/* The gold kicker was drawn for the navy sections, where it is 6.5:1. On the
+   teal band it is 2.38:1, a serious AA failure at 13px, so it goes white
+   there. Same rule as the numbers above: gold on navy, white on teal. */
+.civic-band-teal .civic-kicker {
+  color: #fff;
+}
 
 .civic-kicker-dark {
   font-size: 13px;
@@ -956,51 +959,6 @@
   text-transform: uppercase;
   color: var(--teal-ink);
   margin-bottom: 18px;
-}
-
-.civic-hero h1 {
-  font-size: clamp(54px, 8.4vw, 116px);
-  line-height: 0.98;
-  letter-spacing: -0.032em;
-  font-weight: 700;
-  max-width: 11em;
-  margin-bottom: 30px;
-  text-wrap: balance;
-}
-
-/* Highlighter swipe behind the key word. */
-.civic-hero h1 .hl {
-  background: linear-gradient(
-    to top,
-    rgba(217, 164, 65, 0.9) 0%,
-    rgba(217, 164, 65, 0.9) 34%,
-    transparent 34%
-  );
-  padding: 0 0.08em;
-  margin: 0 -0.08em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
-.civic-hero .lede {
-  font-size: 20px;
-  line-height: 1.55;
-  color: rgba(255, 255, 255, 0.84);
-  max-width: 34em;
-}
-
-.civic-hero .actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 40px;
-}
-
-.civic-hero .pledge {
-  margin-top: 34px;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.62);
-  max-width: 44em;
 }
 
 /* Chunky buttons. */
@@ -1077,7 +1035,11 @@
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.2em;
-  opacity: 0.65;
+  /* Solid, not translucent. At 0.65 the number came to 3.23:1 on the teal card
+     and failed WCAG AA, which is a serious violation on the home page. Any
+     opacity under 1 fails on teal, so the number carries the card's own colour
+     and is kept quiet by its size instead. Fixed once already and back with
+     this redesign, which is why tests/e2e/a11y.spec.ts runs axe over it. */
   margin-bottom: 26px;
 }
 .civic-program .tag {
@@ -1181,9 +1143,9 @@
 }
 .civic-cta p {
   font-size: 19px;
-  /* Solid white, not 85% of it: on this teal the translucent version measures
-     4.34:1 and misses AA for text this size. Solid clears it at 4.6:1. */
-  color: #FFFFFF;
+  /* Solid white: at 85% this came to 4.34:1 on the teal band and failed AA.
+     The same line, fixed in step three and back with this redesign. */
+  color: #ffffff;
   max-width: 36em;
 }
 .civic-cta .actions {
@@ -1194,8 +1156,7 @@
 }
 
 @media (max-width: 900px) {
-  .civic-hero-inner { padding-top: 72px; padding-bottom: 72px; }
-  .civic-trust-inner { grid-template-columns: 1fr; gap: 18px; }
+    .civic-trust-inner { grid-template-columns: 1fr; gap: 18px; }
   .civic-programs { grid-template-columns: 1fr; }
   .civic-program { min-height: 0; padding: 44px 28px 48px; }
   .civic-steps li { grid-template-columns: 76px 1fr; gap: 18px; }
@@ -1206,9 +1167,620 @@
   .btn-gold:hover, .btn-outline-w:hover { transform: none; }
 }
 
+/* Empty state for the explorer when pay data is not published yet. */
+.civic-empty {
+  font-size: 18px;
+  color: var(--ink-2);
+  border: 2px dashed var(--line);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+/* ---- Homepage v2: photos back, mission-wide ---- */
+
+/* The base .photo slot (navy block when the file is missing). */
+.photo {
+  position: relative;
+  overflow: hidden;
+  background: #0F2A44;
+}
+.photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.civic-everything {
+  /* padding-block, not the shorthand: this class sits on the same element as
+     .wrap, and a shorthand here wipes the 24px gutter .wrap sets, which puts
+     the headline on the edge of a phone screen. The same mistake has been
+     made three times now, which is why tests/e2e/site.spec.ts measures it. */
+  padding-block: 96px 80px;
+}
+
+.civic-everything h2 {
+  font-size: clamp(40px, 6vw, 76px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 18px 0 20px;
+  color: #0F2A44;
+}
+
+.hl-dark {
+  background: linear-gradient(transparent 55%, #D9A441 55%, #D9A441 95%, transparent 95%);
+  padding: 0 6px;
+}
+
+.civic-everything-lede {
+  font-size: 21px;
+  line-height: 1.55;
+  max-width: 46rem;
+  color: var(--ink-2);
+  margin: 0 0 48px;
+}
+
+.civic-programs-photo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.civic-program-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border: 3px solid #0F2A44;
+  box-shadow: 10px 10px 0 rgba(15, 42, 68, 0.9);
+}
+
+.civic-program-card > * {
+  min-width: 0;
+}
+
+.civic-program-card:nth-child(even) .civic-program-photo {
+  order: 2;
+}
+
+.civic-program-photo.photo {
+  width: 100%;
+  min-height: 320px;
+}
+
+@media (min-width: 901px) {
+  /* In the 2-column card, force the photo to fill the full row height.
+     Without this, aspect-ratio keeps it short when the text runs long,
+     leaving a white gap. !important beats the inline aspect-ratio. */
+  .civic-program-photo.photo {
+    height: 100%;
+    aspect-ratio: auto !important;
+  }
+}
+
+.civic-program-card-body {
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.civic-program-card.tone-navy .civic-program-card-body { background: #0F2A44; color: #fff; }
+.civic-program-card.tone-teal .civic-program-card-body { background: #187585; color: #fff; }
+.civic-program-card.tone-gold .civic-program-card-body { background: #D9A441; color: #0F2A44; }
+
+.civic-program-card .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 6px 12px;
+  margin: 14px 0 18px;
+}
+
+.civic-program-card h3 {
+  font-size: clamp(28px, 3.4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0 0 16px;
+}
+
+.civic-program-card p {
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+  opacity: 0.92;
+}
+
+.civic-program-card .more {
+  font-weight: 800;
+  font-size: 18px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  color: inherit;
+}
+
+.civic-program-card .more:hover { text-decoration-thickness: 4px; }
+
+.civic-steps-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 64px;
+  align-items: start;
+}
+
+.civic-steps-photo {
+  width: 100%;
+  border: 6px solid #fff;
+  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.35);
+  position: sticky;
+  top: 32px;
+}
+
+.civic-explorer-lede {
+  font-size: 20px;
+  line-height: 1.55;
+  max-width: 44rem;
+  color: var(--ink-2);
+  margin: 0 0 36px;
+}
+
+@media (max-width: 900px) {
+  .civic-steps-grid { grid-template-columns: 1fr; }
+  .civic-steps-photo { position: relative; top: auto; max-width: 420px; }
+  .civic-program-card { grid-template-columns: 1fr; }
+  .civic-program-card:nth-child(even) .civic-program-photo { order: 0; }
+  .civic-program-photo.photo { min-height: 240px; }
+  .civic-program-card-body { padding: 36px 28px; }
+}
+
+@media (max-width: 700px) {
+  .civic-everything { padding-block: 64px 56px; }
+}
+
+/* ---- Shared civic page styles (Reports, Votes, Explorer, Records, About, Get Involved) ---- */
+
+.civic-page-hero {
+  background: #0F2A44;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.civic-page-hero::after {
+  content: "\00A7";
+  position: absolute;
+  right: -30px;
+  bottom: -120px;
+  font-size: clamp(280px, 34vw, 520px);
+  line-height: 1;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+  user-select: none;
+}
+
+.civic-page-hero-inner {
+  /* padding-block: see .civic-everything. */
+  padding-block: 72px 64px;
+  position: relative;
+  z-index: 1;
+}
+
+.civic-page-hero h1 {
+  font-size: clamp(42px, 6.5vw, 88px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  margin: 0 0 24px;
+  max-width: 16em;
+}
+
+.civic-page-hero .lede {
+  font-size: clamp(19px, 2.4vw, 24px);
+  line-height: 1.55;
+  max-width: 44rem;
+  color: #fff;
+  margin: 0 0 32px;
+}
+
+.civic-page-hero .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.civic-section {
+  /* padding-block: see .civic-everything. */
+  padding-block: 60px;
+}
+
+.civic-section h2 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: #0F2A44;
+  margin: 0 0 20px;
+}
+
+.civic-section .civic-section-lede {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 44rem;
+  margin: 0 0 40px;
+}
+
+.civic-band {
+  padding: 60px 0;
+}
+
+.civic-band-navy { background: #0F2A44; color: #fff; }
+.civic-band-teal { background: #187585; color: #fff; }
+.civic-band-gold { background: #D9A441; color: #0F2A44; }
+.civic-band-paper { background: #F7F4EC; color: #0F2A44; }
+
+.civic-band h2 {
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0 0 20px;
+}
+
+.civic-band-navy h2, .civic-band-teal h2 { color: #fff; }
+.civic-band-gold h2, .civic-band-paper h2 { color: #0F2A44; }
+
+/* The generic .sub and .unavailable set dark ink; override for colored bands. */
+.civic-band-navy .sub, .civic-band-teal .sub { color: #fff; }
+.civic-band-gold .sub, .civic-band-paper .sub { color: #0F2A44; }
+.civic-band-navy .unavailable, .civic-band-teal .unavailable { color: rgba(255, 255, 255, 0.8); }
+.civic-band-gold .unavailable, .civic-band-paper .unavailable { color: rgba(15, 42, 68, 0.75); }
+
+.civic-band .sub {
+  font-size: 19px;
+  line-height: 1.6;
+  opacity: 0.92;
+  max-width: 44rem;
+  margin: 0 0 24px;
+}
+
+.civic-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.civic-card {
+  border: 3px solid #0F2A44;
+  box-shadow: 8px 8px 0 rgba(15, 42, 68, 0.9);
+  padding: 40px 36px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.civic-card > * { min-width: 0; }
+
+.civic-card.tone-navy { background: #0F2A44; color: #fff; }
+.civic-card.tone-teal { background: #187585; color: #fff; border-color: #0F2A44; }
+.civic-card.tone-gold { background: #D9A441; color: #0F2A44; }
+
+.civic-card .tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 6px 12px;
+  margin-bottom: 18px;
+}
+
+.civic-card h3 {
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  margin: 0 0 14px;
+}
+
+.civic-card p {
+  font-size: 17px;
+  line-height: 1.6;
+  opacity: 0.92;
+  margin: 0 0 20px;
+}
+
+.civic-card .civic-card-foot {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+.civic-card .more {
+  font-weight: 800;
+  font-size: 17px;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.civic-card .more:hover { text-decoration-thickness: 4px; }
+
+.civic-card .unavailable {
+  opacity: 0.75;
+  font-style: italic;
+}
+
+/* The generic .unavailable sets a muted grey, which reads on a white card and
+   not on a coloured one: it came to 1.81:1 on gold and 2.22:1 on navy, both
+   serious AA failures. The card's own colour, solid, the way the bands above
+   already do it. Italic still carries "nothing here yet". */
+.civic-card.tone-navy .unavailable,
+.civic-card.tone-teal .unavailable {
+  color: #fff;
+  opacity: 1;
+}
+.civic-card.tone-gold .unavailable {
+  color: #0F2A44;
+  opacity: 1;
+}
+
+.civic-numbered {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+
+.civic-numbered li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.civic-numbered .n {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  /* Gold on white is 2.24:1, under the 3:1 large text minimum. On a light
+     section the number takes teal ink, which is the variable that already has
+     a dark mode value; on the navy and teal bands gold is what reads, at
+     6.5:1, and that is the override below. Gold on light was fixed in step
+     three and came back with this redesign. */
+  color: var(--teal-ink);
+  letter-spacing: -0.02em;
+}
+
+/* Gold reads on navy at 6.5:1 and on teal at 2.38:1, so it belongs on the
+   navy band only. On teal the number is white, which is 5.4:1. */
+.civic-band-navy .civic-numbered .n {
+  color: #D9A441;
+}
+.civic-band-teal .civic-numbered .n {
+  color: #fff;
+}
+
+.civic-numbered h3 {
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: #0F2A44;
+}
+
+.civic-numbered p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.civic-note {
+  border-left: 6px solid #D9A441;
+  padding: 4px 0 4px 24px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 46rem;
+  margin: 32px 0 0;
+}
+
+.civic-note a { color: #0F2A44; font-weight: 700; }
+
+@media (max-width: 700px) {
+  .civic-page-hero-inner { padding-block: 56px 48px; }
+  .civic-section, .civic-band { padding-block: 44px; }
+  .civic-card { padding: 32px 26px; }
+  .civic-numbered li { grid-template-columns: 56px 1fr; gap: 14px; }
+  .civic-numbered .n { font-size: 32px; }
+}
+
+.civic-band-navy .civic-numbered p { color: #fff; opacity: 0.94; }
+.civic-band-navy .civic-numbered h3 { color: #fff; }
+.civic-band-navy a { color: #D9A441; }
+.civic-band-navy .officers-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.civic-band-navy .officers-list li { font-size: 18px; }
+.civic-band-navy .officers-list .agency-name { font-weight: 700; }
+.civic-band-navy h3.civic-h3 { margin-top: 48px; margin-bottom: 20px; font-size: 24px; color: #fff; }
+
+.btn-outline-navy {
+  border: 3px solid #0F2A44;
+  color: #0F2A44;
+  background: transparent;
+}
+.btn-outline-navy:hover { background: #0F2A44; color: #fff; }
+
+/* Full-bleed photo band: an editorial break between sections. */
+.civic-photo-band.photo {
+  width: 100%;
+  max-height: 440px;
+  border-top: 3px solid #0F2A44;
+  border-bottom: 3px solid #0F2A44;
+}
+
+@media (max-width: 700px) {
+  /* Inline aspect-ratio is 21/8 (cinematic); on phones that is a sliver,
+     so force a taller frame. !important beats the inline style. */
+  .civic-photo-band.photo {
+    aspect-ratio: 16 / 10 !important;
+    max-height: 320px;
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   Explainers: /ballot, /levy, /contract, /explainers, and their admin.
+   Built from the civic page styles above. Gold stays reserved for the
+   sourced underline, so nothing here adds a gold accent of its own.
+   --------------------------------------------------------------------------- */
+
+.explainer-dateline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  margin: -8px 0 0;
+}
+.explainer-dateline span:first-child:not(:last-child) { font-weight: 700; color: #fff; }
+
+.explainer-photo { margin: 0; border-bottom: 3px solid #0F2A44; }
+.explainer-photo img {
+  display: block;
+  width: 100%;
+  max-height: 440px;
+  object-fit: cover;
+}
+
+.explainer-body > h2 { margin-bottom: 28px; }
+
+/* Ballot: one card per issue, stacked, yes and no side by side. */
+.explainer-issues { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
+.explainer-issue.civic-card { color: #0F2A44; }
+.explainer-issue .tag { margin-bottom: 14px; }
+.explainer-yes-no {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 8px 0 18px;
+}
+.explainer-yes-no > div { border-top: 3px solid #0F2A44; padding-top: 12px; }
+.explainer-yes-no dt { font-size: 14px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.explainer-yes-no dd { font-size: 18px; line-height: 1.55; margin: 0; }
+.explainer-cost { font-size: 17px; line-height: 1.6; margin: 0 0 12px; }
+@media (max-width: 640px) { .explainer-yes-no { grid-template-columns: 1fr; } }
+
+/* Levy: the key numbers as callouts. */
+.explainer-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 0 0 40px;
+}
+.explainer-facts > div {
+  border: 3px solid #0F2A44;
+  background: #fff;
+  color: #0F2A44;
+  padding: 20px 22px;
+}
+.explainer-facts dt { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.explainer-facts dd { font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.15; margin: 0; font-variant-numeric: tabular-nums; }
+
+.explainer-prose { max-width: 44rem; margin-bottom: 40px; }
+.explainer-prose h3 { font-size: 22px; font-weight: 700; color: var(--ink); margin: 24px 0 8px; }
+.explainer-prose p { font-size: 18px; line-height: 1.6; color: var(--ink-2); }
+
+.levy-calc {
+  border: 3px solid #0F2A44;
+  box-shadow: 8px 8px 0 rgba(15, 42, 68, 0.9);
+  background: #fff;
+  color: #0F2A44;
+  padding: 32px;
+  max-width: 40rem;
+}
+.levy-calc h2 { font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 18px; }
+.levy-calc .field label { display: block; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.levy-calc .field input {
+  width: 100%; max-width: 20rem; min-height: 52px; font: inherit; font-size: 22px;
+  font-variant-numeric: tabular-nums; color: #0F2A44; background: #fff;
+  border: 2px solid #0F2A44; border-radius: 10px; padding: 8px 14px;
+}
+.levy-calc .counter { color: #4B5A6B; }
+.levy-calc-result { display: flex; flex-wrap: wrap; gap: 8px 36px; margin: 22px 0 6px; font-size: 18px; }
+.levy-calc-result p { margin: 0; }
+.levy-calc-figure { font-size: clamp(30px, 4vw, 42px); font-weight: 800; font-variant-numeric: tabular-nums; margin-right: 6px; }
+.levy-calc .note { color: #4B5A6B; }
+@media (max-width: 700px) { .levy-calc { padding: 24px 20px; box-shadow: 5px 5px 0 rgba(15, 42, 68, 0.9); } }
+
+/* Contract: a vertical timeline, newest first. */
+.explainer-timeline { list-style: none; margin: 0; padding: 0 0 0 28px; border-left: 3px solid #0F2A44; max-width: 46rem; }
+.explainer-timeline li { position: relative; padding: 0 0 32px; }
+.explainer-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -37px;
+  top: 4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid #0F2A44;
+}
+.explainer-timeline li:first-child::before { background: #0F2A44; }
+.explainer-timeline-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 15px; color: var(--ink-3); margin: 0 0 4px; }
+.explainer-timeline-meta span { font-weight: 700; color: var(--teal-ink); }
+.explainer-timeline h3 { font-size: 21px; line-height: 1.3; margin: 0 0 6px; }
+.explainer-timeline p { font-size: 17px; line-height: 1.6; color: var(--ink-2); margin: 0 0 6px; }
+.explainer-timeline-source { font-size: 15px; }
+
+/* Sources band and the closing lines. */
+.explainer-sources li { color: #0F2A44; }
+.explainer-source-date, .explainer-source-note { font-size: 15px; color: rgba(15, 42, 68, 0.8); }
+.explainer-download { margin: 28px 0 0; }
+.explainer-updated { margin: 24px 0 0; font-size: 16px; color: #0F2A44; }
+.civic-band-paper .civic-note { color: #0F2A44; }
+
+/* Cards on the index and the home page. The title link covers the card. */
+.explainer-card-link { color: inherit; text-decoration: none; }
+.explainer-card-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.explainer-card-date { font-size: 15px; opacity: 0.85; margin: 0 0 10px; }
+.explainer-all { margin: 28px 0 0; }
+.explainer-all .more { font-weight: 800; font-size: 18px; color: #0F2A44; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+.preview-banner-link { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Admin */
+.explainer-type-hint { display: block; font-size: 14px; font-weight: 400; color: var(--ink-3); }
+.explainer-badges { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.explainer-actions { display: inline-flex; flex-wrap: wrap; gap: 4px 16px; align-items: center; font-size: 15px; }
+.explainer-actions a { display: inline-flex; align-items: center; min-height: 44px; }
+.explainer-status { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; align-items: center; margin: 8px 0 4px; }
+.explainer-checklist { margin-top: 16px; }
+.explainer-checklist ul { margin: 8px 0 0 20px; display: grid; gap: 6px; font-size: 15px; }
+.explainer-editor > fieldset { margin-top: 10px; }
+.explainer-subform { margin: 0; }
+.explainer-row { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.explainer-row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 16px; }
+.explainer-row-head h4 { font-size: 16px; font-weight: 600; }
+.explainer-row-tools { display: flex; flex-wrap: wrap; gap: 0 14px; }
+.explainer-publish { border-top: 1px solid var(--line); padding-top: 18px; }
+.explainer-publish .field label { display: block; font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
+/* .admin-form label is display: block, which would put a radio or checkbox
+   on its own line above its text. */
+.admin-form label.check-row { display: flex; align-items: flex-start; gap: 12px; color: var(--ink); font-size: 16px; }
+.admin-form label.check-row input { width: 22px; height: 22px; min-height: 0; flex: none; margin-top: 2px; padding: 0; }
+.explainer-editor > fieldset > legend { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
+
 @layer components {
   /* ---------------------------------------------------------------------
-     Ballot explainers. One strip, one list, one fixed page shape.
+     Ballot explainers on reports. One strip, one list, one fixed page shape.
+     Distinct from the templated explainer system's own classes above: this is
+     the report-shaped explainer, which answers the same three questions in
+     the same order every time.
      --------------------------------------------------------------------- */
 
   /* Shown only while an election is still to come. Navy on gold, which is the
@@ -1239,6 +1811,11 @@
   .ballot-title { font-size: 19px; font-weight: 500; letter-spacing: -.01em; }
   .ballot-list a:hover .ballot-title { text-decoration: underline; text-underline-offset: 3px; }
 
+  /* One heading per election, so a date never labels an issue from another. */
+  .ballot-group { margin-top: 28px; }
+  .ballot-group + .ballot-group { margin-top: 44px; }
+  .ballot-group h2 { font-size: 26px; letter-spacing: -.02em; }
+
   .explainer { margin-top: 36px; border-top: 1px solid var(--line); }
   .explainer-ballot {
     margin-top: 20px; font-size: 14px; color: var(--ink-3);
@@ -1254,60 +1831,7 @@
   .explainer-section ul, .explainer-section ol { margin: 12px 0 0 22px; display: grid; gap: 8px; }
   .explainer-section li { color: var(--ink-2); font-size: 17px; max-width: 42em; }
   .explainer .note { margin-top: 28px; }
-}
 
-@layer components {
-  /* One heading per election, so a date never labels an issue from another. */
-  .ballot-group { margin-top: 28px; }
-  .ballot-group + .ballot-group { margin-top: 44px; }
-  .ballot-group h2 { font-size: 26px; letter-spacing: -.02em; }
-}
-
-/* ---------------------------------------------------------------------------
-   next/image with `fill` positions itself against the nearest positioned
-   ancestor. The Photo component gave it none, so every photograph on the site
-   was absolutely positioned against the viewport instead of its own slot: four
-   full screen images stacked over the top of the home page, painting over
-   whatever was there. The slot has to be positioned for the image to stay in
-   it.
-   --------------------------------------------------------------------------- */
-.photo {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  background: var(--band);
-}
-.photo img { object-fit: cover; }
-
-/* The hero renders a background photo, a scrim over it and the words on top,
-   but only the first of those three had any CSS. Without the scrim the white
-   headline sat straight on a pale photograph. The markup already names the
-   layers; these are the rules that make them layers. */
-.civic-hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-.civic-hero-bg img { object-fit: cover; }
-.civic-hero-scrim {
-  position: absolute;
-  inset: 0;
-  /* Darkest where the headline sits, so the photograph still reads at the
-     edges. Navy rather than black, which is the colour the hero falls back to
-     when there is no photograph at all. */
-  background: linear-gradient(
-    100deg,
-    rgba(15, 42, 68, 0.94) 0%,
-    rgba(15, 42, 68, 0.88) 45%,
-    rgba(15, 42, 68, 0.72) 100%
-  );
-}
-.civic-hero-inner {
-  position: relative;
-  z-index: 1;
-}
-
-@layer components {
   /* Scheduled jobs on the dashboard. Operational, so it sits under the work
      and reads quieter than it: amber only where something has gone quiet. */
   .watcher-status { margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--line); }
@@ -1321,4 +1845,22 @@
   .watcher-status li.stale .watcher-name,
   .watcher-status li.stale strong { color: var(--amber); }
   .watcher-status li.stale strong { font-weight: 600; }
+}
+
+/* ---------------------------------------------------------------------------
+   Form labels on the coloured cards and bands.
+
+   The label colour is the muted grey that reads on paper. These forms sit on
+   navy and teal, where that grey is 2.92:1 and 1.07:1, both serious AA
+   failures on the two pages a reader is most likely to be filling in. White on
+   both, which is 14.6:1 on navy and 5.4:1 on teal. Unlayered, so it wins over
+   the component layer rule it is correcting.
+   --------------------------------------------------------------------------- */
+.civic-card.tone-navy .public-form label,
+.civic-card.tone-teal .public-form label,
+.civic-band-navy .public-form label,
+.civic-band-teal .public-form label,
+.civic-band-navy .subscribe label,
+.civic-band-teal .subscribe label {
+  color: #fff;
 }
