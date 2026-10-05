@@ -48,6 +48,11 @@ export function SiteFooter({ ein, mailingAddress }: SiteFooterProps) {
               : " [Mailing address]"}
           </span>
           <span>{NEUTRALITY_LINE}</span>
+          <span>
+            <Link href="/admin" style={{ opacity: 0.7 }}>
+              Admin sign in
+            </Link>
+          </span>
         </div>
       </div>
     </footer>
