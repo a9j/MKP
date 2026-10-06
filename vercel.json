@@ -3,6 +3,7 @@
   "framework": "nextjs",
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install --frozen-lockfile",
+  "crons": [{ "path": "/api/cron/digest", "schedule": "0 11 * * *" }],
   "headers": [
     {
       "source": "/(.*)",

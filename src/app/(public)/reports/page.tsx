@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Photo } from "@/components/photo";
 import { ReportList } from "@/components/public/report-list";
-import { getPublishedReports } from "@/lib/queries/reports";
+import { ballotGroups, getPublishedReports } from "@/lib/queries/reports";
 import { getSiteSettings } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
@@ -18,6 +19,11 @@ export default async function ReportsPage() {
   const latestPayReport = reports.find((r) => r.type === "pay_report");
   const latestBallot = reports.find((r) => r.type === "ballot_explainer");
   const levies = reports.filter((r) => r.type === "levy_explainer");
+
+  // Explainers for an election still to come, soonest first and then by issue
+  // number. The heading carries the date, so it goes stale by itself rather
+  // than needing anyone to take it down.
+  const groups = ballotGroups(reports);
 
   /** Report types, verbatim from the copy doc. */
   const TYPES = [
@@ -81,6 +87,30 @@ export default async function ReportsPage() {
         className="civic-photo-band"
         priority
       />
+
+      {groups.length > 0 ? (
+        <section className="wrap civic-section" id="on-the-ballot">
+          <p className="sub">
+            What each issue asks for, what it would fund, and what happens if it fails.
+            No recommendation, no endorsement.
+          </p>
+          {groups.map((group) => (
+            <div className="ballot-group" key={group.date} data-ballot-date={group.date}>
+              <h2>On the ballot, {group.label}</h2>
+              <ul className="ballot-list">
+                {group.reports.map((report) => (
+                  <li key={report.id}>
+                    <Link href={`/reports/${report.slug}`}>
+                      <span className="ballot-issue">{report.issueNumber}</span>
+                      <span className="ballot-title">{report.title}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </section>
+      ) : null}
 
       <section className="wrap civic-section">
         <div className="civic-cards">

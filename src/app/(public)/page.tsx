@@ -6,6 +6,7 @@ import { Photo } from "@/components/photo";
 import { NEUTRALITY_LINE } from "@/lib/nav";
 import { getLatestFeed } from "@/lib/queries/feed";
 import { getExplorerData } from "@/lib/queries/explorer";
+import { getPublishedReports, onTheBallot } from "@/lib/queries/reports";
 import { getLatestExplainers } from "@/lib/queries/explainers";
 import { ExplainerCards } from "@/components/explainers/explainer-cards";
 
@@ -18,7 +19,7 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   description:
-    "The Mona K Project reads Toledo's public records — school budgets, board votes, salaries, city finances, ballot issues — and explains them in plain language. Every number sourced. No positions.",
+    "The Mona K Project reads Toledo's public records: school budgets, board votes, salaries, city finances, ballot issues. We explain them in plain language. Every number sourced. No positions.",
 };
 
 const PROGRAMS = [
@@ -34,8 +35,21 @@ const PROGRAMS = [
     alt: "A teacher leading a classroom of students",
   },
   {
+    // Added with the budget Explorer in step two and lost in each redesign
+    // since. The copy is the brief's, verbatim.
     n: "02",
     tone: "teal",
+    tag: "Tool",
+    title: "City Budget Explorer",
+    body: "Where does Toledo's money go? The adopted budget by department, what one percent would change, and what it costs per resident. Every figure sourced.",
+    linkLabel: "Open the budget",
+    href: "/budget",
+    photo: "for-residents.jpg",
+    alt: "A quiet residential street lined with houses and trees",
+  },
+  {
+    n: "03",
+    tone: "gold",
     tag: "Reports",
     title: "Reports",
     body: "The annual Toledo Teacher Pay Report, plain-language explainers for every ballot issue, and a contract tracker when talks open. Sourced, reviewed, no recommendations.",
@@ -45,8 +59,8 @@ const PROGRAMS = [
     alt: "A family laughing together at home",
   },
   {
-    n: "03",
-    tone: "gold",
+    n: "04",
+    tone: "navy",
     tag: "Records",
     title: "Records Desk and Vote Watch",
     body: "Every public records request we've filed and what came back. Every school board vote that touches money or staffing, and how each member voted.",
@@ -111,14 +125,29 @@ const TRUST_ITEMS = [
 ];
 
 export default async function HomePage() {
-  const [latest, explorer, explainers] = await Promise.all([
+  const [latest, explorer, explainers, reports] = await Promise.all([
     getLatestFeed(6),
     getExplorerData(),
     getLatestExplainers(3),
+    getPublishedReports(),
   ]);
+
+  // Only while there is an election still to come, and it takes itself down
+  // the day after rather than waiting for somebody to remember.
+  const ballot = onTheBallot(reports);
 
   return (
     <>
+      {ballot.length > 0 ? (
+        <aside className="ballot-strip">
+          <div className="wrap">
+            <Link href="/reports#on-the-ballot">
+              Voting on {ballot[0].ballotDateLabel}? Read what&rsquo;s on the ballot.
+            </Link>
+          </div>
+        </aside>
+      ) : null}
+
       <header className="home-hero relative isolate overflow-hidden bg-[#F7F5F0] text-[#1B2A3A]">
         <picture>
           <source media="(min-width: 768px)" srcSet={heroWide.srcSet} sizes={heroWide.sizes} />
@@ -248,14 +277,19 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="wrap civic-explorer" id="explorer">
+      <section className="wrap civic-explorer" aria-labelledby="explorer-heading">
         <p className="civic-kicker-dark">One example</p>
-        <h2>Start with a paycheck.</h2>
+        <h2 id="explorer-heading">Start with a paycheck.</h2>
         <p className="civic-explorer-lede">
           The Teacher Pay Explorer is the first tool. More are coming: the city
           budget, board votes, ballot issues. This is what &ldquo;readable&rdquo;
           looks like.
         </p>
+        {/* The id belongs on the widget, not the section around it: it is both
+            the anchor target and the prefix for the widget's own field ids
+            (#explorer-step and the rest). Having it in both places put the
+            same id on the page twice, which is invalid. Fixed in step three
+            and back with this redesign. */}
         {explorer ? (
           <PayExplorer data={explorer} id="explorer" />
         ) : (

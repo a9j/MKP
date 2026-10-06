@@ -511,11 +511,25 @@
       border-top: 1px solid var(--line); border-bottom: 0;
     }
     .admin-rail .admin-brand { display: none; }
-    .admin-rail ul { justify-content: space-between; padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); }
-    .admin-rail li { flex: 1; }
-    .admin-rail li a { justify-content: center; font-size: 13px; padding: 0 4px; min-height: 48px; }
+    /* Twelve screens do not fit across 390px in one row. Laid out in one they
+       were, so the last few sat past the right edge and could only be reached
+       by swiping a 48px strip, with nothing to say they were there. Two rows of
+       six fit every label at a readable size. Fixed in September, lost in each
+       redesign since, and measured by a test now so it cannot go quietly
+       again. */
+    .admin-rail ul {
+      display: grid; grid-template-columns: repeat(6, 1fr);
+      gap: 0; overflow: visible;
+      padding: 2px 4px calc(2px + env(safe-area-inset-bottom));
+    }
+    .admin-rail li a {
+      justify-content: center; font-size: 13px; padding: 0 2px; min-height: 44px;
+      text-align: center;
+    }
     .rail-long { display: none; }
     .rail-short { display: inline; }
+    /* Clear of the two row bar, so the last field of a form is never under it. */
+    .admin-main { padding-bottom: 140px; }
   }
 
   .login { max-width: 420px; margin: 48px auto; padding: 0 20px; }
@@ -717,6 +731,18 @@
     letter-spacing: -.03em; font-weight: 600; max-width: 18em;
   }
   @media (max-width: 900px) { .page-head { padding: 48px 0 8px; } }
+
+  /* The gutter .wrap sets is wiped out by the padding shorthand above, on the
+     same element. Above the container width nothing shows for it, because the
+     block is centred inside a wider viewport. Below it, the headline runs to
+     the edge of the screen while every section under it keeps 24px, which is
+     what a phone shows as text falling off the left side.
+     This was fixed in September and has come back with each redesign since,
+     which is why tests/e2e/site.spec.ts measures it rather than trusting the
+     rule to stay. */
+  @media (max-width: 1167px) {
+    .page-head { padding-inline: 24px; }
+  }
 
   .explorer-section { padding: 40px 24px 72px; }
   /* Full width so the chart is not squeezed into a hero column. */
@@ -940,6 +966,13 @@
   margin-bottom: 30px;
 }
 
+/* The gold kicker was drawn for the navy sections, where it is 6.5:1. On the
+   teal band it is 2.38:1, a serious AA failure at 13px, so it goes white
+   there. Same rule as the numbers above: gold on navy, white on teal. */
+.civic-band-teal .civic-kicker {
+  color: #fff;
+}
+
 .civic-kicker-dark {
   font-size: 13px;
   font-weight: 700;
@@ -1023,7 +1056,11 @@
   font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.2em;
-  opacity: 0.65;
+  /* Solid, not translucent. At 0.65 the number came to 3.23:1 on the teal card
+     and failed WCAG AA, which is a serious violation on the home page. Any
+     opacity under 1 fails on teal, so the number carries the card's own colour
+     and is kept quiet by its size instead. Fixed once already and back with
+     this redesign, which is why tests/e2e/a11y.spec.ts runs axe over it. */
   margin-bottom: 26px;
 }
 .civic-program .tag {
@@ -1127,7 +1164,9 @@
 }
 .civic-cta p {
   font-size: 19px;
-  color: rgba(255, 255, 255, 0.85);
+  /* Solid white: at 85% this came to 4.34:1 on the teal band and failed AA.
+     The same line, fixed in step three and back with this redesign. */
+  color: #ffffff;
   max-width: 36em;
 }
 .civic-cta .actions {
@@ -1175,7 +1214,11 @@
 }
 
 .civic-everything {
-  padding: 96px 0 80px;
+  /* padding-block, not the shorthand: this class sits on the same element as
+     .wrap, and a shorthand here wipes the 24px gutter .wrap sets, which puts
+     the headline on the edge of a phone screen. The same mistake has been
+     made three times now, which is why tests/e2e/site.spec.ts measures it. */
+  padding-block: 96px 80px;
 }
 
 .civic-everything h2 {
@@ -1317,7 +1360,7 @@
 }
 
 @media (max-width: 700px) {
-  .civic-everything { padding: 64px 0 56px; }
+  .civic-everything { padding-block: 64px 56px; }
 }
 
 /* ---- Shared civic page styles (Reports, Votes, Explorer, Records, About, Get Involved) ---- */
@@ -1343,7 +1386,8 @@
 }
 
 .civic-page-hero-inner {
-  padding: 72px 0 64px;
+  /* padding-block: see .civic-everything. */
+  padding-block: 72px 64px;
   position: relative;
   z-index: 1;
 }
@@ -1371,7 +1415,8 @@
 }
 
 .civic-section {
-  padding: 60px 0;
+  /* padding-block: see .civic-everything. */
+  padding-block: 60px;
 }
 
 .civic-section h2 {
@@ -1491,6 +1536,20 @@
   font-style: italic;
 }
 
+/* The generic .unavailable sets a muted grey, which reads on a white card and
+   not on a coloured one: it came to 1.81:1 on gold and 2.22:1 on navy, both
+   serious AA failures. The card's own colour, solid, the way the bands above
+   already do it. Italic still carries "nothing here yet". */
+.civic-card.tone-navy .unavailable,
+.civic-card.tone-teal .unavailable {
+  color: #fff;
+  opacity: 1;
+}
+.civic-card.tone-gold .unavailable {
+  color: #0F2A44;
+  opacity: 1;
+}
+
 .civic-numbered {
   list-style: none;
   margin: 0;
@@ -1510,8 +1569,22 @@
   font-size: 40px;
   font-weight: 800;
   line-height: 1;
-  color: #D9A441;
+  /* Gold on white is 2.24:1, under the 3:1 large text minimum. On a light
+     section the number takes teal ink, which is the variable that already has
+     a dark mode value; on the navy and teal bands gold is what reads, at
+     6.5:1, and that is the override below. Gold on light was fixed in step
+     three and came back with this redesign. */
+  color: var(--teal-ink);
   letter-spacing: -0.02em;
+}
+
+/* Gold reads on navy at 6.5:1 and on teal at 2.38:1, so it belongs on the
+   navy band only. On teal the number is white, which is 5.4:1. */
+.civic-band-navy .civic-numbered .n {
+  color: #D9A441;
+}
+.civic-band-teal .civic-numbered .n {
+  color: #fff;
 }
 
 .civic-numbered h3 {
@@ -1540,8 +1613,8 @@
 .civic-note a { color: #0F2A44; font-weight: 700; }
 
 @media (max-width: 700px) {
-  .civic-page-hero-inner { padding: 56px 0 48px; }
-  .civic-section, .civic-band { padding: 44px 0; }
+  .civic-page-hero-inner { padding-block: 56px 48px; }
+  .civic-section, .civic-band { padding-block: 44px; }
   .civic-card { padding: 32px 26px; }
   .civic-numbered li { grid-template-columns: 56px 1fr; gap: 14px; }
   .civic-numbered .n { font-size: 32px; }
@@ -1722,6 +1795,97 @@
 .admin-form label.check-row { display: flex; align-items: flex-start; gap: 12px; color: var(--ink); font-size: 16px; }
 .admin-form label.check-row input { width: 22px; height: 22px; min-height: 0; flex: none; margin-top: 2px; padding: 0; }
 .explainer-editor > fieldset > legend { font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
+
+@layer components {
+  /* ---------------------------------------------------------------------
+     Ballot explainers on reports. One strip, one list, one fixed page shape.
+     Distinct from the templated explainer system's own classes above: this is
+     the report-shaped explainer, which answers the same three questions in
+     the same order every time.
+     --------------------------------------------------------------------- */
+
+  /* Shown only while an election is still to come. Navy on gold, which is the
+     one place gold carries a block rather than a rule: it is a notice, not a
+     sourced figure, and it is never next to one. */
+  .ballot-strip { background: var(--gold); }
+  .ballot-strip a {
+    display: flex; align-items: center; min-height: 52px;
+    color: #2A1F00; font-weight: 600; font-size: 16px;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+
+  .ballot-list { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--line); }
+  .ballot-list li { border-bottom: 1px solid var(--line); }
+  /* A grid, not wrapping flex: with flex the issue number sat beside a short
+     title and above a long one, so no two rows lined up. */
+  .ballot-list a {
+    display: grid; grid-template-columns: 92px 1fr; align-items: baseline;
+    gap: 4px 12px; padding: 18px 0; color: var(--ink);
+  }
+  @media (max-width: 420px) {
+    .ballot-list a { grid-template-columns: 1fr; }
+  }
+  .ballot-issue {
+    font-size: 14px; font-weight: 600; color: var(--teal-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .ballot-title { font-size: 19px; font-weight: 500; letter-spacing: -.01em; }
+  .ballot-list a:hover .ballot-title { text-decoration: underline; text-underline-offset: 3px; }
+
+  /* One heading per election, so a date never labels an issue from another. */
+  .ballot-group { margin-top: 28px; }
+  .ballot-group + .ballot-group { margin-top: 44px; }
+  .ballot-group h2 { font-size: 26px; letter-spacing: -.02em; }
+
+  .explainer { margin-top: 36px; border-top: 1px solid var(--line); }
+  .explainer-ballot {
+    margin-top: 20px; font-size: 14px; color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .explainer-section { padding: 28px 0 0; }
+  .explainer-section h2 {
+    font-size: 22px; letter-spacing: -.02em; font-weight: 600; max-width: none;
+    margin-bottom: 10px;
+  }
+  .explainer-section p { color: var(--ink-2); font-size: 17px; max-width: 42em; }
+  .explainer-section p + p { margin-top: 12px; }
+  .explainer-section ul, .explainer-section ol { margin: 12px 0 0 22px; display: grid; gap: 8px; }
+  .explainer-section li { color: var(--ink-2); font-size: 17px; max-width: 42em; }
+  .explainer .note { margin-top: 28px; }
+
+  /* Scheduled jobs on the dashboard. Operational, so it sits under the work
+     and reads quieter than it: amber only where something has gone quiet. */
+  .watcher-status { margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .watcher-status h2 { font-size: 15px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+  .watcher-status ul { list-style: none; margin: 0; padding: 0; }
+  .watcher-status li {
+    display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline;
+    padding: 7px 0; font-size: 14px; color: var(--ink-3);
+  }
+  .watcher-name { font-weight: 500; color: var(--ink-2); }
+  .watcher-status li.stale .watcher-name,
+  .watcher-status li.stale strong { color: var(--amber); }
+  .watcher-status li.stale strong { font-weight: 600; }
+}
+
+/* ---------------------------------------------------------------------------
+   Form labels on the coloured cards and bands.
+
+   The label colour is the muted grey that reads on paper. These forms sit on
+   navy and teal, where that grey is 2.92:1 and 1.07:1, both serious AA
+   failures on the two pages a reader is most likely to be filling in. White on
+   both, which is 14.6:1 on navy and 5.4:1 on teal. Unlayered, so it wins over
+   the component layer rule it is correcting.
+   --------------------------------------------------------------------------- */
+.civic-card.tone-navy .public-form label,
+.civic-card.tone-teal .public-form label,
+.civic-band-navy .public-form label,
+.civic-band-teal .public-form label,
+.civic-band-navy .subscribe label,
+.civic-band-teal .subscribe label {
+  color: #fff;
+}
+
 /* Print / Save as PDF: just the report, no site chrome. */
 @media print {
   .site-nav, .site-footer, .no-print, .civic-photo-band, .preview-banner { display: none !important; }

@@ -7,6 +7,7 @@ import { sendEmail, renderEmail } from "@/lib/email";
 import { env } from "@/lib/env";
 import { SUMMARY_MARKDOWN_MAX, MAX_DOCUMENT_BYTES } from "@/lib/limits";
 import { slugify as slugOf } from "@/lib/slug";
+import { isExplainer } from "@/lib/report-types";
 
 export type SaveResult = {
   ok: boolean;
@@ -44,6 +45,13 @@ export async function saveReport(form: FormData): Promise<SaveResult> {
     .map((label, i) => ({ label, url: urls[i] ?? "" }))
     .filter((s) => s.label.length > 0 || s.url.length > 0);
 
+  const ballotDate = String(form.get("ballotDate") ?? "").trim();
+  const issueNumber = String(form.get("issueNumber") ?? "").trim();
+  const asksFor = String(form.get("asksFor") ?? "").trim();
+  const funds = String(form.get("funds") ?? "").trim();
+  const ifFails = String(form.get("ifFails") ?? "").trim();
+  const homeownerCost = String(form.get("homeownerCost") ?? "").trim();
+
   const file = form.get("pdf");
   const pdf = file instanceof File && file.size > 0 ? file : null;
 
@@ -54,6 +62,33 @@ export async function saveReport(form: FormData): Promise<SaveResult> {
     fieldErrors.summary = "Write a summary.";
   } else if (summary.length > SUMMARY_MARKDOWN_MAX) {
     fieldErrors.summary = `${summary.length} characters. The limit is ${SUMMARY_MARKDOWN_MAX}.`;
+  }
+
+  // An explainer answers all three questions or it is not published. The
+  // server checks this as well as the form, so the rule does not depend on the
+  // browser having run the right JavaScript.
+  if (isExplainer(type)) {
+    if (asksFor.length === 0) fieldErrors.asksFor = "Say what the issue asks for.";
+    if (funds.length === 0) fieldErrors.funds = "Say what it would fund.";
+    if (ifFails.length === 0) fieldErrors.ifFails = "Say what happens if it fails.";
+
+    if (ballotDate && !ISO_DATE.test(ballotDate)) {
+      fieldErrors.ballotDate = "Give a date, or leave it empty.";
+    }
+    // Half an identity is not a state worth saving: the database refuses it
+    // too, and a message here beats a constraint error.
+    if (ballotDate && issueNumber.length === 0) {
+      fieldErrors.issueNumber = "An election date needs the issue number that goes with it.";
+    }
+    if (!ballotDate && issueNumber.length > 0) {
+      fieldErrors.ballotDate = "An issue number needs the date of the election it is on.";
+    }
+    // The homeowner figure is the one a reader checks against their own tax
+    // bill, so it only publishes with the certification it came from.
+    if (homeownerCost.length > 0 && !/auditor/i.test(homeownerCost)) {
+      fieldErrors.homeownerCost =
+        "Cite the county auditor's certification in the text, since that is where this figure has to come from.";
+    }
   }
 
   // At least one source, because a report with nothing behind it is exactly
@@ -96,6 +131,15 @@ export async function saveReport(form: FormData): Promise<SaveResult> {
     summary,
     body: body.length > 0 ? body : null,
     status,
+    // Cleared when the type is not an explainer, so changing a report's type
+    // cannot leave ballot answers hanging off something that is not on a
+    // ballot.
+    ballot_date: isExplainer(type) ? ballotDate || null : null,
+    issue_number: isExplainer(type) ? issueNumber || null : null,
+    asks_for: isExplainer(type) ? asksFor || null : null,
+    funds: isExplainer(type) ? funds || null : null,
+    if_fails: isExplainer(type) ? ifFails || null : null,
+    homeowner_cost: isExplainer(type) ? homeownerCost || null : null,
     // Set the first time it goes out, and left alone afterwards so an edit
     // does not rewrite the publication date.
     ...(status === "published" ? { published_at: new Date().toISOString() } : {}),

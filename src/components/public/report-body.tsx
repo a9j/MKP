@@ -1,7 +1,8 @@
 import Markdown from "react-markdown";
 import { Sourced } from "@/components/sourced";
+import { ExplainerSections } from "@/components/public/explainer-sections";
 import { PrintButton } from "@/components/public/print-button";
-import type { Report } from "@/lib/report-types";
+import { isExplainer, type Report } from "@/lib/report-types";
 
 /**
  * The parts of a report page that the public view and the council preview
@@ -27,6 +28,10 @@ export function ReportBody({ report }: { report: Report }) {
       <div className="report-summary">
         <Markdown>{report.summary}</Markdown>
       </div>
+
+      {/* An explainer answers its three questions before anything else on the
+          page: that is what the reader came for, not the PDF. */}
+      {isExplainer(report.type) ? <ExplainerSections report={report} /> : null}
 
       <div className="actions no-print">
         {report.pdfUrl ? (

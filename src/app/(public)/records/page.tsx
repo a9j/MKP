@@ -141,7 +141,7 @@ export default async function RecordsPage() {
             {agencies.map((agency) => (
               <li key={agency.id}>
                 <span className="agency-name">{agency.name}</span>
-                {" — "}
+                {": "}
                 {agency.records_officer_email ? (
                   <a href={`mailto:${agency.records_officer_email}`}>
                     {agency.records_officer_email}

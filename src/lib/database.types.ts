@@ -23,18 +23,21 @@ export type Database = {
       admins: {
         Row: {
           created_at: string
+          digest_email: string | null
           email: string
           id: string
           name: string | null
         }
         Insert: {
           created_at?: string
+          digest_email?: string | null
           email: string
           id?: string
           name?: string | null
         }
         Update: {
           created_at?: string
+          digest_email?: string | null
           email?: string
           id?: string
           name?: string | null
@@ -1475,9 +1478,15 @@ export type Database = {
       }
       reports: {
         Row: {
+          asks_for: string | null
+          ballot_date: string | null
           body: string | null
           created_at: string
+          funds: string | null
+          homeowner_cost: string | null
           id: string
+          if_fails: string | null
+          issue_number: string | null
           preview_token: string
           published_at: string | null
           report_date: string
@@ -1485,13 +1494,19 @@ export type Database = {
           status: Database["public"]["Enums"]["publish_status"]
           summary: string | null
           title: string
-          type: Database["public"]["Enums"]["report_type"]
+          type: string
           updated_at: string
         }
         Insert: {
+          asks_for?: string | null
+          ballot_date?: string | null
           body?: string | null
           created_at?: string
+          funds?: string | null
+          homeowner_cost?: string | null
           id?: string
+          if_fails?: string | null
+          issue_number?: string | null
           preview_token?: string
           published_at?: string | null
           report_date: string
@@ -1499,13 +1514,19 @@ export type Database = {
           status?: Database["public"]["Enums"]["publish_status"]
           summary?: string | null
           title: string
-          type: Database["public"]["Enums"]["report_type"]
+          type: string
           updated_at?: string
         }
         Update: {
+          asks_for?: string | null
+          ballot_date?: string | null
           body?: string | null
           created_at?: string
+          funds?: string | null
+          homeowner_cost?: string | null
           id?: string
+          if_fails?: string | null
+          issue_number?: string | null
           preview_token?: string
           published_at?: string | null
           report_date?: string
@@ -1513,7 +1534,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["publish_status"]
           summary?: string | null
           title?: string
-          type?: Database["public"]["Enums"]["report_type"]
+          type?: string
           updated_at?: string
         }
         Relationships: []

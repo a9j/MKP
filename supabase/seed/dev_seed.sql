@@ -39,9 +39,36 @@ insert into public.reports (slug, title, type, report_date, summary, status, pub
   ('draft-levy-explainer', 'Draft levy explainer', 'levy_explainer',
    '2026-09-14', 'Not ready for release.', 'draft', null);
 
+-- Two published explainers for an election still to come, so the "On the
+-- ballot" grouping, the home page strip and the three part page all have
+-- something real to render. The ballot date is held a year out from whenever
+-- the seed is run, so these never quietly expire and leave the pages empty.
+insert into public.reports (
+  slug, title, type, report_date, summary, status, published_at,
+  ballot_date, issue_number, asks_for, funds, if_fails, homeowner_cost
+) values
+  ('issue-12-library-levy', 'Issue 12: the library levy', 'ballot_explainer',
+   current_date - 30, 'A 1.5 mill renewal for the public library, on the ballot this November.',
+   'published', now(), current_date + 365, 'Issue 12',
+   'A renewal of the existing 1.5 mill levy for the public library system, for ten years.',
+   'Branch hours, materials, and the summer reading program, as the library board''s resolution describes them.',
+   'The library board has said branch hours would be reduced. The levy expires at the end of the following year.',
+   'The county auditor''s certification states $52.50 a year on a home valued at $100,000.'),
+  ('issue-9-operating-levy', 'Issue 9: the schools operating levy', 'levy_explainer',
+   current_date - 31, 'A 4.9 mill operating levy for Toledo Public Schools.',
+   'published', now(), current_date + 365, 'Issue 9',
+   'A new 4.9 mill operating levy for Toledo Public Schools, for five years.',
+   'Day to day operations: salaries, utilities, transportation and building upkeep.',
+   'The district''s five year forecast shows a deficit in the second year without it.',
+   null);
+
 insert into public.report_sources (report_id, label, url, sort_order)
 select id, 'TPS certified salary schedule, 2026-27', 'https://example.com/source.pdf', 0
 from public.reports where slug = '2026-toledo-teacher-pay-report';
+
+insert into public.report_sources (report_id, label, url, sort_order)
+select id, 'Lucas County Auditor, levy certification', 'https://example.com/source.pdf', 0
+from public.reports where slug in ('issue-12-library-levy', 'issue-9-operating-levy');
 
 -- Records requests, including one open past ten business days.
 insert into public.records_requests (agency_id, request_text, date_filed, status, date_responded)

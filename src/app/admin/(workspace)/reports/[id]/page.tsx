@@ -29,7 +29,7 @@ export default async function EditReportPage({
   const supabase = await createServerSupabase();
   const { data: report } = await supabase
     .from("reports")
-    .select("id, slug, title, type, report_date, summary, body, status, preview_token, report_sources(label, url, sort_order)")
+    .select("id, slug, title, type, report_date, summary, body, status, preview_token, ballot_date, issue_number, asks_for, funds, if_fails, homeowner_cost, report_sources(label, url, sort_order)")
     .eq("id", id)
     .maybeSingle();
 
