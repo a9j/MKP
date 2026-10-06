@@ -7,7 +7,7 @@
 
 -- Where the digest goes for an administrator who reads mail somewhere other
 -- than the address they sign in with. Null means use the sign in address.
--- Guarded for the same reason 0013 is: applied to the live project by hand
+-- Guarded for the same reason 0015 is: applied to the live project by hand
 -- before the file was renumbered.
 alter table public.admins add column if not exists digest_email text;
 

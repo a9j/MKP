@@ -1480,6 +1480,7 @@ export type Database = {
         Row: {
           asks_for: string | null
           ballot_date: string | null
+          body: string | null
           created_at: string
           funds: string | null
           homeowner_cost: string | null
@@ -1499,6 +1500,7 @@ export type Database = {
         Insert: {
           asks_for?: string | null
           ballot_date?: string | null
+          body?: string | null
           created_at?: string
           funds?: string | null
           homeowner_cost?: string | null
@@ -1518,6 +1520,7 @@ export type Database = {
         Update: {
           asks_for?: string | null
           ballot_date?: string | null
+          body?: string | null
           created_at?: string
           funds?: string | null
           homeowner_cost?: string | null

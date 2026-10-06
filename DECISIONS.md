@@ -1058,6 +1058,85 @@ The `/explainers` index lists only templated explainers. The Phase One spec's
 Reports page still describes ballot, levy and contract work in its own cards
 and was left alone.
 
+## 2026-10-05
+
+### Reports read on the page; the PDF is a download
+Explainers were only reachable as an embedded PDF. `reports.body` (migration
+0013) holds the full explainer in markdown and renders on `/reports/[slug]`.
+The summary stays capped at 600 characters as the lede and card text. The PDF
+is offered as a download: the attached file when there is one, otherwise a
+"Download as PDF" button that prints the page with a print stylesheet that
+strips the site chrome. A report with no body still falls back to the inline
+PDF. Markdown tables are not used because react-markdown runs without GFM.
+
+### Levy card links to the levy explainers
+The Levy Explainers card on `/reports` now links to published
+`levy_explainer` reports, and the status-note fallbacks use `||` so an empty
+setting no longer renders a blank label.
+
+## 2026-10-05, the templated explainer system turned on in production
+
+### 0011 was applied in six pieces, then checked against the file
+The Supabase tool this session has times out at 60 seconds, and the whole
+migration in one call rolled back twice. It went up in six verified pieces
+instead. Because hand applied SQL can drift from the file it came from, the
+result was checked rather than trusted: a digest over every column, constraint,
+index, function body, view definition, policy expression and trigger on the
+five affected tables came to the same md5 (155 objects) in production and in a
+local database built from the migration files. Nothing in 0011 drops or
+rewrites data, and `explainers` was empty when it ran.
+
+### alter policy, not drop and create
+`drop policy` on `explainers` hung past the tool's timeout every time, while
+every other statement ran in under a second. `alter policy` changes the same
+`using` clause in place and ran immediately. It is the better statement here
+anyway: drop and create leaves a window, however short, in which the table has
+no read policy at all.
+
+### The levy pairing is listed in code, not stored
+A levy now reaches a reader two ways: the written report at `/reports/[slug]`,
+and the structured page at `/levy/[slug]` with the calculator. The pairing
+between them is editorial, not structural, so `src/lib/levy-pairs.ts` lists it
+rather than a column carrying it. Each side links to the other only when the
+other is published, so an unpaired or draft page shows one less link and never
+a broken one.
+
+### The four real explainers were created as drafts
+Publishing goes through `publish_explainer()` as a signed in admin, which this
+session cannot be: it has no admin session, and the egress policy blocks
+monakproject.org and the Supabase host. The three levy explainers and the
+ballot page were written as drafts with their figures sourced, and
+`explainer_problems()` returns an empty list for all four, so each is one
+Publish press away. The publish path itself was proved locally: the same rows,
+published through `publish_explainer()` as an admin, produced version 1 and a
+rendered page with the cross link.
+
+### The ballot page carries three of twelve measures
+The verified October 4 text for the other nine lives only in the PDF attached
+to the ballot report, which this session cannot read for the same egress
+reason. Rather than paraphrase a ballot issue from memory, the three levy cards
+that could be sourced from published copy were written and the rest left out,
+with the page held as a draft.
+
+### The ballot overview reads on the page, and names its own gap
+The 12-measure overview had an empty body, so it reached a reader only as an
+embedded PDF. It now reads on the page, written from material already verified
+and already published: the inventory of the 12 measures comes from this
+report's own summary, and the Issue 8, 9 and 13 figures come from the three
+levy explainers. Nothing on it is a new claim.
+
+What it does not do is paraphrase the nine measures whose verified text exists
+only inside the attached PDF, which this session cannot read. Rather than
+write nine plausible ballot summaries from memory, the page names all twelve so
+a reader knows what they will see, explains the three that are checked, and
+sends them to the Board of Elections for their own ballot. The page says this
+in a line of its own, because a reader is owed the shape of what is missing
+rather than a page that looks complete.
+
+Measured with the repo's own Flesch-Kincaid: the overview is grade 6.3, and the
+three levy explainers are 5.4, 4.8 and 5.4. The editorial cap is 8th grade.
+
+
 ## 2026-10-05, phase 2 step 3: ballot explainers
 
 Step three of the build order, the one with the deadline: early voting opens in

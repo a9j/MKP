@@ -19,6 +19,7 @@ type Row = {
   type: string;
   report_date: string;
   summary: string | null;
+  body: string | null;
   status: string;
   ballot_date: string | null;
   issue_number: string | null;
@@ -31,7 +32,7 @@ type Row = {
 
 // One string literal, not a concatenation: supabase-js reads this at the type
 // level to work out the shape of a row, and it can only do that with a literal.
-const SELECT = "id, slug, title, type, report_date, summary, status, ballot_date, issue_number, asks_for, funds, if_fails, homeowner_cost, report_sources(label, url, sort_order)";
+const SELECT = "id, slug, title, type, report_date, summary, body, status, ballot_date, issue_number, asks_for, funds, if_fails, homeowner_cost, report_sources(label, url, sort_order)";
 
 async function attachDocuments(
   client: ReturnType<typeof createPublicClient>,
@@ -59,6 +60,7 @@ async function attachDocuments(
       reportDate: row.report_date,
       reportDateLabel: formatDay(row.report_date),
       summary: row.summary ?? "",
+      body: row.body ?? "",
       status: row.status as "draft" | "published",
       pdfUrl: document ? documentUrl(document.storage_path) : null,
       pdfName: document?.file_name ?? null,

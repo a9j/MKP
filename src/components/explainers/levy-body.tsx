@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { usd } from "@/lib/format";
 import { usdCents } from "@/lib/levy-math";
 import { SourcedFigure } from "@/components/explainers/explainer-page";
@@ -10,7 +11,14 @@ function millsLabel(mills: number): string {
   return `${n} ${n === 1 ? "mill" : "mills"}`;
 }
 
-export function LevyBody({ explainer }: { explainer: Explainer }) {
+export function LevyBody({
+  explainer,
+  companionReportSlug = null,
+}: {
+  explainer: Explainer;
+  /** The written explainer for the same levy, when one is published. */
+  companionReportSlug?: string | null;
+}) {
   const levy = explainer.levy;
   if (!levy) return null;
 
@@ -70,6 +78,14 @@ export function LevyBody({ explainer }: { explainer: Explainer }) {
       </div>
 
       <LevyCalculator mills={levy.mills} costPer100k={levy.costPer100k} levyKind={levy.levyKind} />
+
+      {companionReportSlug ? (
+        <p className="note companion-link">
+          <Link href={`/reports/${companionReportSlug}`}>
+            Read the full written explainer, with the ballot language and what each side says
+          </Link>
+        </p>
+      ) : null}
     </>
   );
 }

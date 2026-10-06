@@ -18,6 +18,7 @@ export default async function ReportsPage() {
 
   const latestPayReport = reports.find((r) => r.type === "pay_report");
   const latestBallot = reports.find((r) => r.type === "ballot_explainer");
+  const levies = reports.filter((r) => r.type === "levy_explainer");
 
   // Explainers for an election still to come, soonest first and then by issue
   // number. The heading carries the date, so it goes stale by itself rather
@@ -33,7 +34,7 @@ export default async function ReportsPage() {
       body: "What TPS teachers earn at each step, how that compares to nearby districts and to inflation, what the district's finances actually look like, and three sourced raise scenarios with what each would cost.",
       status: latestPayReport
         ? { label: `Read the ${latestPayReport.reportDate.slice(0, 4)} report`, href: `/reports/${latestPayReport.slug}` }
-        : { label: settings.reports_next_report_note ?? "Coming November 2026", href: null },
+        : { label: settings.reports_next_report_note || "Coming November 2026", href: null },
     },
     {
       tone: "teal",
@@ -49,14 +50,19 @@ export default async function ReportsPage() {
       title: "Levy Explainers",
       cadence: "When a levy is on the ballot",
       body: "What it asks for, what it funds, what happens if it fails. No recommendation.",
-      status: { label: settings.levy_status_note ?? "No levy currently on the ballot", href: null },
+      status:
+        levies.length > 1
+          ? { label: `Read the ${levies.length} levy explainers`, href: "#levy-explainers" }
+          : levies.length === 1
+            ? { label: "Read the levy explainer", href: `/reports/${levies[0].slug}` }
+            : { label: settings.levy_status_note || "No levy currently on the ballot", href: null },
     },
     {
       tone: "navy",
       title: "Contract Tracker",
       cadence: "When contract talks open",
       body: "The current agreement side by side with the surrounding districts on pay, planning time, class size, and health contributions.",
-      status: { label: settings.contract_status_note ?? "Talks are not currently open", href: null },
+      status: { label: settings.contract_status_note || "Talks are not currently open", href: null },
     },
   ] as const;
 
@@ -124,6 +130,24 @@ export default async function ReportsPage() {
           ))}
         </div>
       </section>
+
+      {levies.length > 1 ? (
+        <section className="wrap civic-section" id="levy-explainers">
+          <h2>Levy explainers for November 3</h2>
+          <p className="sub">One page per levy. What it asks for, what it costs, and what each side says. No recommendation.</p>
+          <div className="civic-cards">
+            {levies.map((levy) => (
+              <article className="civic-card tone-gold" key={levy.id}>
+                <div className="tag">{levy.reportDateLabel}</div>
+                <h3>{levy.title}</h3>
+                <div className="civic-card-foot">
+                  <a className="more" href={`/reports/${levy.slug}`}>Read the explainer &rarr;</a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="civic-band civic-band-paper">
         <div className="wrap">
