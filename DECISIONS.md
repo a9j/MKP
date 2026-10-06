@@ -1461,3 +1461,14 @@ built page's were no longer the same element and a deliberate design change
 read as a drift. It now selects the heading over the feed, which both documents
 still share, and matches at 800px again. Narrowing a selector to compare the
 same thing is not the same as loosening a check to make it pass.
+
+### A setting shows up everywhere, so saving one revalidates the layout
+The EIN and the mailing address sit in the footer of every public page, but a
+settings save only revalidated six routes by name. Putting the real EIN in
+showed the gap: it appeared on the six and left the placeholder on
+`/corrections`, `/reports`, `/votes`, `/budget`, `/listening` and
+`/explainers`. Listing routes one by one was never going to hold for something
+the whole site renders, so a settings save now calls
+`revalidatePath("/", "layout")`, which covers every page under the public
+layout. The per route list stays for the saves that really do touch named
+pages.
