@@ -62,16 +62,15 @@ export default async function AboutPage() {
       <section className="wrap civic-section">
         <p className="civic-kicker-dark">Principles</p>
         <h2>What we will not bend on.</h2>
-        <ol className="civic-numbered">
-          {PRINCIPLES.map((principle, i) => (
+        {/* A ul, not an ol: no principle here outranks another, and numbering
+            them read as a ranking. */}
+        <ul className="civic-points">
+          {PRINCIPLES.map((principle) => (
             <li key={principle}>
-              <span className="n">{String(i + 1).padStart(2, "0")}</span>
-              <div>
-                <p style={{ fontSize: 20, fontWeight: 600, color: "#0F2A44" }}>{principle}</p>
-              </div>
+              <p style={{ fontSize: 20, fontWeight: 600, color: "#0F2A44" }}>{principle}</p>
             </li>
           ))}
-        </ol>
+        </ul>
         {/* Said plainly, on the page, rather than buried in a policy nobody
             opens. Editable from /admin/settings, and it ships filled in. */}
         {settings.ai_disclosure ? (

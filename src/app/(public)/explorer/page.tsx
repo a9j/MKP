@@ -97,17 +97,17 @@ export default async function ExplorerPage() {
       <section className="wrap civic-section" id="features">
         <p className="civic-kicker-dark">Features</p>
         <h2>What the Explorer shows you.</h2>
-        <ol className="civic-numbered">
-          {FEATURES.map((feature, i) => (
+        {/* A ul, not an ol: these four are things the Explorer does, in no
+            particular order, so numbering them stated a sequence that is not
+            there. */}
+        <ul className="civic-points">
+          {FEATURES.map((feature) => (
             <li key={feature.title}>
-              <span className="n">{String(i + 1).padStart(2, "0")}</span>
-              <div>
-                <h3>{feature.title}</h3>
-                <p>{feature.body}</p>
-              </div>
+              <h3>{feature.title}</h3>
+              <p>{feature.body}</p>
             </li>
           ))}
-        </ol>
+        </ul>
         <p className="civic-note">
           Every figure in the Explorer links to the public document it came from.
         </p>

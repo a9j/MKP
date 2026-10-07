@@ -128,7 +128,7 @@ export default async function RecordsPage() {
           <ol className="civic-numbered">
             {STEPS.map((step, i) => (
               <li key={step}>
-                <span className="n">{String(i + 1).padStart(2, "0")}</span>
+                <span className="n">{i + 1}</span>
                 <div>
                   <p>{step}</p>
                 </div>

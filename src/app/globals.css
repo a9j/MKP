@@ -171,11 +171,14 @@
   .src-lg { border-bottom-width: 3px; }
 
   /* nav */
+  /* Opaque, not frosted. A translucent blurred bar is the stock look of every
+     template on the internet, and it costs something real: text sliding under
+     a half transparent bar is unreadable for the moment it crosses, and the
+     blur repaints the whole strip on every scroll frame. The hairline under it
+     is what separates the nav from the page, which is the house rule anyway. */
   .site-nav {
     position: sticky; top: 0;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: saturate(180%) blur(14px);
-    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    background: var(--bg);
     border-bottom: 1px solid var(--line);
     z-index: 10;
   }
@@ -859,18 +862,11 @@
     .program:last-child { border-bottom: 0; }
   }
 
-  /* how we work */
-  .band { background: var(--band); }
-  .steps { margin-top: 40px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; counter-reset: s; }
-  .step { counter-increment: s; padding-top: 18px; border-top: 2px solid var(--ink); }
-  .step::before {
-    content: counter(s); display: block; font-weight: 600; font-size: 14px;
-    color: var(--ink-3); margin-bottom: 10px; font-variant-numeric: tabular-nums;
-  }
-  .step h3 { font-size: 17px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 6px; }
-  .step p { font-size: 15px; color: var(--ink-2); }
-  @media (max-width: 900px) { .steps { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+  /* The old .steps / .step block lived here: a 5 column grid whose ::before
+     drew a counter above each step. Nothing has carried those classes since
+     the "how it works" section became .civic-steps, so it was dead rules
+     keeping a second numbered-step treatment alive. Removed with the "01, 02"
+     numerals it belonged to. */
 
   /* latest */
   .latest { margin-top: 36px; border-top: 1px solid var(--line); }
@@ -1052,17 +1048,11 @@
 .civic-program.tone-navy { background: #0F2A44; }
 .civic-program.tone-teal { background: #187585; }
 .civic-program.tone-gold { background: #D9A441; color: #0F2A44; }
-.civic-program-n {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  /* Solid, not translucent. At 0.65 the number came to 3.23:1 on the teal card
-     and failed WCAG AA, which is a serious violation on the home page. Any
-     opacity under 1 fails on teal, so the number carries the card's own colour
-     and is kept quiet by its size instead. Fixed once already and back with
-     this redesign, which is why tests/e2e/a11y.spec.ts runs axe over it. */
-  margin-bottom: 26px;
-}
+/* The "01, 02, 03" that used to sit at the top of each program card is gone.
+   The four programs are not a sequence: nobody does the Explorer before the
+   Records Desk, so numbering them told the reader something untrue to buy a
+   bit of decoration. It also took a WCAG AA fix to keep legible on teal, which
+   is a lot of upkeep for a label that carried no information. */
 .civic-program .tag {
   font-size: 13px;
   font-weight: 700;
@@ -1120,19 +1110,30 @@
 }
 .civic-steps li {
   display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 28px;
+  /* 28px, not 120px. The column was sized for a 72px display numeral; with the
+     number back at reading size it left the heading stranded a long way from
+     the number it belongs to. */
+  grid-template-columns: 28px 1fr;
+  gap: 20px;
   align-items: baseline;
   padding: 30px 0;
   border-bottom: 2px solid rgba(255, 255, 255, 0.18);
 }
+/* The step number, plain. It was 44 to 72px, filled with transparent and drawn
+   with a 2px gold -webkit-text-stroke: a giant hollow numeral, which is both a
+   stock decoration and a real risk, because anything whose only colour is
+   color:transparent plus a prefixed stroke disappears entirely where the
+   prefixed property is not honoured. These five steps are a genuine sequence,
+   so the number stays; it just reads as a number now. */
 .civic-step-n {
-  font-size: clamp(44px, 5vw, 72px);
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: -0.03em;
   line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 2px #D9A441;
+  /* Solid gold on the section's navy, 6.5:1. Not a token: this section sets its
+     own navy and white rather than using the theme, so --gold would flip with
+     the colour scheme and land light gold on navy in dark mode. */
+  color: #D9A441;
+  font-variant-numeric: tabular-nums;
 }
 .civic-steps li h3 {
   font-size: 24px;
@@ -1180,7 +1181,7 @@
     .civic-trust-inner { grid-template-columns: 1fr; gap: 18px; }
   .civic-programs { grid-template-columns: 1fr; }
   .civic-program { min-height: 0; padding: 44px 28px 48px; }
-  .civic-steps li { grid-template-columns: 76px 1fr; gap: 18px; }
+  .civic-steps li { grid-template-columns: 24px 1fr; gap: 14px; }
   .civic-cta { padding: 72px 0; }
 }
 
@@ -1560,23 +1561,47 @@
 
 .civic-numbered li {
   display: grid;
-  grid-template-columns: 72px 1fr;
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: 32px 1fr;
+  gap: 16px;
+  align-items: baseline;
 }
 
+/* The step number, at reading size. It was 40px and 800 weight in a 72px
+   column, which is a display numeral rather than a label, and it was written
+   "01" to "05". Only the records desk list keeps a number at all, because only
+   that list is a real sequence: you file, then you wait, then you get an
+   answer. See .civic-points for the lists that were never in an order. */
 .civic-numbered .n {
-  font-size: 40px;
-  font-weight: 800;
-  line-height: 1;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
   /* Gold on white is 2.24:1, under the 3:1 large text minimum. On a light
      section the number takes teal ink, which is the variable that already has
      a dark mode value; on the navy and teal bands gold is what reads, at
      6.5:1, and that is the override below. Gold on light was fixed in step
      three and came back with this redesign. */
   color: var(--teal-ink);
-  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
+
+/* A list of parallel points: the Explorer's features, the principles on
+   /about. Numbering them said they came in an order, which was not true of
+   either, and the numerals cost two contrast fixes to stay legible. Hairline
+   dividers separate them instead, which is the house rule for everything else
+   on the site. */
+.civic-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 46rem;
+}
+
+.civic-points li {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.civic-points li:first-child { border-top: 1px solid var(--line); }
 
 /* Gold reads on navy at 6.5:1 and on teal at 2.38:1, so it belongs on the
    navy band only. On teal the number is white, which is 5.4:1. */
@@ -1587,13 +1612,15 @@
   color: #fff;
 }
 
-.civic-numbered h3 {
+.civic-numbered h3,
+.civic-points h3 {
   font-size: 22px;
   margin: 0 0 8px;
   color: #0F2A44;
 }
 
-.civic-numbered p {
+.civic-numbered p,
+.civic-points p {
   font-size: 17px;
   line-height: 1.6;
   color: var(--ink-2);

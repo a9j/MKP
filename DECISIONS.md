@@ -1530,3 +1530,62 @@ each. Replacing that with full sections is a material change to something
 readers had already seen, so it goes in the corrections log with what changed
 and why, the same as an error would. The log is the record of what the page
 used to say.
+
+## 2026-10-07, the stock decorations audit
+
+Checked against a list of fifteen tells, the ones that mark a page as having
+been assembled from a template rather than designed. Eleven were already
+absent, which the house rules had done on their own: Instrument Sans rather
+than Inter, a navy and teal and gold palette with no purple, no gradient text,
+no icon tiles, no giant "10M+", no beige italic serif, and "one animation on
+the site" meaning the stylesheet holds no `@keyframes` at all, so there is
+nowhere for a pulsing green dot to live. No em dashes and no marketing verbs,
+because both were already banned.
+
+Four were present and are gone.
+
+### The sticky nav was frosted glass
+`backdrop-filter: saturate(180%) blur(14px)` over an 88 percent background. It
+is the stock look, and it costs something real: text sliding under a
+half transparent bar is unreadable for the moment it crosses, and the blur
+repaints the whole strip on every scroll frame. The nav is opaque now. The
+hairline under it was already doing the separating.
+
+### The step numbers were hollow outlined numerals
+`.civic-step-n` was 44 to 72px, `color: transparent`, drawn with a 2px gold
+`-webkit-text-stroke`. Besides being decoration, anything whose only colour
+comes from a prefixed property disappears entirely where that property is not
+honoured, and the fill underneath was transparent. The numbers are 15px solid
+gold on the section's navy, 6.5:1.
+
+### "01, 02" ran down four lists, three of which were not sequences
+The home page programs, the Explorer's features and the principles on /about
+were all numbered. None of them is ordered: nobody opens the Explorer before
+the Records Desk, and no principle outranks another, so the numerals asserted
+an order that does not exist. Those three lost their numbers, and the two that
+were `<ol>` became `<ul>`, which is the same correction in the markup. They are
+hairline divided lists now, which is what the house rule said in the first
+place.
+
+The records desk list kept its numbers, because filing a request really does
+happen in that order, and so did the home page's five steps. Both dropped the
+zero padding. The rule that came out of it: a numeral earns its place only when
+the order is real, and it is never zero padded.
+
+### The numeral column outlived the numeral
+Shrinking the numbers left them floating in a 120px column sized for the old
+display type, with the heading stranded across a gap. Caught by looking at the
+page rather than by a test. Column is 28px now, 24px on phones.
+
+### This is a test, not a note
+Two comments in the stylesheet already said a fix had been made once and came
+back with a redesign, so tests/e2e/house-style.spec.ts now checks for all
+fifteen. It reads two places, because there are two ways in: the authored
+globals.css, with its comments stripped, since several of them name the
+property they removed and would otherwise fail on their own changelog; and the
+computed style of every element the pages render, which catches the same
+decoration arriving as a Tailwind utility class in JSX. Reading the built
+bundle instead does not work, because Tailwind ships definitions for utilities
+nobody uses, so the bundle contains the string "backdrop-filter" whether or not
+anything is frosted. The test was checked by putting a frosted nav, a purple
+glow and a "01" back and watching all three fail.

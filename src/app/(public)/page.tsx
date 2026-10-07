@@ -24,7 +24,6 @@ export const metadata: Metadata = {
 
 const PROGRAMS = [
   {
-    n: "01",
     tone: "navy",
     tag: "Tool",
     title: "Teacher Pay Explorer",
@@ -37,7 +36,6 @@ const PROGRAMS = [
   {
     // Added with the budget Explorer in step two and lost in each redesign
     // since. The copy is the brief's, verbatim.
-    n: "02",
     tone: "teal",
     tag: "Tool",
     title: "City Budget Explorer",
@@ -48,7 +46,6 @@ const PROGRAMS = [
     alt: "A quiet residential street lined with houses and trees",
   },
   {
-    n: "03",
     tone: "gold",
     tag: "Reports",
     title: "Reports",
@@ -59,7 +56,6 @@ const PROGRAMS = [
     alt: "A family laughing together at home",
   },
   {
-    n: "04",
     tone: "navy",
     tag: "Records",
     title: "Records Desk and Vote Watch",
@@ -220,7 +216,6 @@ export default async function HomePage() {
                 className="civic-program-photo"
               />
               <div className="civic-program-card-body">
-                <div className="civic-program-n">{program.n}</div>
                 <div className="tag">{program.tag}</div>
                 <h3>{program.title}</h3>
                 <p>{program.body}</p>
@@ -258,7 +253,7 @@ export default async function HomePage() {
             <ol>
               {STEPS.map((step, i) => (
                 <li key={step.title}>
-                  <span className="civic-step-n">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="civic-step-n">{i + 1}</span>
                   <div>
                     <h3>{step.title}</h3>
                     <p>{step.body}</p>
