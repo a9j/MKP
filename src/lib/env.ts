@@ -54,6 +54,21 @@ export const env = {
    * With nothing configured, a deployment describes itself by its own URL
    * rather than announcing localhost to anything that reads the page.
    */
+  /**
+   * Secret mixed into the daily visitor hash, so the hash cannot be reversed
+   * by guessing IP addresses. Falls back to the service role key, which is
+   * already a server only secret, so tracking works with nothing new to set.
+   */
+  get trackingSalt() {
+    return optional("TRACKING_SALT") ?? required("SUPABASE_SERVICE_ROLE_KEY");
+  },
+  /** Search engine ownership tokens. Each tag is only rendered when set. */
+  get googleSiteVerification() {
+    return optional("NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION");
+  },
+  get bingSiteVerification() {
+    return optional("NEXT_PUBLIC_BING_SITE_VERIFICATION");
+  },
   get siteUrl() {
     const configured = optional("NEXT_PUBLIC_SITE_URL");
     if (configured) return configured.replace(/\/+$/, "");

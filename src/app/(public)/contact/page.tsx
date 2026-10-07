@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { InquiryForm } from "@/components/public/inquiry-form";
 import { getSiteSettings } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Contact",
   description:
-    "Questions about a report, a records request, or a vote summary? Found an error? Write to The Mona K Project.",
-};
+    "Questions about a report, a records request, or a vote summary? Found an error? Write to The Mona K Project in Toledo.",
+  path: "/contact",
+});
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Contact", path: "/contact" }]))} />
       <header className="wrap page-head">
         <h1>Write to us.</h1>
         <p className="lede">

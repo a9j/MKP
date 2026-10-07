@@ -21,6 +21,29 @@ export const metadata: Metadata = {
   },
   description:
     "The Mona K Project reads Toledo's school budgets, salary schedules, board votes, and city finances and explains them in plain language. Every number sourced. No positions.",
+  applicationName: "The Mona K Project",
+  authors: [{ name: "The Mona K Project", url: "/about" }],
+  publisher: "The Mona K Project",
+  category: "Civic information",
+  // Phone numbers and addresses in budget tables are figures, not links.
+  formatDetection: { telephone: false, address: false, email: false },
+  openGraph: {
+    type: "website",
+    siteName: "The Mona K Project",
+    locale: "en_US",
+  },
+  twitter: { card: "summary_large_image" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  verification: {
+    ...(env.googleSiteVerification ? { google: env.googleSiteVerification } : {}),
+    ...(env.bingSiteVerification
+      ? { other: { "msvalidate.01": env.bingSiteVerification } }
+      : {}),
+  },
 };
 
 /**

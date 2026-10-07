@@ -24,6 +24,9 @@ Copy `.env.example` to `.env.local` and fill it in.
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key. Server only, bypasses RLS, never expose it |
 | `RESEND_API_KEY` | Resend API key for the contact form, council previews and subscriber mail. Without it, mail is written to `.local-storage/emails` instead of being sent, so nothing is ever dropped silently |
 | `NEXT_PUBLIC_SITE_URL` | Absolute site URL. Confirmation links, council preview links, Open Graph images and the sitemap are all built from it |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Optional. Google Search Console ownership token (the `content` value of its meta tag) |
+| `NEXT_PUBLIC_BING_SITE_VERIFICATION` | Optional. Bing Webmaster Tools ownership token |
+| `TRACKING_SALT` | Optional. Secret for the daily visitor hash at `/api/track`. Falls back to the service role key |
 | `EMAIL_FROM` | Optional. The from address on outgoing mail. Defaults to `The Mona K Project <hello@monakproject.org>` |
 | `SUBSCRIBE_TOKEN_SECRET` | Optional. Signs subscriber confirmation links. Defaults to the service role key |
 | `AUTOMATION_ENABLED` | Master switch for the scheduled collectors and every model call. `false` by default, and nothing reads it yet |

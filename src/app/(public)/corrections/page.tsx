@@ -1,21 +1,26 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { getCorrections } from "@/lib/queries/site";
 import { ScrollableTable } from "@/components/public/scrollable-table";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Corrections",
   description:
-    "Every correction The Mona K Project has made, with the date, the page, what changed and why.",
-};
+    "Every correction The Mona K Project has made, with the date, the page, what changed, and why.",
+  path: "/corrections",
+});
 
 export default async function CorrectionsPage() {
   const corrections = await getCorrections();
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Corrections", path: "/corrections" }]))} />
       <header className="wrap page-head">
         <h1>Every correction we have made.</h1>
         <p className="lede">

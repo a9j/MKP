@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import { Photo } from "@/components/photo";
 import Link from "next/link";
 import { getPeople } from "@/lib/queries/site";
@@ -7,11 +10,12 @@ import { getSiteSettings } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "About",
+export const metadata: Metadata = pageMetadata({
+  title: "About: A Nonpartisan Toledo Public Records Nonprofit",
   description:
-    "The Mona K Project is a Toledo nonprofit that makes public records readable. No positions, no endorsements, every number linked to its source.",
-};
+    "The Mona K Project is a Toledo, Ohio 501(c)(3) nonprofit that makes public records readable. No positions, no endorsements, every number linked to its source.",
+  path: "/about",
+});
 
 /** Principles, verbatim from the copy doc. */
 const PRINCIPLES = [
@@ -33,6 +37,7 @@ export default async function AboutPage() {
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "About", path: "/about" }]))} />
       <header className="civic-page-hero">
         <div className="wrap civic-page-hero-inner">
           <p className="civic-kicker">About</p>

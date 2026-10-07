@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import { Photo } from "@/components/photo";
 import { ReportList } from "@/components/public/report-list";
 import { getPublishedReports } from "@/lib/queries/reports";
@@ -6,11 +9,12 @@ import { getSiteSettings } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Reports",
+export const metadata: Metadata = pageMetadata({
+  title: "Reports on Toledo Teacher Pay, Levies, and Ballot Issues",
   description:
-    "The annual Toledo Teacher Pay Report, ballot explainers, levy explainers, and contract trackers. Reviewed, sourced, free.",
-};
+    "The annual Toledo Teacher Pay Report, plain-language explainers for every Toledo levy and ballot issue, and the TPS contract tracker. Reviewed, sourced, and free.",
+  path: "/reports",
+});
 
 export default async function ReportsPage() {
   const [reports, settings] = await Promise.all([getPublishedReports(), getSiteSettings()]);
@@ -56,6 +60,7 @@ export default async function ReportsPage() {
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Reports", path: "/reports" }]))} />
       <header className="civic-page-hero">
         <div className="wrap civic-page-hero-inner">
           <p className="civic-kicker">Reports</p>

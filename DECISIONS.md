@@ -586,6 +586,50 @@ Promoting the vote title from `h3` to `h2` broke an end to end test that
 selected `.vote h3`. The heading now carries a class the test matches on, so a
 correct change to the document outline does not read as a regression.
 
+## 2026-10-07, search and traffic
+
+### Visits and time on page are measured first party, in Supabase
+Plausible stays, but its numbers live in another account and its free tier is a
+trial. The ask was to see when someone arrives and how long they stay, from the
+admin panel. So the public layout carries a small tracker that records each
+page opened (`page_views`) and pings every 15 seconds with the seconds the page
+has actually been on screen. A background tab does not count.
+
+The privacy line from phase 7 holds: no cookies, no IP address stored, nothing
+that follows a reader. The visit id lives in `sessionStorage` and dies with the
+tab. Unique readers are a SHA-256 of a secret, the date, the IP and the browser
+string, which rotates at midnight UTC, the same method Plausible uses. Only the
+referrer's host is kept, because a full referring URL can carry a search query.
+
+The browser never talks to the table. `/api/track` validates, drops bots, and
+writes with the service role; RLS lets only an administrator read. A forged ping
+cannot claim more time than the page has been open. Automated browsers
+(`navigator.webdriver`) are skipped, so the e2e suite and Lighthouse write
+nothing.
+
+### Every public page names its canonical URL
+A shared link with `?utm_source=` or the `www.` host would otherwise count as a
+second page and split its ranking. `pageMetadata()` in `src/lib/seo.ts` sets the
+canonical, title, description and share card text in one place. It is set per
+page rather than in the root layout, because a root canonical would be inherited
+by every page that forgot its own and point them all at the home page.
+
+### Structured data
+The public layout describes the organization (`NGO`, 501(c)(3), Toledo) and the
+site on every page. Inner pages carry breadcrumbs. The Explorer and the City
+Budget Explorer are described as `Dataset`s, which is what gets them into Google
+Dataset Search, a real channel for public figures like these. Each report is a
+`Report` with its date and its sources as citations.
+
+### Titles name what people search for
+"Explorer" told a search engine nothing. Page titles now carry the terms a
+Toledo reader types: TPS salary schedule, Toledo city budget, school board votes,
+public records requests. Visible headings are unchanged.
+
+### The sitemap stopped claiming every page changed on every build
+Static pages no longer send a `lastModified` of the build time. Google learns to
+ignore a date that is always new. Reports keep their real date.
+
 ## Open questions
 
 1. The copy doc's own "What I still need from you" list is unanswered: legal

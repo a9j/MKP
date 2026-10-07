@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import Markdown from "react-markdown";
 import { getListeningSessions } from "@/lib/queries/site";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Listening",
+export const metadata: Metadata = pageMetadata({
+  title: "Listening Sessions with Toledo Teachers and Parents",
   description:
     "What Toledo teachers and parents told The Mona K Project, published in full, and what it changed about what we build next.",
-};
+  path: "/listening",
+});
 
 export default async function ListeningPage() {
   const sessions = await getListeningSessions();
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Listening", path: "/listening" }]))} />
       <header className="wrap page-head">
         <h1>What we heard, and what it changed.</h1>
         <p className="lede">

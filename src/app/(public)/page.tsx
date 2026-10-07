@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { getImageProps } from "next/image";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
@@ -14,10 +15,11 @@ import { getExplorerData } from "@/lib/queries/explorer";
  */
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   description:
-    "The Mona K Project reads Toledo's public records — school budgets, board votes, salaries, city finances, ballot issues — and explains them in plain language. Every number sourced. No positions.",
-};
+    "Toledo's public records in plain language: Toledo Public Schools budgets, teacher pay, school board votes, city finances, and ballot issues. Every number sourced. No positions.",
+  path: "/",
+});
 
 const PROGRAMS = [
   {

@@ -15,6 +15,7 @@ const LINKS = [
   { href: "/admin/people", label: "People", short: "People" },
   { href: "/admin/corrections", label: "Corrections", short: "Fixes" },
   { href: "/admin/subscribers", label: "Subscribers", short: "Subs" },
+  { href: "/admin/traffic", label: "Traffic", short: "Traffic" },
   { href: "/admin/settings", label: "Settings", short: "Settings" },
 ];
 

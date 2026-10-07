@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import { Photo } from "@/components/photo";
 import { InquiryForm } from "@/components/public/inquiry-form";
 import { SubscribeForm } from "@/components/public/subscribe-form";
@@ -6,11 +9,12 @@ import { getSiteSettings } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Get Involved",
+export const metadata: Metadata = pageMetadata({
+  title: "Get Involved: Donate, Volunteer, Join the Council",
   description:
-    "Donate, join the advisory council, or volunteer to help Toledo read its own records.",
-};
+    "Donate, join the advisory council, or volunteer to help Toledo read its own public records.",
+  path: "/get-involved",
+});
 
 export default async function GetInvolvedPage() {
   const settings = await getSiteSettings();
@@ -18,6 +22,7 @@ export default async function GetInvolvedPage() {
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Get Involved", path: "/get-involved" }]))} />
       <header className="civic-page-hero">
         <div className="wrap civic-page-hero-inner">
           <p className="civic-kicker">Get involved</p>

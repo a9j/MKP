@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReportBody } from "@/components/public/report-body";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata, plainText, reportLd } from "@/lib/seo";
 import { getPublishedReport, getPublishedReports } from "@/lib/queries/reports";
 
 export const revalidate = 3600;
@@ -19,10 +22,12 @@ export async function generateMetadata({
   const report = await getPublishedReport(slug);
   if (!report) return { title: "Report not found" };
 
-  return {
+  return pageMetadata({
     title: report.title,
-    description: report.summary.replace(/[#*_`>\-]/g, "").slice(0, 160),
-  };
+    description: plainText(report.summary, 160),
+    path: `/reports/${report.slug}`,
+    type: "article",
+  });
 }
 
 export default async function ReportPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -32,6 +37,15 @@ export default async function ReportPage({ params }: { params: Promise<{ slug: s
 
   return (
     <>
+      <JsonLd
+        data={graph(
+          breadcrumbLd(env.siteUrl, [
+            { name: "Reports", path: "/reports" },
+            { name: report.title, path: `/reports/${report.slug}` },
+          ]),
+          reportLd(env.siteUrl, report),
+        )}
+      />
       <header className="wrap page-head">
         <h1>{report.title}</h1>
       </header>

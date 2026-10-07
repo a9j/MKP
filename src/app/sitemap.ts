@@ -4,8 +4,6 @@ import { getPublishedReports } from "@/lib/queries/reports";
 
 /** Every public page, plus one entry per published report. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
   const pages = [
     { path: "/", priority: 1 },
     { path: "/explorer", priority: 0.9 },
@@ -21,7 +19,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/corrections", priority: 0.5 },
   ].map((page) => ({
     url: `${env.siteUrl}${page.path}`,
-    lastModified: now,
+    // No lastModified on these. A date that changes on every build tells
+    // Google every page changed, and it learns to ignore the field. Reports
+    // carry their real date below.
     changeFrequency: "weekly" as const,
     priority: page.priority,
   }));
