@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import { Photo } from "@/components/photo";
 import Link from "next/link";
 import { VoteList } from "@/components/public/vote-list";
@@ -6,17 +9,19 @@ import { getVotes } from "@/lib/queries/votes";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Vote Watch",
+export const metadata: Metadata = pageMetadata({
+  title: "Vote Watch: Toledo School Board Votes",
   description:
-    "Every Toledo Public Schools board vote on money or staffing, summarized in one sentence with each member's vote.",
-};
+    "Every Toledo Public Schools board vote on money or staffing, summarized in one sentence, with how each board member voted and a link to the agenda.",
+  path: "/votes",
+});
 
 export default async function VotesPage() {
   const votes = await getVotes();
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Vote Watch", path: "/votes" }]))} />
       <header className="civic-page-hero">
         <div className="wrap civic-page-hero-inner">
           <p className="civic-kicker">Vote Watch</p>

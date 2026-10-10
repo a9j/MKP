@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, datasetLd, graph, pageMetadata } from "@/lib/seo";
 import { Photo } from "@/components/photo";
 import Link from "next/link";
 import { PayExplorer } from "@/components/explorer/pay-explorer";
@@ -13,11 +16,12 @@ import { getSiteSettings } from "@/lib/queries/settings";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Explorer",
+export const metadata: Metadata = pageMetadata({
+  title: "Toledo Teacher Pay Explorer: TPS Salary Schedule",
   description:
-    "See what Toledo Public Schools teachers earn at every step, what each raise scenario would cost, and how TPS compares to eight surrounding districts.",
-};
+    "See what Toledo Public Schools teachers earn at every step and lane of the TPS salary schedule, what each raise scenario would cost, and how TPS pay compares to eight nearby districts.",
+  path: "/explorer",
+});
 
 /** Feature blocks from mona-k-project-site-copy.md, Explorer section. */
 const FEATURES = [
@@ -49,8 +53,40 @@ export default async function ExplorerPage() {
 
   const externalExplorer = settings.explorer_url;
 
+  // The documents behind every figure on the page, for Google Dataset Search.
+  const sourceUrls = new Set<string>();
+  if (data) {
+    for (const lane of Object.values(data.byDistrict[data.homeDistrict] ?? {})) {
+      for (const cell of Object.values(lane)) sourceUrls.add(cell.sourceUrl);
+    }
+  }
+  for (const c of budget.categories) sourceUrls.add(c.sourceUrl);
+  for (const v of vacancies.vacancies) sourceUrls.add(v.sourceUrl);
+  const dataset = datasetLd(env.siteUrl, {
+    path: "/explorer",
+    name: "Toledo Public Schools Teacher Salary Schedule and Pay Comparison",
+    description:
+      "Toledo Public Schools (TPS) teacher salaries by step and lane, raise scenarios, pay in eight surrounding Ohio districts, salaries since 2010 adjusted for inflation, the district budget by category, and open teaching positions. Every figure links to the public document it came from.",
+    keywords: [
+      "Toledo Public Schools",
+      "TPS teacher salary schedule",
+      "Toledo teacher pay",
+      "Ohio teacher salaries",
+      "school district budget",
+      "teacher vacancies",
+    ],
+    sources: [...sourceUrls].slice(0, 20).map((url) => ({ name: "Public record", url })),
+    ...(data?.schoolYear ? { temporalCoverage: data.schoolYear.replace("-", "/") } : {}),
+  });
+
   return (
     <>
+      <JsonLd
+        data={graph(
+          breadcrumbLd(env.siteUrl, [{ name: "Teacher Pay Explorer", path: "/explorer" }]),
+          dataset,
+        )}
+      />
       <header className="civic-page-hero">
         <div className="wrap civic-page-hero-inner">
           <p className="civic-kicker">Explorer</p>

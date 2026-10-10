@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { getMemberTallies, groupTalliesByBody } from "@/lib/queries/votes";
 import { ScrollableTable } from "@/components/public/scrollable-table";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Voting records by member",
+export const metadata: Metadata = pageMetadata({
+  title: "Toledo School Board Members' Voting Records",
   description:
     "How each Toledo Public Schools board member has voted on the money and staffing decisions The Mona K Project tracks.",
-};
+  path: "/votes/members",
+});
 
 export default async function MembersPage() {
   const members = await getMemberTallies();
@@ -17,6 +21,7 @@ export default async function MembersPage() {
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Vote Watch", path: "/votes" }, { name: "Voting records by member", path: "/votes/members" }]))} />
       <header className="wrap page-head">
         <h1>Voting records by member</h1>
         <p className="lede">

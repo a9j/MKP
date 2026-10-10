@@ -464,6 +464,9 @@
   .admin-inner h1 { font-size: 28px; letter-spacing: -.02em; font-weight: 600; margin-bottom: 8px; }
   .admin-help { color: var(--ink-2); font-size: 15px; max-width: 48em; margin-bottom: 8px; }
   .admin-help code { font-size: 13.5px; color: var(--ink); }
+  .traffic-ranges { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 4px; }
+  .traffic-ranges a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-2); text-decoration: none; font-size: 15px; }
+  .traffic-ranges a[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 
   .admin-rail { background: var(--bg); border-bottom: 1px solid var(--line); }
   .admin-rail .admin-brand { height: 56px; padding: 0 20px; }

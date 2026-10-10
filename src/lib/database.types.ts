@@ -1110,6 +1110,60 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          city: string | null
+          country: string | null
+          device: string
+          engaged_seconds: number
+          id: string
+          last_seen_at: string
+          path: string
+          referrer_host: string | null
+          region: string | null
+          started_at: string
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          visit_id: string
+          visitor_hash: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          device?: string
+          engaged_seconds?: number
+          id: string
+          last_seen_at?: string
+          path: string
+          referrer_host?: string | null
+          region?: string | null
+          started_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visit_id: string
+          visitor_hash: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          device?: string
+          engaged_seconds?: number
+          id?: string
+          last_seen_at?: string
+          path?: string
+          referrer_host?: string | null
+          region?: string | null
+          started_at?: string
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          visit_id?: string
+          visitor_hash?: string
+        }
+        Relationships: []
+      }
       people: {
         Row: {
           active: boolean

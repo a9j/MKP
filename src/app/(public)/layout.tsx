@@ -1,7 +1,11 @@
 import Script from "next/script";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
+import { VisitTracker } from "@/components/visit-tracker";
+import { JsonLd } from "@/components/json-ld";
 import { getSiteSettings } from "@/lib/queries/settings";
+import { env } from "@/lib/env";
+import { graph, organizationLd, websiteLd } from "@/lib/seo";
 
 /**
  * The public site: sticky nav, content, footer.
@@ -25,6 +29,10 @@ export default async function PublicLayout({
         src="https://plausible.io/js/script.js"
         strategy="afterInteractive"
       />
+      {/* First party visit and time on page measurement, read at /admin/traffic. */}
+      <VisitTracker />
+      {/* Who publishes this site, for search engines. On every public page. */}
+      <JsonLd data={graph(organizationLd(env.siteUrl, settings), websiteLd(env.siteUrl))} />
       <SiteNav />
       <main id="main">{children}</main>
       <SiteFooter ein={settings.org_ein} mailingAddress={settings.mailing_address} />

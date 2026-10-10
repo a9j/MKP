@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
+import { env } from "@/lib/env";
+import { breadcrumbLd, graph, pageMetadata } from "@/lib/seo";
 import { Photo } from "@/components/photo";
 import { getRecordsRequests, getAgencies, documentUrl } from "@/lib/queries/records";
 import { getSiteSettings } from "@/lib/queries/settings";
@@ -6,11 +9,12 @@ import { ScrollableTable } from "@/components/public/scrollable-table";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Records Desk",
+export const metadata: Metadata = pageMetadata({
+  title: "Records Desk: Toledo Public Records Requests",
   description:
-    "Every public records request The Mona K Project has filed, with responses and documents. Plus a plain guide to filing your own.",
-};
+    "Every Ohio public records request The Mona K Project has filed with Toledo agencies, with responses and documents, plus a plain guide to filing your own.",
+  path: "/records",
+});
 
 /** The "File your own" steps, verbatim from the copy doc. */
 const STEPS = [
@@ -32,6 +36,7 @@ export default async function RecordsPage() {
 
   return (
     <>
+      <JsonLd data={graph(breadcrumbLd(env.siteUrl, [{ name: "Records Desk", path: "/records" }]))} />
       <header className="civic-page-hero">
         <div className="wrap civic-page-hero-inner">
           <p className="civic-kicker">Records Desk</p>
