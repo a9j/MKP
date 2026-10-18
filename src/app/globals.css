@@ -187,11 +187,7 @@
     display: flex; align-items: center; gap: 10px; white-space: nowrap;
     color: var(--ink); font-weight: 600; font-size: 16px; letter-spacing: -.01em;
   }
-  .mark { width: 22px; height: 22px; border-radius: 6px; background: var(--ink); position: relative; }
-  .mark::after {
-    content: ""; position: absolute; left: 5px; right: 5px; bottom: 5px;
-    height: 3px; background: var(--gold); border-radius: 2px;
-  }
+  .brand-logo { display: block; flex: none; }
   .links { display: flex; gap: 28px; font-size: 15px; }
   .links a { color: var(--ink-2); }
   .links a:hover { color: var(--ink); }

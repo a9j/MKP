@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { NAV_LINKS, SUPPORT_CTA } from "@/lib/nav";
+import { BrandLogo } from "@/components/brand-logo";
 
 /**
  * The mockup hides the nav links below 820px and offers nothing in their
@@ -17,7 +18,7 @@ export function SiteNav() {
       <div className="wrap">
         <div className="nav">
           <Link className="brand" href="/" onClick={() => setOpen(false)}>
-            <span className="mark" aria-hidden="true" />
+            <BrandLogo height={32} priority />
             The Mona K Project
           </Link>
 
