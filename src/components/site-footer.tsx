@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NEUTRALITY_LINE } from "@/lib/nav";
+import { BrandLogo } from "@/components/brand-logo";
 
 type SiteFooterProps = {
   /** From site_settings. Empty until it is filled in from the admin panel. */
@@ -15,7 +16,7 @@ export function SiteFooter({ ein, mailingAddress }: SiteFooterProps) {
         <div className="foot">
           <div>
             <Link className="brand" href="/">
-              <span className="mark" aria-hidden="true" />
+              <BrandLogo height={40} />
               The Mona K Project
             </Link>
             <p style={{ marginTop: 14 }}>

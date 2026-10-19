@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import { usePathname } from "next/navigation";
 
 /** Left rail on desktop, bottom tab bar on a phone. */
@@ -25,7 +26,7 @@ export function AdminRail() {
   return (
     <nav className="admin-rail" aria-label="Admin sections">
       <Link className="brand admin-brand" href="/admin">
-        <span className="mark" aria-hidden="true" />
+        <BrandLogo height={28} />
         <span className="admin-brand-text">The Mona K Project</span>
       </Link>
       <ul>
