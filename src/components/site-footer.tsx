@@ -30,6 +30,7 @@ export function SiteFooter({ ein, mailingAddress }: SiteFooterProps) {
             <Link href="/reports">Reports</Link>
             <Link href="/records">Records Desk</Link>
             <Link href="/votes">Vote Watch</Link>
+            <Link href="/receipts">Receipts</Link>
           </div>
 
           <div className="col">

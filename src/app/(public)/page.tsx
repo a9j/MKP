@@ -65,6 +65,16 @@ const PROGRAMS = [
     photo: "for-residents.jpg",
     alt: "A quiet residential street lined with houses and trees",
   },
+  {
+    tone: "navy",
+    tag: "Youth",
+    title: "Receipts: Youth Records Fellowship",
+    body: "A paid, year-long fellowship where Toledo teens investigate how public money works, then publish what they find as short videos with the source document on screen.",
+    linkLabel: "Meet the Receipts Crew",
+    href: "/receipts",
+    photo: "receipts-crew.jpg",
+    alt: "Toledo teens working together at a library table",
+  },
 ] as const;
 
 const STEPS = [
