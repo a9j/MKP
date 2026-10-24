@@ -34,6 +34,7 @@ export default async function ReportsPage() {
         : { label: settings.reports_next_report_note ?? "Coming November 2026", href: null },
     },
     {
+      id: "explainers",
       tone: "teal",
       title: "Ballot Explainers",
       cadence: "Every election",
@@ -84,7 +85,11 @@ export default async function ReportsPage() {
       <section className="wrap civic-section">
         <div className="civic-cards">
           {TYPES.map((type) => (
-            <article className={`civic-card tone-${type.tone}`} key={type.title}>
+            <article
+              className={`civic-card tone-${type.tone}`}
+              key={type.title}
+              id={"id" in type ? type.id : undefined}
+            >
               <div className="tag">{type.cadence}</div>
               <h3>{type.title}</h3>
               <p>{type.body}</p>
